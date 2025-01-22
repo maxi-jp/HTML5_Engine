@@ -1,0 +1,19 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-decoration: none;
+}
+
+body {
+    background-color: grey;
+    text-align: center;
+}
+
+canvas {
+    background-color: white;
+    margin: 20px auto;
+    border: solid black 1px;
+    cursor: none;
+}
