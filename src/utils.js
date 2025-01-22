@@ -95,8 +95,7 @@ function IntersectionBetweenLines(l1p1, l1p2, l2p1, l2p2) {
         const t = ((l1p1.x - l2p1.x) * (l2p1.y - l2p2.y) - (l1p1.y - l2p1.y) * (l2p1.x - l2p2.x)) / den;
         const u = -((l1p1.x - l1p2.x) * (l1p1.y - l2p1.y) - (l1p1.y - l1p2.y) * (l1p1.x - l2p1.x)) / den;
 
-        if (t > 0 && t < 1 && u > 0 && u < 1)
-        {
+        if (t > 0 && t < 1 && u > 0 && u < 1) {
             result.x = l1p1.x + t * (l1p2.x - l1p1.x);
             result.y = l1p1.y + t * (l1p2.y - l1p1.y);
             result.det = den;
@@ -151,8 +150,7 @@ class Vector2 {
     Normalize() {
         const length = this.Length();
 
-        if (length > 0)
-        {
+        if (length > 0) {
             this.x = this.x / length;
             this.y = this.y / length;
         }

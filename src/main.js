@@ -14,10 +14,14 @@ var time = 0,
 let bgGrad;
 
 var graphicAssets = {
-    /*bigboss: {
-        path: "assets/bigboss.jpg",
+    ships: {
+        path: "assets/simpleSpace_sheet.png",
         img: null
-    }*/
+    },
+    crosshair: {
+        path: "assets/crosshair060.png",
+        img: null
+    }
 };
 
 function LoadImages(assets, onloaded) {
@@ -74,6 +78,8 @@ function Start() {
     bgGrad.addColorStop(0.35, "#07073e");
     bgGrad.addColorStop(0.95, "#22375e");
     bgGrad.addColorStop(1, "#274f98");
+
+    TTS.Start();
 }
 
 function Loop() {
@@ -109,7 +115,7 @@ function Loop() {
 }
 
 function Update(deltaTime) {
-    
+    TTS.Update(deltaTime);
 }
 
 function Draw(/** @type {CanvasRenderingContext2D} */ctx) {
@@ -118,6 +124,8 @@ function Draw(/** @type {CanvasRenderingContext2D} */ctx) {
     // background
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    TTS.Draw(ctx);
 
     // draw the mouse position
     ctx.beginPath();

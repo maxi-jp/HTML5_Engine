@@ -35,14 +35,13 @@ class GameObject {
 class Rectangle extends GameObject {
     constructor(position) {
         super(position);
-        this.with = 100;
+        this.width = 100;
         this.height = 100;
         this.color = 'red';
     }
 
     Start() {
-        this._position.x = canvas.width / 2;
-        this._position.y = canvas.height / 2;
+        
     }
 
     Update(deltaTime) {
@@ -54,7 +53,7 @@ class Rectangle extends GameObject {
         ctx.save();
         ctx.translate(this._position.x, this._position.y);
         ctx.rotate(this._rotation);
-        ctx.fillRect(-this.with / 2, -this.height / 2, this.with, this.height);
+        ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
         ctx.restore();
     }
 }
@@ -82,14 +81,14 @@ class SpriteObject extends GameObject {
     }
 
     Start() {}
-    Update(deltaTime){}
+    Update(deltaTime) {}
 
     Draw(ctx) {
         this.sprite.Draw(ctx);
     }
 
-    Draw(ctx) {
-        this.sprite.Draw(ctx);
+    DrawSection(ctx, sx, sy, sw, sh) {
+        this.sprite.DrawSection(ctx, sx, sy, sw, sh);
     }
 }
 
