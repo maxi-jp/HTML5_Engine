@@ -10,22 +10,11 @@ var time = 0,
     framesAcum = 0,
     acumDelta = 0;
 
-// background gradient
-let bgGrad;
-
-var graphicAssets = {
-    ships: {
-        path: "assets/simpleSpace_sheet.png",
-        img: null
-    },
-    crosshair: {
-        path: "assets/crosshair060.png",
-        img: null
-    }
-};
+// current Game global reference
+var game = null;
 
 function LoadImages(assets, onloaded) {
-    if (Object.keys(assets).length === 0)
+    if (assets === null || Object.keys(assets).length === 0)
         onloaded();
     
     let imagesToLoad = 0;
@@ -62,24 +51,18 @@ function Init() {
     Input.SetupKeyboardEvents();
     Input.SetupMouseEvents(canvas);
 
-    LoadImages(graphicAssets, ()=>{
-        Start();
-        Loop();
-    });
+    if (game) {
+        LoadImages(game.graphicAssets, ()=>{
+            Start();
+            Loop();
+        });
+    }
 }
 
 function Start() {
     time = performance.now();
 
-    // configure background gradient
-    bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    bgGrad.addColorStop(0, "#191200");
-    bgGrad.addColorStop(0.1, "#000000");
-    bgGrad.addColorStop(0.35, "#07073e");
-    bgGrad.addColorStop(0.95, "#22375e");
-    bgGrad.addColorStop(1, "#274f98");
-
-    TTS.Start();
+    game.Start();
 }
 
 function Loop() {
@@ -115,24 +98,18 @@ function Loop() {
 }
 
 function Update(deltaTime) {
-    TTS.Update(deltaTime);
+    // update the game's logic
+    game.Update(deltaTime);
 }
 
 function Draw(/** @type {CanvasRenderingContext2D} */ctx) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // background
-    ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // draw the game
+    game.Draw(ctx);
 
-    TTS.Draw(ctx);
-
-    // draw the mouse position
-    ctx.beginPath();
-    ctx.arc(Input.mouse.x, Input.mouse.y, 5, 0, PI2, false);
-    ctx.fillStyle = "red";
-    ctx.closePath();
-    ctx.fill();
+    // draw stats
+    DrawStats(ctx);
 }
 
 function DrawStats(ctx) {

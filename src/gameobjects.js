@@ -1,5 +1,6 @@
 
 class GameObject {
+    _active = true;
     _rotation = 0;
     _scale = 1;
 
@@ -7,6 +8,9 @@ class GameObject {
         this._position = Vector2.Copy(position);
     }
 
+    get active() {
+        return this._active;
+    }
     get position() {
         return this._position;
     }
@@ -17,6 +21,9 @@ class GameObject {
         return this._scale;
     }
 
+    set active(value) {
+        this._active = value;
+    }
     set position(value) {
         this._position = Vector2.Copy(value);
     }
@@ -55,6 +62,49 @@ class Rectangle extends GameObject {
         ctx.rotate(this._rotation);
         ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
         ctx.restore();
+    }
+}
+
+class Circle extends GameObject {
+    constructor(position, radious, color) {
+        super(position);
+        this.radious = radious;
+        this.color = color;
+    }
+
+    Draw(ctx) {
+        ctx.fillStyle = this.color;
+        ctx.save();
+        ctx.translate(this._position.x, this._position.y);
+        ctx.rotate(this._rotation);
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radious, 0, PI2, false);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+class Circumference extends GameObject {
+    constructor(position, radious, color, lineWidth) {
+        super(position);
+        this.radious = radious;
+        this.color = color;
+        this.lineWidth = lineWidth
+    }
+
+    Draw(ctx) {
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = this.lineWidth;
+        ctx.save();
+        ctx.translate(this._position.x, this._position.y);
+        ctx.rotate(this._rotation);
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radious, 0, PI2, false);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.restore();
+        ctx.lineWidth = 1;
     }
 }
 
