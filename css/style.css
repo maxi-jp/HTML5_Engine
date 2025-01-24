@@ -15,5 +15,5 @@ canvas {
     background-color: white;
     margin: 20px auto;
     border: solid black 1px;
-    cursor: none;
+    /* cursor: none; */
 }
