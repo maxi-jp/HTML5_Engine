@@ -39,12 +39,10 @@ class GameObject {
     Draw(ctx){}
 }
 
-class Rectangle extends GameObject {
+class RectangleGO extends GameObject {
     constructor(position) {
         super(position);
-        this.width = 100;
-        this.height = 100;
-        this.color = 'red';
+        this.rectangle = new Rectangle(this._position, 100, 100, 'red');
     }
 
     Start() {
@@ -60,7 +58,7 @@ class Rectangle extends GameObject {
         ctx.save();
         ctx.translate(this._position.x, this._position.y);
         ctx.rotate(this._rotation);
-        ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+        ctx.fillRect(-this.rectangle.width / 2, -this.rectangle.height / 2, this.rectangle.width, this.rectangle.height);
         ctx.restore();
     }
 }

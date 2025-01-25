@@ -86,6 +86,10 @@ var Input = {
         return this.mouse.pressed;
     },
 
+    IsMouseDown: function () {
+        return this.mouse.down;
+    },
+
     PostUpdate: function () {
         // clean keyboard keydown events
         for (var property in this.keyboard.keydown) {

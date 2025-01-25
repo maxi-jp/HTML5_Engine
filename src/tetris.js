@@ -1,6 +1,7 @@
 class Tetris extends Game {
     constructor() {
         super();
+
         this.grid = null;
         this.gridSize = { rows: 20, cols: 10 };
         this.gridPosition = { x: 220, y: 20 };
@@ -19,15 +20,23 @@ class Tetris extends Game {
         ];
         
         this.currentPiece = null;
-        this.nextPiece = null;
+        this.nextPieces = [];
+        this.nextPiecesCount = 5;
+        this.savedPiece = null;
+        this.lastPieceSaved = false;
         
         this.currentDropTime = 0; // time passed since the last drop
-        this.timeToDrop = 1; // time to drop a piece in milliseconds
+        this.dropTime = 0.5; // time to drop a piece in seconds
 
-        this.minTimeToMove = 0.1; // minimum time to move a piece in milliseconds
+        this.minTimeToMove = 0.05; // minimum time to move a piece in milliseconds
+        this.minTimeToMoveSinceLastMove = 0.35; // minimum time to repeat movement since the first key down
         this.lastTimeMoved = 0; // last time the piece was moved
-
+        this.repeatedMovement = false;
+        
         this.totalLinesCleared = 0;
+        this.scoreTable = [0, 40, 100, 300, 1200];
+        this.score = 0;
+        this.scoreLabel = null;
     }
     
     Start() {
@@ -35,16 +44,28 @@ class Tetris extends Game {
         this.lastTime = 0;
         this.InitializeGrid(this.gridSize.rows, this.gridSize.cols);
         
+        // Initialize the first piece
         this.currentPiece = this.CreateRandomPiece();
         this.currentPiece.position.x = this.initialPiecePosition.x;
         this.currentPiece.position.y = this.initialPiecePosition.y;
         
-        this.nextPiece = this.CreateRandomPiece();
+        // Initialize next pieces array
+        this.nextPieces = [];
+        for (let i = 0; i < this.nextPiecesCount; i++) {
+            this.nextPieces.push(this.CreateRandomPiece());
+        }
+        
+        this.savedPiece = null;
+        this.lastPieceSaved = false;
         
         this.totalLinesCleared = 0;
+        this.score = 0;
+
+        this.scoreLabel = new TextLabel("Score: 0", new Vector2(20, 420), "20px Comic Sans MS", "black", "left", "middle", false);
+        this.keysLabel = new TextLabel("Keys: A (left) | D (right) | W (rotate) | Space (save piece)", new Vector2(20, 460), "16px Comic Sans MS", "grey", "left", "middle", false);
         
         // center the grid in the canvas
-        this.gridPosition.x = (canvas.width - this.gridSize.cols * this.squareSize) / 2;
+        this.gridPosition.x = Math.floor((canvas.width - this.gridSize.cols * this.squareSize) / 2);
     }
 
     Update(deltaTime) {
@@ -53,7 +74,7 @@ class Tetris extends Game {
         this.HandleInput(deltaTime);
         
         this.currentDropTime += deltaTime;
-        if (this.currentDropTime > this.timeToDrop) {
+        if (this.currentDropTime > this.dropTime) {
             this.Drop();
         }
     }
@@ -62,31 +83,37 @@ class Tetris extends Game {
         super.Draw(ctx);
 
         // Draw the grid
-        ctx.strokeRect(this.gridPosition.x, this.gridPosition.y, this.gridSize.cols * this.squareSize, this.gridSize.rows * this.squareSize);
-
+        // Fallen pieces of the grid
         for (let y = 0; y < this.grid.length; y++) {
             for (let x = 0; x < this.grid[y].length; x++) {
                 if (this.grid[y][x] !== 0) {
-                    ctx.fillStyle = 'gray';
-                    ctx.fillRect(this.gridPosition.x + x * this.squareSize, this.gridPosition.y + y * this.squareSize, this.squareSize, this.squareSize);
-                    ctx.strokeRect(this.gridPosition.x + x * this.squareSize, this.gridPosition.y + y * this.squareSize, this.squareSize, this.squareSize);
+                    DrawFillRectangle(ctx, this.gridPosition.x + x * this.squareSize, this.gridPosition.y + y * this.squareSize, this.squareSize, this.squareSize, 'gray');
+                    DrawStrokeRectangle(ctx, this.gridPosition.x + x * this.squareSize, this.gridPosition.y + y * this.squareSize, this.squareSize, this.squareSize, 'black', 1);
                 }
             }
         }
-        
+
         // Draw the current piece
         this.DrawPiece(ctx, this.currentPiece, this.gridPosition.x + this.currentPiece.position.x * this.squareSize, this.gridPosition.y + this.currentPiece.position.y * this.squareSize);
         
-        // Draw the next piece
-        ctx.strokeRect(this.gridPosition.x + this.gridSize.cols * this.squareSize + 20, this.gridPosition.y, 6 * this.squareSize, 4 * this.squareSize);
+        // Border of the grid
+        DrawStrokeRectangle(ctx, this.gridPosition.x, this.gridPosition.y, this.gridSize.cols * this.squareSize, this.gridSize.rows * this.squareSize, 'black', 2);
         
-        this.DrawPiece(ctx, this.nextPiece, this.gridPosition.x + (this.gridSize.cols + 1) * this.squareSize + 20, this.gridPosition.y + 20);
+        // Draw the next pieces
+        DrawStrokeRectangle(ctx, this.gridPosition.x + this.gridSize.cols * this.squareSize + 20, this.gridPosition.y, 6 * this.squareSize, 4 * this.squareSize, 'black', 2);
+        for (let i = 0; i < this.nextPieces.length; i++) {
+            this.DrawPiece(ctx, this.nextPieces[i], this.gridPosition.x + (this.gridSize.cols + 1) * this.squareSize + 20, this.gridPosition.y + 20 + (i * 4 * this.squareSize));
+        }
+
+        // Draw the saved piece
+        DrawStrokeRectangle(ctx, this.gridPosition.x - 6 * this.squareSize - 20, this.gridPosition.y, 6 * this.squareSize, 4 * this.squareSize, 'black', 2);
+        if (this.savedPiece !== null) {
+            this.DrawPiece(ctx, this.savedPiece, this.gridPosition.x - 6 * this.squareSize - 20, this.gridPosition.y + 20);
+        }
         
         // UI
-        ctx.font = "40px Comic Sans MS";
-        ctx.fillStyle = "black";
-        ctx.textAlign = "left";
-        ctx.fillText("Lines: " + this.totalLinesCleared, 20, 40);
+        this.keysLabel.Draw(ctx);
+        this.scoreLabel.Draw(ctx);
     }
     
     InitializeGrid(rows, cols) {
@@ -161,6 +188,10 @@ class Tetris extends Game {
         }
     }
 
+    ResetPieceRotation(piece) {
+        piece.shape = this.pieces.find(p => p.type === piece.type).shape;
+    }
+
     MoveCurrentPiece(offset) {
         this.currentPiece.position.x += offset;
         if (this.CheckPieceGridCollision(this.currentPiece)) {
@@ -174,30 +205,58 @@ class Tetris extends Game {
         if (Input.IsKeyDown(KEY_LEFT) || Input.IsKeyDown(KEY_A)) {
             this.MoveCurrentPiece(-1);
             this.lastTimeMoved = 0;
+            this.repeatedMovement = true;
         }
         if (Input.IsKeyDown(KEY_RIGHT) || Input.IsKeyDown(KEY_D)) {
             this.MoveCurrentPiece(1);
             this.lastTimeMoved = 0;
+            this.repeatedMovement = true;
         }
         // continous press movement
-        if ((Input.IsKeyPressed(KEY_LEFT) || Input.IsKeyPressed(KEY_A)) && this.lastTimeMoved > this.minTimeToMove) {
-            this.MoveCurrentPiece(-1);
-            this.lastTimeMoved = 0;
+        if (Input.IsKeyPressed(KEY_LEFT) || Input.IsKeyPressed(KEY_A)) {
+            if ((this.repeatedMovement && this.lastTimeMoved > this.minTimeToMoveSinceLastMove) || (!this.repeatedMovement && this.lastTimeMoved > this.minTimeToMove)) {
+                this.MoveCurrentPiece(-1);
+                this.lastTimeMoved = 0;
+                this.repeatedMovement = false;
+            }
         }
-        if ((Input.IsKeyPressed(KEY_RIGHT) || Input.IsKeyPressed(KEY_D)) && this.lastTimeMoved > this.minTimeToMove) {
-            this.MoveCurrentPiece(1);
-            this.lastTimeMoved = 0;
+        if (Input.IsKeyPressed(KEY_RIGHT) || Input.IsKeyPressed(KEY_D)) {
+            if ((this.repeatedMovement && this.lastTimeMoved > this.minTimeToMoveSinceLastMove) || (!this.repeatedMovement && this.lastTimeMoved > this.minTimeToMove)) {
+                this.MoveCurrentPiece(1);
+                this.lastTimeMoved = 0;
+                this.repeatedMovement = false;
+            }
         }
 
         // drop movement
-        if (Input.IsKeyPressed(KEY_DOWN) || Input.IsKeyPressed(KEY_S) && this.lastTimeMoved > this.minTimeToMove) {
+        if ((Input.IsKeyPressed(KEY_DOWN) || Input.IsKeyPressed(KEY_S)) && this.lastTimeMoved > this.minTimeToMove) {
             this.Drop();
             this.lastTimeMoved = 0;
         }
 
         // rotate
-        if (Input.IsKeyDown(KEY_UP) || Input.IsKeyDown(KEY_W)) {
+        if (Input.IsKeyDown(KEY_W) || Input.IsKeyDown(KEY_UP) || Input.IsMouseDown()) {
             this.RotateCurrentPiece();
+        }
+
+        // Save the current piece
+        if (Input.IsKeyPressed(KEY_SPACE) && !this.lastPieceSaved) {
+            if (this.savedPiece === null) {
+                this.savedPiece = this.currentPiece;
+                this.currentPiece = this.nextPieces.shift();
+                this.nextPieces.push(this.CreateRandomPiece());
+            } else {
+                const temp = this.currentPiece;
+                this.currentPiece = this.savedPiece;
+                this.savedPiece = temp;
+            }
+            this.currentPiece.position.x = this.initialPiecePosition.x;
+            this.currentPiece.position.y = this.initialPiecePosition.y;
+
+            this.ResetPieceRotation(this.savedPiece);
+
+            this.currentDropTime = 0;
+            this.lastPieceSaved = true;
         }
     }
 
@@ -209,11 +268,12 @@ class Tetris extends Game {
             this.MergePieceIntoGrid(this.currentPiece);
             this.CheckAndClearLines();
 
-            this.currentPiece = this.nextPiece;
+            this.currentPiece = this.nextPieces.shift();
             this.currentPiece.position.x = this.initialPiecePosition.x;
             this.currentPiece.position.y = this.initialPiecePosition.y;
 
-            this.nextPiece = this.CreateRandomPiece();
+            this.nextPieces.push(this.CreateRandomPiece());
+            this.lastPieceSaved = false;
         }
         this.currentDropTime = 0;
     }
@@ -231,15 +291,19 @@ class Tetris extends Game {
             linesCleared++;
             y++;
         }
+
         this.totalLinesCleared += linesCleared;
+        this.UpdateScore(linesCleared);
+    }
+
+    UpdateScore(linesCleared) {
+        this.score += this.scoreTable[linesCleared];
+        this.scoreLabel.text = `Score: ${this.score}`;
     }
 
     DrawPiece(ctx, piece, x, y) {
-        ctx.strokeStyle = 'grey';
-        ctx.strokeRect(x, y, this.squareSize * 4, this.squareSize * 4);
-
-        ctx.fillStyle = piece.color;
-        ctx.strokeStyle = 'black';
+        // Debug bounding box
+        DrawStrokeRectangle(ctx, x, y, this.squareSize * 4, this.squareSize * 4, 'grey', 1);
 
         for (let j = 0; j < piece.shape.length; j++) {
             for (let i = 0; i < piece.shape[j].length; i++) {
@@ -247,8 +311,8 @@ class Tetris extends Game {
                     const coordX = x + i * this.squareSize;
                     const coordY = y + j * this.squareSize;
 
-                    ctx.fillRect(coordX, coordY, this.squareSize, this.squareSize);
-                    ctx.strokeRect(coordX, coordY, this.squareSize, this.squareSize);
+                    DrawFillRectangle(ctx, coordX, coordY, this.squareSize, this.squareSize, piece.color);
+                    DrawStrokeRectangle(ctx, coordX, coordY, this.squareSize, this.squareSize, 'black', 1);
                 }
             }
         }
