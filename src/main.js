@@ -45,7 +45,7 @@ function LoadImages(assets, onloaded) {
 function Init() {
     canvas = document.getElementById("myCanvas");
     ctx = canvas.getContext("2d");
-    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = true;
 
     // input setup
     Input.SetupKeyboardEvents();

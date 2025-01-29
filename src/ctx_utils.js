@@ -100,10 +100,10 @@ class TextLabel {
 
 function DrawRectangle(ctx, x, y, width, height, color, stroke=false, lineWidth=1) {
     if (stroke) {
-        DrawFillRectangle(ctx, x, y, width, height, color);
+        DrawStrokeRectangle(ctx, x, y, width, height, color, lineWidth);
     }
     else {
-        DrawStrokeRectangle(ctx, x, y, width, height, color, lineWidth);
+        DrawFillRectangle(ctx, x, y, width, height, color);
     }
 }
 
