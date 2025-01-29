@@ -24,6 +24,7 @@ class Tetris extends Game {
         this.nextPiecesCount = 5;
         this.savedPiece = null;
         this.lastPieceSaved = false;
+        this.ghostPiece = null; // preview of where the current piece is going to fall
         
         this.currentDropTime = 0; // time passed since the last drop
         this.dropTime = 0.5; // time to drop a piece in seconds
@@ -48,6 +49,12 @@ class Tetris extends Game {
         this.currentPiece = this.CreateRandomPiece();
         this.currentPiece.position.x = this.initialPiecePosition.x;
         this.currentPiece.position.y = this.initialPiecePosition.y;
+        this.ghostPiece = {
+            type: this.currentPiece.type,
+            color: 'rgba(128, 128, 128, 0.5)', // semi-transparent grey
+            shape: [],
+            position: { x: 0, y: 0 }
+        };
         
         // Initialize next pieces array
         this.nextPieces = [];
@@ -62,7 +69,7 @@ class Tetris extends Game {
         this.score = 0;
 
         this.scoreLabel = new TextLabel("Score: 0", new Vector2(20, 420), "20px Comic Sans MS", "black", "left", "middle", false);
-        this.keysLabel = new TextLabel("Keys: A (left) | D (right) | W (rotate) | Space (save piece)", new Vector2(20, 460), "16px Comic Sans MS", "grey", "left", "middle", false);
+        this.keysLabel = new TextLabel("Keys: A (left) | D (right) | Space (rotate) | W (instant fall) | Q (save piece)", new Vector2(20, 460), "16px Comic Sans MS", "grey", "left", "middle", false);
         
         // center the grid in the canvas
         this.gridPosition.x = Math.floor((canvas.width - this.gridSize.cols * this.squareSize) / 2);
@@ -77,6 +84,9 @@ class Tetris extends Game {
         if (this.currentDropTime > this.dropTime) {
             this.Drop();
         }
+
+        // update the ghost piece
+        this.UpdateGhostPiece();
     }
 
     Draw(ctx) {
@@ -92,6 +102,9 @@ class Tetris extends Game {
                 }
             }
         }
+
+        // Draw the ghost piece
+        this.DrawPiece(ctx, this.ghostPiece, this.gridPosition.x + this.ghostPiece.position.x * this.squareSize, this.gridPosition.y + this.ghostPiece.position.y * this.squareSize);
 
         // Draw the current piece
         this.DrawPiece(ctx, this.currentPiece, this.gridPosition.x + this.currentPiece.position.x * this.squareSize, this.gridPosition.y + this.currentPiece.position.y * this.squareSize);
@@ -212,7 +225,7 @@ class Tetris extends Game {
             this.lastTimeMoved = 0;
             this.repeatedMovement = true;
         }
-        // continous press movement
+        // continuous press movement
         if (Input.IsKeyPressed(KEY_LEFT) || Input.IsKeyPressed(KEY_A)) {
             if ((this.repeatedMovement && this.lastTimeMoved > this.minTimeToMoveSinceLastMove) || (!this.repeatedMovement && this.lastTimeMoved > this.minTimeToMove)) {
                 this.MoveCurrentPiece(-1);
@@ -235,19 +248,21 @@ class Tetris extends Game {
         }
 
         // rotate
-        if (Input.IsKeyDown(KEY_W) || Input.IsKeyDown(KEY_UP) || Input.IsMouseDown()) {
+        if (Input.IsKeyDown(KEY_SPACE) || Input.IsMouseDown()) {
             this.RotateCurrentPiece();
         }
 
         // Save the current piece
-        if (Input.IsKeyPressed(KEY_SPACE) && !this.lastPieceSaved) {
+        if (Input.IsKeyPressed(KEY_Q) && !this.lastPieceSaved) {
             if (this.savedPiece === null) {
                 this.savedPiece = this.currentPiece;
                 this.currentPiece = this.nextPieces.shift();
+                this.ghostPiece.type = this.currentPiece.type;
                 this.nextPieces.push(this.CreateRandomPiece());
             } else {
                 const temp = this.currentPiece;
                 this.currentPiece = this.savedPiece;
+                this.ghostPiece.type = this.currentPiece.type;
                 this.savedPiece = temp;
             }
             this.currentPiece.position.x = this.initialPiecePosition.x;
@@ -257,6 +272,11 @@ class Tetris extends Game {
 
             this.currentDropTime = 0;
             this.lastPieceSaved = true;
+        }
+
+        // Full fall
+        if (Input.IsKeyDown(KEY_W)) {
+            this.FullFall();
         }
     }
 
@@ -271,6 +291,7 @@ class Tetris extends Game {
             this.currentPiece = this.nextPieces.shift();
             this.currentPiece.position.x = this.initialPiecePosition.x;
             this.currentPiece.position.y = this.initialPiecePosition.y;
+            this.ghostPiece.type = this.currentPiece.type;
 
             this.nextPieces.push(this.CreateRandomPiece());
             this.lastPieceSaved = false;
@@ -316,6 +337,35 @@ class Tetris extends Game {
                 }
             }
         }
+    }
+
+    FullFall() {
+        while (!this.CheckPieceGridCollision(this.currentPiece)) {
+            this.currentPiece.position.y++;
+        }
+        this.currentPiece.position.y--;
+
+        this.MergePieceIntoGrid(this.currentPiece);
+        this.CheckAndClearLines();
+
+        this.currentPiece = this.nextPieces.shift();
+        this.currentPiece.position.x = this.initialPiecePosition.x;
+        this.currentPiece.position.y = this.initialPiecePosition.y;
+        this.ghostPiece.type = this.currentPiece.type;
+
+        this.nextPieces.push(this.CreateRandomPiece());
+        this.lastPieceSaved = false;
+        this.currentDropTime = 0;
+    }
+
+    UpdateGhostPiece() {
+        this.ghostPiece.shape = this.currentPiece.shape;
+        this.ghostPiece.position = { ...this.currentPiece.position };
+
+        while (!this.CheckPieceGridCollision(this.ghostPiece)) {
+            this.ghostPiece.position.y++;
+        }
+        this.ghostPiece.position.y--;
     }
 }
 
