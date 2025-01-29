@@ -144,3 +144,41 @@ function DrawStrokeText(ctx, text, x, y, font, color="black", align="center", ba
 }
 
 // #endregion
+
+// #region other helper functions
+
+// Given a color return a desaturated version of it
+function DesaturateColor(color, desaturateValue=0.5) {
+    // Create a temporary element to use getComputedStyle for converting named colors to RGB
+    const element = document.createElement('div');
+    element.style.color = color;
+  
+    document.body.appendChild(element); // append temporarily
+
+    // Get the computed color in RGB format
+    const computedColor = window.getComputedStyle(element).color;
+
+    document.body.removeChild(element);
+  
+    if (!computedColor || computedColor === 'rgba(0, 0, 0, 0)') {
+        console.warn(`Unable to desaturate color "${color}".`);
+        return color;
+    }
+
+    // Extract RGB values from the computed color string 'rgb(r, g, b)'
+    const rgbValues = computedColor.match(/\d+/g).map(Number);
+    const [r, g, b] = rgbValues;
+
+    // Calculate the luminance (average of the RGB channels)
+    const avg = (r + g + b) / 3;
+  
+    // Adjust each RGB channel towards the average (this is the desaturation step)
+    const newR = Math.round(r + (avg - r) * desaturateValue);
+    const newG = Math.round(g + (avg - g) * desaturateValue);
+    const newB = Math.round(b + (avg - b) * desaturateValue);
+  
+    // Return the desaturated color in RGB format
+    return `rgb(${newR}, ${newG}, ${newB})`;
+}
+
+// #endgerion

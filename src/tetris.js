@@ -55,6 +55,7 @@ class Tetris extends Game {
             shape: [],
             position: { x: 0, y: 0 }
         };
+        this.UpdateGhostPieceAfterChange();
         
         // Initialize next pieces array
         this.nextPieces = [];
@@ -257,13 +258,13 @@ class Tetris extends Game {
             if (this.savedPiece === null) {
                 this.savedPiece = this.currentPiece;
                 this.currentPiece = this.nextPieces.shift();
-                this.ghostPiece.type = this.currentPiece.type;
                 this.nextPieces.push(this.CreateRandomPiece());
+                this.UpdateGhostPieceAfterChange();
             } else {
                 const temp = this.currentPiece;
                 this.currentPiece = this.savedPiece;
-                this.ghostPiece.type = this.currentPiece.type;
                 this.savedPiece = temp;
+                this.UpdateGhostPieceAfterChange();
             }
             this.currentPiece.position.x = this.initialPiecePosition.x;
             this.currentPiece.position.y = this.initialPiecePosition.y;
@@ -291,7 +292,7 @@ class Tetris extends Game {
             this.currentPiece = this.nextPieces.shift();
             this.currentPiece.position.x = this.initialPiecePosition.x;
             this.currentPiece.position.y = this.initialPiecePosition.y;
-            this.ghostPiece.type = this.currentPiece.type;
+            this.UpdateGhostPieceAfterChange();
 
             this.nextPieces.push(this.CreateRandomPiece());
             this.lastPieceSaved = false;
@@ -351,7 +352,7 @@ class Tetris extends Game {
         this.currentPiece = this.nextPieces.shift();
         this.currentPiece.position.x = this.initialPiecePosition.x;
         this.currentPiece.position.y = this.initialPiecePosition.y;
-        this.ghostPiece.type = this.currentPiece.type;
+        this.UpdateGhostPieceAfterChange();
 
         this.nextPieces.push(this.CreateRandomPiece());
         this.lastPieceSaved = false;
@@ -366,6 +367,11 @@ class Tetris extends Game {
             this.ghostPiece.position.y++;
         }
         this.ghostPiece.position.y--;
+    }
+
+    UpdateGhostPieceAfterChange() {
+        this.ghostPiece.type = this.currentPiece.type;
+        this.ghostPiece.color = DesaturateColor(this.currentPiece.color, 0.75);
     }
 }
 
