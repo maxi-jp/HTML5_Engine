@@ -107,7 +107,7 @@ class SpriteObject extends GameObject {
         super(position);
         super.rotation = rotation;
         super.scale = scale;
-        
+
         this.sprite = new Sprite(img, this._position, this._rotation, this._scale);
     }
 
@@ -172,5 +172,116 @@ class SSAnimationObject extends SpriteObject {
         // reset the frame count
         this.actualFrame = 0;
         this.actualFrameCountTime = 0;
+    }
+}
+
+class Camera {
+    _position;
+    _rotation = 0;
+    _scale = 1;
+
+    constructor(position) {
+        this._position = Vector2.Copy(position);
+    }
+
+    get position() {
+        return this._position;
+    }
+    get rotation() {
+        return this._rotation;
+    }
+    get scale() {
+        return this._scale;
+    }
+
+    set position(value) {
+        this._position = Vector2.Copy(value);
+    }
+    set rotation(value) {
+        this._rotation = value;
+    }
+    set scale(value) {
+        this._scale = value;
+    }
+
+    Start() {}
+    Update(deltaTime) {}
+
+    PreDraw(ctx) {
+        ctx.save();
+    }
+
+    PostDraw(ctx) {
+        ctx.restore();
+    }
+}
+
+class FollowCamera extends Camera {
+    constructor(position, target, minX, maxX, minY, maxY, smoothingSpeed=5) {
+        super(position);
+
+        this.target = target;
+        this.targetPosition = Vector2.Zero();
+
+        this.minX = minX;
+        this.maxX = maxX;
+        this.minY = minY;
+        this.maxY = maxY;
+
+        this.smoothingSpeed = smoothingSpeed;
+
+        // shake
+        this.shakingValue = Vector2.Zero();
+        this.shakingTime = 0;
+        this.shakingSpeed = 40;
+        this.shakingSize = 5;
+        this.shakeInitRandom = Vector2.Zero();
+    }
+
+    Start() {
+        this.position.Set(
+            this.target.position.x - canvas.width / 2,
+            this.target.position.y - canvas.height / 2
+        );
+    }
+
+    Update(deltaTime) {
+        this.targetPosition.x = this.target.position.x - canvas.width / 2;
+        this.targetPosition.y = this.target.position.y - canvas.height / 2;
+
+        if (this.targetPosition.x < this.minX)
+            this.targetPosition.x = this.minX;
+        if (this.targetPosition.x > this.maxX)
+            this.targetPosition.x = this.maxX;
+
+        if (this.targetPosition.y < this.minY)
+            this.targetPosition.y = this.minY;
+        if (this.targetPosition.y > this.maxY)
+            this.targetPosition.y = this.maxY;
+
+        this.shakingValue.Set(0, 0);
+        if (this.shakingTime > 0) {
+            this.shakingTime -= deltaTime;
+
+            this.shakingValue.x = Math.cos(this.shakeInitRandom.x + this.shakingTime * this.shakingSpeed) * this.shakingSize;
+            this.shakingValue.y = Math.sin(this.shakeInitRandom.y + this.shakingTime * this.shakingSpeed) * this.shakingSize;
+        }
+
+        const smoothStep = this.smoothingSpeed * deltaTime;
+
+        this.position.x += ((this.targetPosition.x - this.position.x) * smoothStep) + this.shakingValue.x;
+        this.position.y += ((this.targetPosition.y - this.position.y) * smoothStep) + this.shakingValue.y;
+    }
+
+    PreDraw(ctx) {
+        super.PreDraw(ctx);
+        ctx.translate(-this.position.x, -this.position.y);
+    }
+
+    Shake(time, speed, size) {
+        this.shakingTime = time;
+        this.shakingSpeed = speed;
+        this.shakingSize = size;
+        this.shakeInitRandom.Random();
     }
 }

@@ -3,6 +3,9 @@ class PlayerShip extends SpriteObject {
         super(position, rotation, scale, img);
 
         this.speed = 300;
+        this.speedRotation = 5;
+        this.speedMult = 1.5;
+
         this.life = 100;
 
         this.movement = Vector2.Zero();
@@ -16,13 +19,15 @@ class PlayerShip extends SpriteObject {
         this.cannonOffset = new Vector2(10, 0);
 
         this.sceneLimits = sceneLimits;
+
+        this.camera = null;
     }
 
     Update(deltaTime) {
         // rotation
         this.rotation = Math.atan2(
-            Input.mouse.y - this.position.y,
-            Input.mouse.x - this.position.x
+            Input.mouse.y - this.position.y + this.camera.position.y,
+            Input.mouse.x - this.position.x + this.camera.position.x
         ) + PIH;
 
         // movement
@@ -41,6 +46,11 @@ class PlayerShip extends SpriteObject {
             this.movement.y += 1;
         }
         this.movement.Normalize();
+        
+        // speed multiply
+        if (Input.IsKeyPressed(KEY_LSHIFT)) {
+            this.movement.MultiplyScalar(this.speedMult);
+        }
 
         // apply the movement
         this.position.x += this.movement.x * this.speed * deltaTime;
