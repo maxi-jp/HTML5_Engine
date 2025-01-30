@@ -1,6 +1,6 @@
-
 class GameObject {
     _active = true;
+    _position;
     _rotation = 0;
     _scale = 1;
 
@@ -45,16 +45,12 @@ class RectangleGO extends GameObject {
         this.rectangle = new Rectangle(this._position, 100, 100, 'red');
     }
 
-    Start() {
-        
-    }
+    Start() { }
 
-    Update(deltaTime) {
-        this._rotation += deltaTime * 2;
-    }
+    Update(deltaTime) { }
 
     Draw(ctx) {
-        ctx.fillStyle = this.color;
+        ctx.fillStyle = this.rectangle.color;
         ctx.save();
         ctx.translate(this._position.x, this._position.y);
         ctx.rotate(this._rotation);
@@ -109,8 +105,9 @@ class Circumference extends GameObject {
 class SpriteObject extends GameObject {
     constructor(position, rotation, scale, img) {
         super(position);
-        this._rotation = rotation;
-        this._scale = scale;
+        super.rotation = rotation;
+        super.scale = scale;
+        
         this.sprite = new Sprite(img, this._position, this._rotation, this._scale);
     }
 
@@ -119,12 +116,12 @@ class SpriteObject extends GameObject {
     }
 
     set rotation(newRotation) {
-        this._rotation = newRotation;
+        super.rotation = newRotation;
         this.sprite.rotation = this._rotation;
     }
 
     set scale(newScale) {
-        this._scale = newScale;
+        super.scale = newScale;
         this.sprite.scale = this._scale;
     }
 

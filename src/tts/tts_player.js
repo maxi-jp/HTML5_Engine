@@ -20,12 +20,10 @@ class PlayerShip extends SpriteObject {
 
     Update(deltaTime) {
         // rotation
-        this._rotation = Math.atan2(
+        this.rotation = Math.atan2(
             Input.mouse.y - this.position.y,
             Input.mouse.x - this.position.x
         ) + PIH;
-
-        this.sprite.rotation = this._rotation;
 
         // movement
         this.movement.Set(0, 0);

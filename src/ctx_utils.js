@@ -143,6 +143,16 @@ function DrawStrokeText(ctx, text, x, y, font, color="black", align="center", ba
     ctx.strokeText(text, x, y);
 }
 
+function DrawSegment(ctx, x1, y1, x2, y2, color, lineWidth=1) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.closePath();
+}
+
 // #endregion
 
 // #region other helper functions

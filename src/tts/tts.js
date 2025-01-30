@@ -52,6 +52,20 @@ class TTS extends Game {
         ctx.fillStyle = this.bgGrad.gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+        // background grid
+        // horizontal lines
+        const verticalStep = 50;
+        const horizontalLines = this.sceneLimits.height / verticalStep;
+        for (let i = 0; i < horizontalLines; i++) {
+            DrawSegment(ctx, this.sceneLimits.position.x, this.sceneLimits.position.y + verticalStep * i, this.sceneLimits.position.x + this.sceneLimits.width, this.sceneLimits.position.y + verticalStep * i, "grey", 1);
+        }
+        // vertical lines
+        const horizontalStep = 50;
+        const verticalLines = this.sceneLimits.width / horizontalStep;
+        for (let i = 0; i < verticalLines; i++) {
+            DrawSegment(ctx, this.sceneLimits.position.x + horizontalStep * i, this.sceneLimits.position.y, this.sceneLimits.position.x + horizontalStep * i, this.sceneLimits.position.y + this.sceneLimits.height, "grey", 1);
+        }
+
         this.sceneLimits.Draw(ctx);
 
         super.Draw(ctx);
