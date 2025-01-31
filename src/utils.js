@@ -1,4 +1,3 @@
-
 const PI2 = Math.PI * 2;
 const PIH = Math.PI / 2;
 const degToRad = Math.PI / 180;
@@ -106,6 +105,45 @@ function IntersectionBetweenLines(l1p1, l1p2, l2p1, l2p2) {
     return result;
 }
 
+// normalize an angle to the range -PI to PI
+function NormalizeAngle(angle) {
+    angle = angle % PI2;
+    if (angle > Math.PI) {
+        angle -= PI2;
+    }
+    else if (angle < -Math.PI) {
+        angle += PI2;
+    }
+    return angle;
+}
+
+function SmoothRotation(currentRotation, targetRotation, speed) {
+    let rotationDifference = targetRotation - currentRotation;
+    rotationDifference = NormalizeAngle(rotationDifference);
+  
+    // calculate the rotation increment
+    let rotationIncrement = Math.sign(rotationDifference) * Math.min(Math.abs(rotationDifference), speed);
+  
+    // check if the rotation is close enough to the target rotation
+    const tolerance = 0.001;
+    if (Math.abs(rotationIncrement) < tolerance) {
+        rotationIncrement = 0; // Snap to the target to avoid floating point issues
+    }
+
+    return currentRotation + rotationIncrement;
+}
+
+function LerpRotation(currentRotation, targetRotation, interpolationFactor) {
+    let rotationDifference = targetRotation - currentRotation;
+    rotationDifference = NormalizeAngle(rotationDifference);
+
+    return currentRotation + rotationDifference * interpolationFactor;
+}
+
+function Lerp(start, end, interpolationFactor) {
+    return start + (end - start) * interpolationFactor;
+}
+
 class Vector2 {
     constructor(x, y) {
         this.x = x;
@@ -173,6 +211,8 @@ class Vector2 {
     MultiplyScalar(scalar) {
         this.x *= scalar;
         this.y *= scalar;
+
+        return this;
     }
 
     AngleBetween(otherVector) {
@@ -196,10 +236,15 @@ class Vector2 {
         this.Normalize();
     }
 
-    static Lerp(v1, v2, speed) {
-        const v1Angle = Math.atan2(v2.y, v2.x);
-        const desiredDir = new Vector2(v2.x, v2.y).Sub(v1).Normalize();
-        const currentDir = new Vector2(v2.x, v2.y).Normalize();
-        currentDir += (desiredDir - currentDir) * speed;
+    static Lerp(v1, v2, interpolationFactor) {
+        return new Vector2(
+            Lerp(v1.x, v2.x, interpolationFactor),
+            Lerp(v1.y, v2.y, interpolationFactor)
+        );
+    }
+
+    Interpolate(otherVector, interpolationFactor) {
+        this.x = Lerp(this.x, otherVector.x, interpolationFactor);
+        this.y = Lerp(this.y, otherVector.y, interpolationFactor);
     }
 }
