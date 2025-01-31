@@ -3,12 +3,16 @@ class PlayerShip extends SpriteObject {
         super(position, rotation, scale, img);
 
         this.speed = 300;
-        this.speedRotation = 5;
-        this.speedMult = 1.5;
+        this.velocity = Vector2.Zero();
+        this.friction = 0.95; // friction factor to simulate inertia
+        this.speedRotation = 10; // interpolation factor for LerpRotation
+        this.speedMult = 1.5; // speed multiplier when LSHIFT is pressed
 
         this.life = 100;
 
         this.movement = Vector2.Zero();
+        this.targetPosition = Vector2.Copy(position);
+        this.targetRotation = 0;
 
         this.boundingRadious = 24;
         this.boundingRadious2 = this.boundingRadious * this.boundingRadious;
@@ -25,10 +29,13 @@ class PlayerShip extends SpriteObject {
 
     Update(deltaTime) {
         // rotation
-        this.rotation = Math.atan2(
+        this.targetRotation = Math.atan2(
             Input.mouse.y - this.position.y + this.camera.position.y,
             Input.mouse.x - this.position.x + this.camera.position.x
         ) + PIH;
+
+        // apply a smooth rotation
+        this.rotation = LerpRotation(this.rotation, this.targetRotation, this.speedRotation * deltaTime);
 
         // movement
         this.movement.Set(0, 0);
@@ -53,8 +60,14 @@ class PlayerShip extends SpriteObject {
         }
 
         // apply the movement
-        this.position.x += this.movement.x * this.speed * deltaTime;
-        this.position.y += this.movement.y * this.speed * deltaTime;
+        this.velocity.Add(this.movement.MultiplyScalar(this.speed * deltaTime));
+        this.velocity.MultiplyScalar(this.friction); // apply friction to simulate inertia
+
+        this.targetPosition.Set(
+            this.position.x + this.velocity.x,
+            this.position.y + this.velocity.y
+        );
+        this.position.Interpolate(this.targetPosition, 0.1);
 
         // check scene limits
         // left wall

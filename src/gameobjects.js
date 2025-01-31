@@ -105,23 +105,40 @@ class Circumference extends GameObject {
 class SpriteObject extends GameObject {
     constructor(position, rotation, scale, img) {
         super(position);
-        super.rotation = rotation;
-        super.scale = scale;
+        this._rotation = rotation;
+        this._scale = scale;
 
         this.sprite = new Sprite(img, this._position, this._rotation, this._scale);
+    }
+
+    get position() {
+        return this._position;
+    }
+
+    get rotation() {
+        return this._rotation;
+    }
+
+    get scale() {
+        return this._scale;
     }
 
     set img(newImg) {
         this.sprite.img = newImg;
     }
 
+    set position(newPosition) {
+        this._position = newPosition;
+        this.sprite.position = this._position;
+    }
+
     set rotation(newRotation) {
-        super.rotation = newRotation;
+        this._rotation = newRotation;
         this.sprite.rotation = this._rotation;
     }
 
     set scale(newScale) {
-        super.scale = newScale;
+        this._scale = newScale;
         this.sprite.scale = this._scale;
     }
 
