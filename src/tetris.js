@@ -1,6 +1,14 @@
+const TetrisGameState = {
+    MainMenu: 0,
+    Playing: 1,
+    GameOver: 2
+};
+
 class Tetris extends Game {
     constructor() {
         super();
+
+        this.currentState = TetrisGameState.Playing;
 
         this.grid = null;
         this.gridSize = { rows: 20, cols: 10 };
@@ -8,15 +16,93 @@ class Tetris extends Game {
         this.squareSize = 20;
 
         this.initialPiecePosition = { x: 3, y: 0 };
+        
+        this.rotationStates = {
+            'I': [
+                [[1, 1, 1, 1]],
+                [[1], [1], [1], [1]]
+            ],
+            'J': [
+                [[1, 0, 0], [1, 1, 1]],
+                [[1, 1], [1, 0], [1, 0]],
+                [[1, 1, 1], [0, 0, 1]],
+                [[0, 1], [0, 1], [1, 1]]
+            ],
+            'L': [
+                [[0, 0, 1], [1, 1, 1]],
+                [[1, 0], [1, 0], [1, 1]],
+                [[1, 1, 1], [1, 0, 0]],
+                [[1, 1], [0, 1], [0, 1]]
+            ],
+            'O': [
+                [[1, 1], [1, 1]]
+            ],
+            'S': [
+                [[0, 1, 1], [1, 1, 0]],
+                [[1, 0], [1, 1], [0, 1]]
+            ],
+            'T': [
+                [[0, 1, 0], [1, 1, 1]],
+                [[1, 0], [1, 1], [1, 0]],
+                [[1, 1, 1], [0, 1, 0]],
+                [[0, 1], [1, 1], [0, 1]]
+            ],
+            'Z': [
+                [[1, 1, 0], [0, 1, 1]],
+                [[0, 1], [1, 1], [1, 0]]
+            ]
+        };
+
+        this.wallKickData = {
+            'I': [
+                [[0, 0], [-2, 0], [1, 0], [-2, -1], [1, 2]],
+                [[0, 0], [-1, 0], [2, 0], [-1, 2], [2, -1]],
+                [[0, 0], [2, 0], [-1, 0], [2, 1], [-1, -2]],
+                [[0, 0], [1, 0], [-2, 0], [1, -2], [-2, 1]]
+            ],
+            'J': [
+                [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
+                [[0, 0], [1, 0], [1, -1], [0, 2], [1, 2]],
+                [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]],
+                [[0, 0], [-1, 0], [-1, -1], [0, 2], [-1, 2]]
+            ],
+            'L': [
+                [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
+                [[0, 0], [1, 0], [1, -1], [0, 2], [1, 2]],
+                [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]],
+                [[0, 0], [-1, 0], [-1, -1], [0, 2], [-1, 2]]
+            ],
+            'O': [
+                [[0, 0]]
+            ],
+            'S': [
+                [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
+                [[0, 0], [1, 0], [1, -1], [0, 2], [1, 2]],
+                [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]],
+                [[0, 0], [-1, 0], [-1, -1], [0, 2], [-1, 2]]
+            ],
+            'T': [
+                [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
+                [[0, 0], [1, 0], [1, -1], [0, 2], [1, 2]],
+                [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]],
+                [[0, 0], [-1, 0], [-1, -1], [0, 2], [-1, 2]]
+            ],
+            'Z': [
+                [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
+                [[0, 0], [1, 0], [1, -1], [0, 2], [1, 2]],
+                [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]],
+                [[0, 0], [-1, 0], [-1, -1], [0, 2], [-1, 2]]
+            ]
+        };
 
         this.pieces = [
-            { type: 'I', color: 'red', shape: [[1, 1, 1, 1]] },
-            { type: 'J', color: 'blue', shape: [[1, 0, 0], [1, 1, 1]] },
-            { type: 'L', color: 'green', shape: [[0, 0, 1], [1, 1, 1]] },
-            { type: 'O', color: 'yellow', shape: [[1, 1], [1, 1]] },
-            { type: 'S', color: 'purple', shape: [[0, 1, 1], [1, 1, 0]] },
-            { type: 'T', color: 'orange', shape: [[0, 1, 0], [1, 1, 1]] },
-            { type: 'Z', color: 'cyan', shape: [[1, 1, 0], [0, 1, 1]] }
+            { type: 'I', color: 'red', shape: this.rotationStates['I'][0] },
+            { type: 'J', color: 'blue', shape: this.rotationStates['J'][0] },
+            { type: 'L', color: 'green', shape: this.rotationStates['L'][0] },
+            { type: 'O', color: 'yellow', shape: this.rotationStates['O'][0] },
+            { type: 'S', color: 'purple', shape: this.rotationStates['S'][0] },
+            { type: 'T', color: 'orange', shape: this.rotationStates['T'][0] },
+            { type: 'Z', color: 'cyan', shape: this.rotationStates['Z'][0] }
         ];
         
         this.currentPiece = null;
@@ -37,11 +123,18 @@ class Tetris extends Game {
         this.totalLinesCleared = 0;
         this.scoreTable = [0, 40, 100, 300, 1200];
         this.score = 0;
+
+        // UI elements
         this.scoreLabel = null;
+        this.keysLabel = null;
+        this.gameOverLavel = null;
+
     }
     
     Start() {
         super.Start();
+        
+        this.currentState = TetrisGameState.Playing;
         this.lastTime = 0;
         this.InitializeGrid(this.gridSize.rows, this.gridSize.cols);
         
@@ -71,7 +164,8 @@ class Tetris extends Game {
 
         this.scoreLabel = new TextLabel("Score: 0", new Vector2(20, 420), "20px Comic Sans MS", "black", "left", "middle", false);
         this.keysLabel = new TextLabel("Keys: A (left) | D (right) | Space (rotate) | W (instant fall) | Q (save piece)", new Vector2(20, 460), "16px Comic Sans MS", "grey", "left", "middle", false);
-        
+        this.gameOverLavel = new TextLabel("Game Over", new Vector2(canvas.width / 2, canvas.height / 2), "40px Comic Sans MS", "black", "center", "middle", false);
+
         // center the grid in the canvas
         this.gridPosition.x = Math.floor((canvas.width - this.gridSize.cols * this.squareSize) / 2);
     }
@@ -79,15 +173,24 @@ class Tetris extends Game {
     Update(deltaTime) {
         super.Update(deltaTime);
 
-        this.HandleInput(deltaTime);
-        
-        this.currentDropTime += deltaTime;
-        if (this.currentDropTime > this.dropTime) {
-            this.Drop();
-        }
+        switch (this.currentState) {
+            case TetrisGameState.Playing:
+                this.HandleInput(deltaTime);
+                
+                this.currentDropTime += deltaTime;
+                if (this.currentDropTime > this.dropTime) {
+                    this.Drop();
+                }
 
-        // update the ghost piece
-        this.UpdateGhostPiece();
+                // update the ghost piece
+                this.UpdateGhostPiece();
+                break;
+            case TetrisGameState.GameOver:
+                if (Input.IsKeyDown(KEY_SPACE)) {
+                    this.Start();
+                }
+                break;
+        }
     }
 
     Draw(ctx) {
@@ -128,6 +231,10 @@ class Tetris extends Game {
         // UI
         this.keysLabel.Draw(ctx);
         this.scoreLabel.Draw(ctx);
+
+        if (this.currentState === TetrisGameState.GameOver) {
+            this.gameOverLavel.Draw(ctx);
+        }
     }
     
     InitializeGrid(rows, cols) {
@@ -172,7 +279,8 @@ class Tetris extends Game {
         });
     }
 
-    RotatePiece(piece) {
+    RotatePieceSimple(piece) {
+        // transpose the matrix
         const rows = piece.shape.length;
         const cols = piece.shape[0].length;
         const newShape = [];
@@ -186,7 +294,18 @@ class Tetris extends Game {
         piece.shape = newShape;
     }
 
-    RotateCurrentPiece() {
+    RotatePiece(piece) {
+        // Super Rotation System (SRS)
+        const type = piece.type;
+        const currentState = this.rotationStates[type].indexOf(piece.shape);
+        const nextState = (currentState + 1) % this.rotationStates[type].length;
+        const newShape = this.rotationStates[type][nextState];
+
+        piece.shape = newShape;
+        return nextState;
+    }
+
+    RotateCurrentPieceSimple() {
         const originalPosition = this.currentPiece.position.x;
         let offset = 1;
         this.RotatePiece(this.currentPiece);
@@ -200,6 +319,37 @@ class Tetris extends Game {
                 return;
             }
         }
+    }
+
+    RotateCurrentPiece() {
+        const originalPosition = { ...this.currentPiece.position };
+        const originalShape = this.currentPiece.shape;
+        const type = this.currentPiece.type;
+        const currentState = this.rotationStates[type].indexOf(originalShape);
+        const nextState = this.RotatePiece(this.currentPiece);
+
+        console.log(`Rotating piece ${type} from state ${currentState} to ${nextState}`);
+
+        for (let i = 0; i < this.wallKickData[type][currentState].length; i++) {
+            const [dx, dy] = this.wallKickData[type][currentState][i];
+            this.currentPiece.position.x += dx;
+            this.currentPiece.position.y += dy;
+
+            console.log(`Trying wall kick: dx=${dx}, dy=${dy}`);
+
+            if (!this.CheckPieceGridCollision(this.currentPiece)) {
+                console.log('Wall kick successful');
+                return;
+            }
+
+            // Revert position if collision detected
+            this.currentPiece.position = { ...originalPosition };
+        }
+
+        // Revert shape if no valid position found
+        console.log('Wall kick failed, reverting rotation');
+        this.currentPiece.shape = originalShape;
+        this.currentPiece.position = originalPosition;
     }
 
     ResetPieceRotation(piece) {
@@ -294,8 +444,13 @@ class Tetris extends Game {
             this.currentPiece.position.y = this.initialPiecePosition.y;
             this.UpdateGhostPieceAfterChange();
 
-            this.nextPieces.push(this.CreateRandomPiece());
-            this.lastPieceSaved = false;
+            if (this.CheckPieceGridCollision(this.currentPiece)) {
+                // check for game over
+                this.currentState = TetrisGameState.GameOver;
+            } else {
+                this.nextPieces.push(this.CreateRandomPiece());
+                this.lastPieceSaved = false;
+            }
         }
         this.currentDropTime = 0;
     }
@@ -354,8 +509,13 @@ class Tetris extends Game {
         this.currentPiece.position.y = this.initialPiecePosition.y;
         this.UpdateGhostPieceAfterChange();
 
-        this.nextPieces.push(this.CreateRandomPiece());
-        this.lastPieceSaved = false;
+        if (this.CheckPieceGridCollision(this.currentPiece)) {
+            // check for game over
+            this.currentState = TetrisGameState.GameOver;
+        } else {
+            this.nextPieces.push(this.CreateRandomPiece());
+            this.lastPieceSaved = false;
+        }
         this.currentDropTime = 0;
     }
 
@@ -376,5 +536,5 @@ class Tetris extends Game {
 }
 
 // initialize the game
-/*if (game === null)
-    game = new Tetris();*/
+// if (game === null)
+//     game = new Tetris();
