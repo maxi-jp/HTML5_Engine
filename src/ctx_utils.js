@@ -1,11 +1,53 @@
 // #region Helper CTX classes
 
 class Color {
+    _r = 0;
+    _g = 0;
+    _b = 0;
+    _a = 1;
+
     constructor(r, g, b, a=1) {
-        this.r = r;
-        this.g = g;
-        this.b = b;
-        this.a = a;
+        this._r = r;
+        this._g = g;
+        this._b = b;
+        this._a = a;
+        this.string = this.toString();
+    }
+
+    get r() {
+        return this._r;
+    }
+
+    get g() {
+        return this._g;
+    }
+
+    get b() {
+        return this._b;
+    }
+
+    get a() {
+        return this._a;
+    }
+
+    set r(value) {
+        this._r = value;
+        this.string = this.toString();
+    }
+
+    set g(value) {
+        this._g = value;
+        this.string = this.toString();
+    }
+
+    set b(value) {
+        this._b = value;
+        this.string = this.toString();
+    }
+
+    set a(value) {
+        this._a = value;
+        this.string = this.toString();
     }
 
     static Copy(color) {
