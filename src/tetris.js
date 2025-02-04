@@ -137,6 +137,11 @@ class Tetris extends Game {
         this.currentState = TetrisGameState.Playing;
         this.lastTime = 0;
         this.InitializeGrid(this.gridSize.rows, this.gridSize.cols);
+
+        // set the right pieces colors
+        this.pieces.forEach(piece => {
+            piece.color = Color.FromHTMLColorName(piece.color);
+        });
         
         // Initialize the first piece
         this.currentPiece = this.CreateRandomPiece();
@@ -144,7 +149,7 @@ class Tetris extends Game {
         this.currentPiece.position.y = this.initialPiecePosition.y;
         this.ghostPiece = {
             type: this.currentPiece.type,
-            color: 'rgba(128, 128, 128, 0.5)', // semi-transparent grey
+            color: new Color(128, 128, 128, 0.5), // semi-transparent grey
             shape: [],
             position: { x: 0, y: 0 }
         };
@@ -249,7 +254,7 @@ class Tetris extends Game {
 
         return {
             type: this.pieces[randomId].type,
-            color: this.pieces[randomId].color,
+            color: Color.Copy(this.pieces[randomId].color),
             shape: this.pieces[randomId].shape,
             position: { x: 0, y: 0 }
         };
@@ -488,7 +493,7 @@ class Tetris extends Game {
                     const coordX = x + i * this.squareSize;
                     const coordY = y + j * this.squareSize;
 
-                    DrawFillRectangle(ctx, coordX, coordY, this.squareSize, this.squareSize, piece.color);
+                    DrawFillRectangle(ctx, coordX, coordY, this.squareSize, this.squareSize, piece.color.string);
                     DrawStrokeRectangle(ctx, coordX, coordY, this.squareSize, this.squareSize, 'black', 1);
                 }
             }
@@ -531,10 +536,11 @@ class Tetris extends Game {
 
     UpdateGhostPieceAfterChange() {
         this.ghostPiece.type = this.currentPiece.type;
-        this.ghostPiece.color = DesaturateColor(this.currentPiece.color, 0.75);
+        this.ghostPiece.color = Color.Copy(this.currentPiece.color).Desaturate(0.33);
+        this.ghostPiece.color.a = 0.5;
     }
 }
 
 // initialize the game
-// if (game === null)
-//     game = new Tetris();
+if (game === null)
+    game = new Tetris();
