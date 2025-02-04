@@ -1,5 +1,80 @@
 // #region Helper CTX classes
 
+class Color {
+    constructor(r, g, b, a=1) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        this.a = a;
+    }
+
+    static Copy(color) {
+        return new Color(color.r, color.g, color.b, color.a);
+    }
+
+    static FromRGB(r, g, b) {
+        return new Color(r, g, b);
+    }
+
+    static FromRGBA(r, g, b, a) {
+        return new Color(r, g, b, a);
+    }
+
+    static FromHex(hex) {
+        let r = parseInt(hex.substring(1, 3), 16);
+        let g = parseInt(hex.substring(3, 5), 16);
+        let b = parseInt(hex.substring(5, 7), 16);
+        return new Color(r, g, b);
+    }
+
+    static FromHexA(hex) {
+        let r = parseInt(hex.substring(1, 3), 16);
+        let g = parseInt(hex.substring(3, 5), 16);
+        let b = parseInt(hex.substring(5, 7), 16);
+        let a = parseInt(hex.substring(7, 9), 16) / 255;
+        return new Color(r, g, b, a);
+    }
+
+    static FromString(color) {
+        if (color.startsWith("#")) {
+            if (color.length === 7) {
+                return Color.FromHex(color);
+            }
+            else if (color.length === 9) {
+                return Color.FromHexA(color);
+            }
+        }
+        else if (color.startsWith("rgb")) {
+            const values = color.match(/\d+/g).map(Number);
+            if (color.startsWith("rgba")) {
+                return Color.FromRGBA(values[0], values[1], values[2], values[3] / 255);
+            } else {
+                return Color.FromRGB(values[0], values[1], values[2]);
+            }
+        }
+        else {
+            return Color.FromRGB(...color.split(',').map(Number));
+        }
+    }
+
+    static FromHTMLColorName(color) {
+        return Color.FromString(HTMLColorNameToRGB(color));
+    }
+
+    Desaturate(desaturateValue=0.5) {
+        const avg = (this.r + this.g + this.b) / 3;
+        this.r = Math.round(this.r + (avg - this.r) * desaturateValue);
+        this.g = Math.round(this.g + (avg - this.g) * desaturateValue);
+        this.b = Math.round(this.b + (avg - this.b) * desaturateValue);
+
+        return this;
+    }
+
+    toString() {
+        return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
+    }
+}
+
 class Sprite {
     constructor(img, position, rotation, scale) {
         this.img = img;
@@ -157,26 +232,38 @@ function DrawSegment(ctx, x1, y1, x2, y2, color, lineWidth=1) {
 
 // #region other helper functions
 
-// Given a color return a desaturated version of it
-function DesaturateColor(color, desaturateValue=0.5) {
+// Given a color HTML name return the RGB value ('red' -> 'rgba(255, 0, 0, 1)')
+function HTMLColorNameToRGB(color) {
     // Create a temporary element to use getComputedStyle for converting named colors to RGB
     const element = document.createElement('div');
     element.style.color = color;
-  
+
     document.body.appendChild(element); // append temporarily
 
     // Get the computed color in RGB format
     const computedColor = window.getComputedStyle(element).color;
 
     document.body.removeChild(element);
+
+    if (!computedColor) {
+        console.warn(`Unable to transform color "${color}".`);
+        return color;
+    }
+
+    return computedColor;
+}
+
+// Given a color return a desaturated version of it
+function DesaturateColor(color, desaturateValue=0.5) {
+    const rgb = this.HTMLColorNameToRGB(color);
   
-    if (!computedColor || computedColor === 'rgba(0, 0, 0, 0)') {
+    if (!rgb || rgb === 'rgba(0, 0, 0, 0)') {
         console.warn(`Unable to desaturate color "${color}".`);
         return color;
     }
 
     // Extract RGB values from the computed color string 'rgb(r, g, b)'
-    const rgbValues = computedColor.match(/\d+/g).map(Number);
+    const rgbValues = rgb.match(/\d+/g).map(Number);
     const [r, g, b] = rgbValues;
 
     // Calculate the luminance (average of the RGB channels)
