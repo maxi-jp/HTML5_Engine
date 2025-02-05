@@ -19,79 +19,85 @@ class Tetris extends Game {
         
         this.rotationStates = {
             'I': [
-                [[1, 1, 1, 1]],
-                [[1], [1], [1], [1]]
+                [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
+                [[0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0]],
+                [[0, 0, 0, 0], [0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0]],
+                [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0]]
             ],
             'J': [
-                [[1, 0, 0], [1, 1, 1]],
-                [[1, 1], [1, 0], [1, 0]],
-                [[1, 1, 1], [0, 0, 1]],
-                [[0, 1], [0, 1], [1, 1]]
+                [[1, 0, 0], [1, 1, 1], [0, 0, 0]],
+                [[0, 1, 1], [0, 1, 0], [0, 1, 0]],
+                [[0, 0, 0], [1, 1, 1], [0, 0, 1]],
+                [[0, 1, 0], [0, 1, 0], [1, 1, 0]]
             ],
             'L': [
-                [[0, 0, 1], [1, 1, 1]],
-                [[1, 0], [1, 0], [1, 1]],
-                [[1, 1, 1], [1, 0, 0]],
-                [[1, 1], [0, 1], [0, 1]]
+                [[0, 0, 1], [1, 1, 1], [0, 0, 0]],
+                [[0, 1, 0], [0, 1, 0], [0, 1, 1]],
+                [[0, 0, 0], [1, 1, 1], [1, 0, 0]],
+                [[1, 1, 0], [0, 1, 0], [0, 1, 0]]
             ],
             'O': [
                 [[1, 1], [1, 1]]
             ],
             'S': [
-                [[0, 1, 1], [1, 1, 0]],
-                [[1, 0], [1, 1], [0, 1]]
+                [[0, 1, 1], [1, 1, 0], [0, 0, 0]],
+                [[0, 1, 0], [0, 1, 1], [0, 0, 1]],
+                [[0, 0, 0], [0, 1, 1], [1, 1, 0]],
+                [[1, 0, 0], [1, 1, 0], [0, 1, 0]]
             ],
             'T': [
-                [[0, 1, 0], [1, 1, 1]],
-                [[1, 0], [1, 1], [1, 0]],
-                [[1, 1, 1], [0, 1, 0]],
-                [[0, 1], [1, 1], [0, 1]]
+                [[0, 1, 0], [1, 1, 1], [0, 0, 0]],
+                [[0, 1, 0], [0, 1, 1], [0, 1, 0]],
+                [[0, 0, 0], [1, 1, 1], [0, 1, 0]],
+                [[0, 1, 0], [1, 1, 0], [0, 1, 0]]
             ],
             'Z': [
-                [[1, 1, 0], [0, 1, 1]],
-                [[0, 1], [1, 1], [1, 0]]
+                [[1, 1, 0], [0, 1, 1], [0, 0, 0]],
+                [[0, 0, 1], [0, 1, 1], [0, 1, 0]],
+                [[0, 0, 0], [1, 1, 0], [0, 1, 1]],
+                [[0, 1, 0], [1, 1, 0], [1, 0, 0]]
             ]
         };
 
         this.wallKickData = {
             'I': [
-                [[0, 0], [-2, 0], [1, 0], [-2, -1], [1, 2]],
-                [[0, 0], [-1, 0], [2, 0], [-1, 2], [2, -1]],
-                [[0, 0], [2, 0], [-1, 0], [2, 1], [-1, -2]],
-                [[0, 0], [1, 0], [-2, 0], [1, -2], [-2, 1]]
+                [[0, 0], [-1, 0], [2, 0], [-1, -2], [2, 1]],
+                [[0, 0], [-2, 0], [1, 0], [-2, 1], [1, -2]],
+                [[0, 0], [2, 0], [-1, 0], [2, -1], [-1, 2]],
+                [[0, 0], [1, 0], [-2, 0], [1, 2], [-2, -1]]
             ],
             'J': [
-                [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
-                [[0, 0], [1, 0], [1, -1], [0, 2], [1, 2]],
-                [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]],
-                [[0, 0], [-1, 0], [-1, -1], [0, 2], [-1, 2]]
+                [[0, 0], [-1, 0], [1, 0], [-1, -1], [1, 2]],
+                [[0, 0], [1, 0], [-1, 0], [1, -2], [-1, 1]],
+                [[0, 0], [1, 0], [-1, 0], [1, -1], [-1, 2]],
+                [[0, 0], [-1, 0], [1, 0], [-1, 2], [1, -1]]
             ],
             'L': [
-                [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
-                [[0, 0], [1, 0], [1, -1], [0, 2], [1, 2]],
-                [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]],
-                [[0, 0], [-1, 0], [-1, -1], [0, 2], [-1, 2]]
+                [[0, 0], [-1, 0], [1, 0], [-1, -1], [1, 2]],
+                [[0, 0], [1, 0], [-1, 0], [1, -2], [-1, 1]],
+                [[0, 0], [1, 0], [-1, 0], [1, -1], [-1, 2]],
+                [[0, 0], [-1, 0], [1, 0], [-1, 2], [1, -1]]
             ],
             'O': [
                 [[0, 0]]
             ],
             'S': [
-                [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
-                [[0, 0], [1, 0], [1, -1], [0, 2], [1, 2]],
-                [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]],
-                [[0, 0], [-1, 0], [-1, -1], [0, 2], [-1, 2]]
+                [[0, 0], [-1, 0], [1, 0], [-1, -1], [1, 2]],
+                [[0, 0], [1, 0], [-1, 0], [1, -2], [-1, 1]],
+                [[0, 0], [1, 0], [-1, 0], [1, -1], [-1, 2]],
+                [[0, 0], [-1, 0], [1, 0], [-1, 2], [1, -1]]
             ],
             'T': [
-                [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
-                [[0, 0], [1, 0], [1, -1], [0, 2], [1, 2]],
-                [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]],
-                [[0, 0], [-1, 0], [-1, -1], [0, 2], [-1, 2]]
+                [[0, 0], [-1, 0], [1, 0], [-1, -1], [1, 2]],
+                [[0, 0], [1, 0], [-1, 0], [1, -2], [-1, 1]],
+                [[0, 0], [1, 0], [-1, 0], [1, -1], [-1, 2]],
+                [[0, 0], [-1, 0], [1, 0], [-1, 2], [1, -1]]
             ],
             'Z': [
-                [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
-                [[0, 0], [1, 0], [1, -1], [0, 2], [1, 2]],
-                [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]],
-                [[0, 0], [-1, 0], [-1, -1], [0, 2], [-1, 2]]
+                [[0, 0], [-1, 0], [1, 0], [-1, -1], [1, 2]],
+                [[0, 0], [1, 0], [-1, 0], [1, -2], [-1, 1]],
+                [[0, 0], [1, 0], [-1, 0], [1, -1], [-1, 2]],
+                [[0, 0], [-1, 0], [1, 0], [-1, 2], [1, -1]]
             ]
         };
 
@@ -115,8 +121,8 @@ class Tetris extends Game {
         this.currentDropTime = 0; // time passed since the last drop
         this.dropTime = 0.5; // time to drop a piece in seconds
 
-        this.minTimeToMove = 0.05; // minimum time to move a piece in milliseconds
-        this.minTimeToMoveSinceLastMove = 0.35; // minimum time to repeat movement since the first key down
+        this.minTimeToMove = 0.033; // minimum time to move a piece in milliseconds
+        this.minTimeToMoveSinceLastMove = 0.25; // minimum time to repeat movement since the first key down
         this.lastTimeMoved = 0; // last time the piece was moved
         this.repeatedMovement = false;
         
@@ -189,6 +195,7 @@ class Tetris extends Game {
 
                 // update the ghost piece
                 this.UpdateGhostPiece();
+                // TODO this call should only be made when the piece is moved or rotated
                 break;
             case TetrisGameState.GameOver:
                 if (Input.IsKeyDown(KEY_SPACE)) {
@@ -284,66 +291,41 @@ class Tetris extends Game {
         });
     }
 
-    RotatePieceSimple(piece) {
-        // transpose the matrix
-        const rows = piece.shape.length;
-        const cols = piece.shape[0].length;
-        const newShape = [];
-
-        for (let y = 0; y < cols; ++y) {
-            newShape[y] = [];
-            for (let x = 0; x < rows; ++x) {
-                newShape[y][x] = piece.shape[rows - 1 - x][y];
-            }
-        }
-        piece.shape = newShape;
-    }
-
-    RotatePiece(piece) {
-        // Super Rotation System (SRS)
+    RotatePiece(piece, direction) {
         const type = piece.type;
         const currentState = this.rotationStates[type].indexOf(piece.shape);
         const nextState = (currentState + 1) % this.rotationStates[type].length;
-        const newShape = this.rotationStates[type][nextState];
 
-        piece.shape = newShape;
         return nextState;
     }
 
-    RotateCurrentPieceSimple() {
-        const originalPosition = this.currentPiece.position.x;
-        let offset = 1;
-        this.RotatePiece(this.currentPiece);
-        
-        while (this.CheckPieceGridCollision(this.currentPiece)) {
-            this.currentPiece.position.x += offset;
-            offset = -(offset + (offset > 0 ? 1 : -1));
-            if (offset > this.currentPiece.shape[0].length) {
-                this.RotatePiece(this.currentPiece); // rotate back
-                this.currentPiece.position.x = originalPosition;
-                return;
-            }
-        }
-    }
-
     RotateCurrentPiece() {
+        // Super Rotation System (SRS)
+        // https://tetris.fandom.com/wiki/SRS
         const originalPosition = { ...this.currentPiece.position };
         const originalShape = this.currentPiece.shape;
         const type = this.currentPiece.type;
         const currentState = this.rotationStates[type].indexOf(originalShape);
-        const nextState = this.RotatePiece(this.currentPiece);
+
+        const nextState = this.RotatePiece(this.currentPiece, 0);
 
         console.log(`Rotating piece ${type} from state ${currentState} to ${nextState}`);
 
-        for (let i = 0; i < this.wallKickData[type][currentState].length; i++) {
-            const [dx, dy] = this.wallKickData[type][currentState][i];
+        const kicks = this.wallKickData[type][currentState];
+
+        for (const kick of kicks) {
+            const [dx, dy] = kick;
             this.currentPiece.position.x += dx;
             this.currentPiece.position.y += dy;
 
+            const newShape = this.rotationStates[type][nextState]; // get the new shape after rotation
+
             console.log(`Trying wall kick: dx=${dx}, dy=${dy}`);
 
-            if (!this.CheckPieceGridCollision(this.currentPiece)) {
+            // Check collision with the new position AND the new shape
+            if (!this.CheckPieceGridCollision({...this.currentPiece, shape: newShape })) {
                 console.log('Wall kick successful');
+                this.currentPiece.shape = newShape; // Update the shape if successful
                 return;
             }
 
@@ -353,8 +335,6 @@ class Tetris extends Game {
 
         // Revert shape if no valid position found
         console.log('Wall kick failed, reverting rotation');
-        this.currentPiece.shape = originalShape;
-        this.currentPiece.position = originalPosition;
     }
 
     ResetPieceRotation(piece) {
@@ -381,6 +361,12 @@ class Tetris extends Game {
             this.lastTimeMoved = 0;
             this.repeatedMovement = true;
         }
+        // debug
+        // if (Input.IsKeyDown(KEY_DOWN) || Input.IsKeyDown(KEY_S))
+        //     this.Drop();
+        // if (Input.IsKeyDown(KEY_UP) || Input.IsKeyDown(KEY_W))
+        //     this.UnDrop();
+
         // continuous press movement
         if (Input.IsKeyPressed(KEY_LEFT) || Input.IsKeyPressed(KEY_A)) {
             if ((this.repeatedMovement && this.lastTimeMoved > this.minTimeToMoveSinceLastMove) || (!this.repeatedMovement && this.lastTimeMoved > this.minTimeToMove)) {
@@ -458,6 +444,12 @@ class Tetris extends Game {
             }
         }
         this.currentDropTime = 0;
+    }
+
+    UnDrop() {
+        // debug function to undo the last drop
+        if (this.currentPiece.position.y > 0)
+            this.currentPiece.position.y--;
     }
 
     CheckAndClearLines() {
