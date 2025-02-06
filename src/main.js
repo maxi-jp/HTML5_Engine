@@ -50,6 +50,7 @@ function Init() {
     // input setup
     Input.SetupKeyboardEvents();
     Input.SetupMouseEvents(canvas);
+    Input.SetupGamepadEvents();
 
     if (game) {
         LoadImages(game.graphicAssets, ()=>{
@@ -86,7 +87,7 @@ function Loop() {
 
     if (deltaTime > 1)
         return;
-
+    
     // Game logic ---------
     Update(deltaTime);
     

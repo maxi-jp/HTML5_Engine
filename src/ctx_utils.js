@@ -235,7 +235,7 @@ function DrawStrokeRectangle(ctx, x, y, width, height, color, lineWidth=1) {
     ctx.strokeRect(x, y, width, height);
 }
 
-function DrawText(ctx, text, x, y, font, color="black", align="center", baseline="middle", stroke=false) {
+function DrawText(ctx, text, x, y, font, color="black", align="center", baseline="alphabetic", stroke=false) {
     if (stroke) {
         DrawStrokeText(ctx, text, x, y, font, color, align, baseline);
     }
@@ -244,7 +244,7 @@ function DrawText(ctx, text, x, y, font, color="black", align="center", baseline
     }
 }
 
-function DrawFillText(ctx, text, x, y, font, color="black", align="center", baseline="middle") {
+function DrawFillText(ctx, text, x, y, font, color="black", align="center", baseline="alphabetic") {
     ctx.font = font;
     ctx.textAlign = align;
     ctx.textBaseline = baseline;
@@ -252,7 +252,7 @@ function DrawFillText(ctx, text, x, y, font, color="black", align="center", base
     ctx.fillText(text, x, y);
 }
 
-function DrawStrokeText(ctx, text, x, y, font, color="black", align="center", baseline="middle") {
+function DrawStrokeText(ctx, text, x, y, font, color="black", align="center", baseline="alphabetic") {
     ctx.font = font;
     ctx.textAlign = align;
     ctx.textBaseline = baseline;
@@ -268,6 +268,32 @@ function DrawSegment(ctx, x1, y1, x2, y2, color, lineWidth=1) {
     ctx.lineTo(x2, y2);
     ctx.stroke();
     ctx.closePath();
+}
+
+function DrawFillCircle(ctx, x, y, radius, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, PI2, false);
+    ctx.fill();
+    ctx.closePath();
+}
+
+function DrawStrokeCircle(ctx, x, y, radius, color, lineWidth=1) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, PI2, false);
+    ctx.stroke();
+    ctx.closePath();
+}
+
+function DrawCircle(ctx, x, y, radius, color, stroke=false, lineWidth=1) {
+    if (stroke) {
+        DrawStrokeCircle(ctx, x, y, radius, color, lineWidth);
+    }
+    else {
+        DrawFillCircle(ctx, x, y, radius, color);
+    }
 }
 
 // #endregion
