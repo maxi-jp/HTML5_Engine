@@ -1,7 +1,8 @@
 const TetrisGameState = {
     MainMenu: 0,
-    Playing: 1,
-    GameOver: 2
+    Pause: 1,
+    Playing: 3,
+    GameOver: 4
 };
 
 class Tetris extends Game {
@@ -134,7 +135,7 @@ class Tetris extends Game {
         this.scoreLabel = null;
         this.keysLabel = null;
         this.gameOverLavel = null;
-
+        this.pauseLavel = null;
     }
     
     Start() {
@@ -176,6 +177,7 @@ class Tetris extends Game {
         this.scoreLabel = new TextLabel("Score: 0", new Vector2(20, 420), "20px Comic Sans MS", "black", "left", "middle", false);
         this.keysLabel = new TextLabel("Keys: A (left) | D (right) | Space (rotate) | W (instant fall) | Q (save piece)", new Vector2(20, 460), "16px Comic Sans MS", "grey", "left", "middle", false);
         this.gameOverLavel = new TextLabel("Game Over", new Vector2(canvas.width / 2, canvas.height / 2), "40px Comic Sans MS", "black", "center", "middle", false);
+        this.pauseLavel = new TextLabel("PAUSE", new Vector2(canvas.width / 2, canvas.height / 2), "40px Comic Sans MS", "black", "center", "middle", false);
 
         // center the grid in the canvas
         this.gridPosition.x = Math.floor((canvas.width - this.gridSize.cols * this.squareSize) / 2);
@@ -183,22 +185,30 @@ class Tetris extends Game {
 
     Update(deltaTime) {
         super.Update(deltaTime);
-
+        
         switch (this.currentState) {
             case TetrisGameState.Playing:
-                this.HandleInput(deltaTime);
-                
-                this.currentDropTime += deltaTime;
-                if (this.currentDropTime > this.dropTime) {
-                    this.Drop();
+                if (Input.IsKeyDown(KEY_PAUSE) || Input.IsKeyDown(KEY_ESCAPE) || Input.IsGamepadButtonDown(0, BUTTON_START))
+                    this.currentState = TetrisGameState.Pause;
+                else {
+                    this.HandleInput(deltaTime);
+                    
+                    this.currentDropTime += deltaTime;
+                    if (this.currentDropTime > this.dropTime) {
+                        this.Drop();
+                    }
+    
+                    // update the ghost piece
+                    this.UpdateGhostPiece();
+                    // TODO this call should only be made when the piece is moved or rotated
                 }
-
-                // update the ghost piece
-                this.UpdateGhostPiece();
-                // TODO this call should only be made when the piece is moved or rotated
+                break;
+            case TetrisGameState.Pause:
+                if (Input.IsKeyDown(KEY_PAUSE) || Input.IsKeyDown(KEY_ESCAPE) || Input.IsGamepadButtonDown(0, BUTTON_START))
+                    this.currentState = TetrisGameState.Playing;
                 break;
             case TetrisGameState.GameOver:
-                if (Input.IsKeyDown(KEY_SPACE)) {
+                if (Input.IsKeyDown(KEY_SPACE) || Input.IsGamepadButtonDown(0, BUTTON_START) || Input.IsGamepadButtonDown(0, BUTTON_A)) {
                     this.Start();
                 }
                 break;
@@ -246,6 +256,9 @@ class Tetris extends Game {
 
         if (this.currentState === TetrisGameState.GameOver) {
             this.gameOverLavel.Draw(ctx);
+        }
+        else if (this.currentState == TetrisGameState.Pause) {
+            this.pauseLavel.Draw(ctx);
         }
     }
     
@@ -351,12 +364,12 @@ class Tetris extends Game {
     HandleInput(deltaTime) {
         this.lastTimeMoved += deltaTime;
         // left-right movement
-        if (Input.IsKeyDown(KEY_LEFT) || Input.IsKeyDown(KEY_A)) {
+        if (Input.IsKeyDown(KEY_LEFT) || Input.IsKeyDown(KEY_A) || Input.IsGamepadButtonDown(0, BUTTON_DPAD_LEFT)) {
             this.MoveCurrentPiece(-1);
             this.lastTimeMoved = 0;
             this.repeatedMovement = true;
         }
-        if (Input.IsKeyDown(KEY_RIGHT) || Input.IsKeyDown(KEY_D)) {
+        if (Input.IsKeyDown(KEY_RIGHT) || Input.IsKeyDown(KEY_D) || Input.IsGamepadButtonDown(0, BUTTON_DPAD_RIGHT)) {
             this.MoveCurrentPiece(1);
             this.lastTimeMoved = 0;
             this.repeatedMovement = true;
@@ -368,14 +381,14 @@ class Tetris extends Game {
         //     this.UnDrop();
 
         // continuous press movement
-        if (Input.IsKeyPressed(KEY_LEFT) || Input.IsKeyPressed(KEY_A)) {
+        if (Input.IsKeyPressed(KEY_LEFT) || Input.IsKeyPressed(KEY_A) || Input.IsGamepadButtonPressed(0, BUTTON_DPAD_LEFT)) {
             if ((this.repeatedMovement && this.lastTimeMoved > this.minTimeToMoveSinceLastMove) || (!this.repeatedMovement && this.lastTimeMoved > this.minTimeToMove)) {
                 this.MoveCurrentPiece(-1);
                 this.lastTimeMoved = 0;
                 this.repeatedMovement = false;
             }
         }
-        if (Input.IsKeyPressed(KEY_RIGHT) || Input.IsKeyPressed(KEY_D)) {
+        if (Input.IsKeyPressed(KEY_RIGHT) || Input.IsKeyPressed(KEY_D) || Input.IsGamepadButtonPressed(0, BUTTON_DPAD_RIGHT)) {
             if ((this.repeatedMovement && this.lastTimeMoved > this.minTimeToMoveSinceLastMove) || (!this.repeatedMovement && this.lastTimeMoved > this.minTimeToMove)) {
                 this.MoveCurrentPiece(1);
                 this.lastTimeMoved = 0;
@@ -384,18 +397,18 @@ class Tetris extends Game {
         }
 
         // drop movement
-        if ((Input.IsKeyPressed(KEY_DOWN) || Input.IsKeyPressed(KEY_S)) && this.lastTimeMoved > this.minTimeToMove) {
+        if ((Input.IsKeyPressed(KEY_DOWN) || Input.IsKeyPressed(KEY_S) || Input.IsGamepadButtonPressed(0, BUTTON_DPAD_DOWN)) && this.lastTimeMoved > this.minTimeToMove) {
             this.Drop();
             this.lastTimeMoved = 0;
         }
 
         // rotate
-        if (Input.IsKeyDown(KEY_SPACE) || Input.IsMouseDown()) {
+        if (Input.IsKeyDown(KEY_SPACE) || Input.IsMouseDown() || Input.IsGamepadButtonDown(0, BUTTON_A)) {
             this.RotateCurrentPiece();
         }
 
         // Save the current piece
-        if (Input.IsKeyPressed(KEY_Q) && !this.lastPieceSaved) {
+        if ((Input.IsKeyPressed(KEY_Q) || Input.IsGamepadButtonPressed(0, BUTTON_LB) || Input.IsGamepadButtonPressed(0, BUTTON_RB)) && !this.lastPieceSaved) {
             if (this.savedPiece === null) {
                 this.savedPiece = this.currentPiece;
                 this.currentPiece = this.nextPieces.shift();
@@ -417,7 +430,7 @@ class Tetris extends Game {
         }
 
         // Full fall
-        if (Input.IsKeyDown(KEY_W)) {
+        if (Input.IsKeyDown(KEY_W) || Input.IsGamepadButtonDown(0, BUTTON_DPAD_UP)) {
             this.FullFall();
         }
     }
