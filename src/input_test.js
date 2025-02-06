@@ -6,6 +6,7 @@ class InputAsset {
         this.height = height;
         this.key = key;
         this.color = "white";
+        this.pressedColor = "lightgreen";
         this.keyDownCount = 0;
         this.keyUpCount = 0;
         this.pressed = false;
@@ -52,6 +53,38 @@ class InputAsset {
         ctx.textAlign = "right";
         ctx.fillText("↑" + this.keyUpCount, this.position.x + 14, this.position.y - 6);
     }
+
+    UpdateAsKeyboard() {
+        // key pressed event
+        this.pressed = Input.IsKeyPressed(this.id);
+        if (this.pressed)
+            this.color = this.pressedColor;
+        else
+            this.color = "white";
+
+        // keydown event
+        if (Input.IsKeyDown(this.id))
+            this.keyDownCount++;
+        // keyup event
+        if (Input.IsKeyUp(this.id))
+            this.keyUpCount++;
+    }
+
+    UpdateAsGamepadButton() {
+        // buttonpressed event
+        this.pressed = Input.IsGamepadButtonPressed(0, this.id);
+        if (this.pressed)
+            this.color = this.pressedColor;
+        else
+            this.color = "white";
+
+        // keydown event
+        if (Input.IsGamepadButtonDown(0, this.id))
+            this.keyDownCount++;
+        // keyup event
+        if (Input.IsGamepadButtonUp(0, this.id))
+            this.keyUpCount++;
+    }
 }
 
 class InputTest extends Game {
@@ -94,32 +127,22 @@ class InputTest extends Game {
             new InputAsset(BUTTON_LT, new Vector2(260, 76), 40, 60, "LT"),
             new InputAsset(BUTTON_RT, new Vector2(590, 76), 40, 60, "RT")
         ];
+        this.gamepadTriggers[0].pressedColor = this.gamepadTriggers[1].pressedColor = "rgba(0, 255, 0, 0.5)";
 
         this.gamepadStickCircles = [
             new InputAsset(BUTTON_LS, new Vector2(370, 230), 40, 40, "LS", {x: 0, y: 0}),
             new InputAsset(BUTTON_RS, new Vector2(520, 230), 40, 40, "RS", {x: 0, y: 0})
         ];
 
-        this.gamepadButtons = [...this.gamepadButtonCircles, ...this.gamepadStickCircles];
+        this.gamepadButtons = [...this.gamepadButtonCircles, ...this.gamepadStickCircles, ...this.gamepadTriggers];
     }
 
     Update(deltaTime) {
         super.Update(deltaTime);
 
+        // keyboard events
         this.keyRects.forEach(rect => {
-            // key pressed event
-            rect.pressed = Input.IsKeyPressed(rect.id);
-            if (rect.pressed)
-                rect.color = "lightgreen";
-            else
-                rect.color = "white";
-
-            // keydown event
-            if (Input.IsKeyDown(rect.id))
-                rect.keyDownCount++;
-            // keyup event
-            if (Input.IsKeyUp(rect.id))
-                rect.keyUpCount++;
+            rect.UpdateAsKeyboard();
         });
 
         // mouse down & up
@@ -131,46 +154,20 @@ class InputTest extends Game {
 
         // gamepad buttons events
         this.gamepadButtons.forEach(button => {
-            // buttonpressed event
-            button.pressed = Input.IsGamepadButtonPressed(0, button.id);
-            if (button.pressed)
-                button.color = "lightgreen";
-            else
-                button.color = "white";
-
-            // keydown event
-            if (Input.IsGamepadButtonDown(0, button.id))
-                button.keyDownCount++;
-            // keyup event
-            if (Input.IsGamepadButtonUp(0, button.id))
-                button.keyUpCount++;
+            button.UpdateAsGamepadButton();
         });
 
-        this.gamepadStickCircles[0].value = Input.GetGamepadStickValue(0, 0);
-        this.gamepadStickCircles[1].value = Input.GetGamepadStickValue(0, 1);
+        // gamepad sticks values
+        for (let i = 0; i < 2; i++) {
+            const stickCircle = this.gamepadStickCircles[i]
+            
+            stickCircle.value = Input.GetGamepadStickValue(0, i);
+            stickCircle.horizontalValue = Input.GetStickValue(0, i, 0);
+            stickCircle.verticalValue = Input.GetStickValue(0, i, 1);
+        }
 
-        this.gamepadStickCircles[0].horizontalValue = Input.LeftStickValue(0, 0);
-        this.gamepadStickCircles[0].verticalValue = Input.LeftStickValue(0, 1);
-        this.gamepadStickCircles[1].horizontalValue = Input.RightStickValue(0, 0);
-        this.gamepadStickCircles[1].verticalValue = Input.RightStickValue(0, 1);
-
-        // gamepad triggers events
+        // gamepad triggers values
         this.gamepadTriggers.forEach(trigger => {
-            // buttonpressed event
-            trigger.pressed = Input.IsGamepadButtonPressed(0, trigger.id);
-            if (trigger.pressed)
-                trigger.color = "rgba(0, 255, 0, 0.5)";
-            else
-                trigger.color = "white";
-
-            // keydown event
-            if (Input.IsGamepadButtonDown(0, trigger.id))
-                trigger.keyDownCount++;
-            // keyup event
-            if (Input.IsGamepadButtonUp(0, trigger.id))
-                trigger.keyUpCount++;
-
-            // trigger value
             trigger.value = Input.GetGamepadTriggerValue(0, trigger.id);
         });
     }
@@ -179,16 +176,17 @@ class InputTest extends Game {
         super.Draw(ctx);
 
         // keyboard keys
+        DrawFillText(ctx, "Keyboard WASD events:", 18, 90, "normal 12px Arial", "black", "left");
         this.keyRects.forEach(keyRect => {
             keyRect.DawAsRectangle(ctx);
         });
-        DrawFillText(ctx, "Keyboard WASD events:", 18, 90, "normal 12px Arial", "black", "left");
 
-        // gamepad keys
+        // gamepad buttons
+        DrawFillText(ctx, "Gamepad0 events:", 240, 20, "normal 12px Arial", "black", "left");
         this.gamepadButtonCircles.forEach(buttonCircle => {
             buttonCircle.DrawAsCircle(ctx)
         });
-        // gamepad stick circles
+        // gamepad stick
         this.gamepadStickCircles.forEach(stick => {
             stick.DrawAsCircle(ctx);
 
@@ -210,7 +208,6 @@ class InputTest extends Game {
             ctx.textAlign = "center";
             ctx.fillText(trigger.value.toFixed(3), trigger.position.x + trigger.width / 2, trigger.position.y + trigger.height - 2);
         });
-        DrawFillText(ctx, "Gamepad0 events:", 240, 20, "normal 12px Arial", "black", "left");
 
         // mouse info (position and state)
         ctx.beginPath();

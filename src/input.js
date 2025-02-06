@@ -55,22 +55,18 @@ var Input = {
         keypressed: {},
         keydown: {}
     },
-
+    gamepad: null,
     gamepads: [
+        // gamepad object structure:
         // {
         //     gamepad: null,
         //     down: [],
         //     up: [],
-        //     pressed: [],
-        //     axes: [],
-        //     triggers: []
+        //     pressed: []
         // }
     ],
-    gamepadButtonDown: [],
-    gamepadButtonUp: [],
-    gamepadButtonPressed: [],
-    gamepadAxes: [],
 
+// #region Setup Functions
     SetupKeyboardEvents: function() {
         AddEvent(document, "keydown", function(e) {
             //console.log(e.keyCode);
@@ -106,7 +102,14 @@ var Input = {
 
     SetupGamepadEvents: function() {
         window.addEventListener("gamepadconnected", (event) => {
-            this.gamepads[event.gamepad.index] = event.gamepad;
+            this.gamepads[event.gamepad.index] = {
+                gamepad: event.gamepad,
+                down: [],
+                up: [],
+                pressed: []
+            }
+            this.gamepad = event.gamepad;
+
             console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
                 event.gamepad.index, event.gamepad.id,
                 event.gamepad.buttons.length, event.gamepad.axes.length);
@@ -114,46 +117,18 @@ var Input = {
 
         window.addEventListener("gamepaddisconnected", (event) => {
             delete this.gamepads[event.gamepad.index];
+            this.gamepads.splice(event.gamepad.index, 1);
+
             console.log("Gamepad disconnected from index %d: %s",
                 event.gamepad.index, event.gamepad.id);
         });
 
-        // Detect already connected gamepads
+        // update connected gamepads and update button states
         this.UpdateGamepads();
     },
+// #endregion
 
-    UpdateGamepads: function() {
-        // update current gamepad connected references
-        const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-        for (let i = 0; i < gamepads.length; i++) {
-            if (gamepads[i]) {
-                this.gamepads[gamepads[i].index] = gamepads[i];
-            }
-        }
-
-        // Update button down and up states
-        for (let gamepadIndex in this.gamepads) {
-            const gamepad = this.gamepads[gamepadIndex];
-            for (let buttonIndex in gamepad.buttons) {
-                const button = gamepad.buttons[buttonIndex];
-
-                this.gamepadButtonDown[buttonIndex] = this.gamepadButtonUp[buttonIndex] = false;
-
-                if (button.pressed && !this.gamepadButtonPressed[buttonIndex]) {
-                    this.gamepadButtonDown[buttonIndex] = true;
-                }
-                if (!button.pressed && this.gamepadButtonPressed[buttonIndex]) {
-                    this.gamepadButtonUp[buttonIndex] = true;
-                }
-
-                this.gamepadButtonPressed[buttonIndex] = button.pressed;
-            }
-
-            // Update axes values
-            this.gamepadAxes[gamepadIndex] = gamepad.axes.slice();
-        }
-    },
-
+// #region Keyboard and Mouse Events
     IsKeyPressed: function(keycode) {
         return this.keyboard.keypressed[keycode];
     },
@@ -173,41 +148,57 @@ var Input = {
     IsMouseDown: function () {
         return this.mouse.down;
     },
+// #endregion
 
+// #region Gamepad Events
     IsGamepadButtonDown: function(gamepadIndex, buttonIndex) {
-        return this.gamepadButtonDown[buttonIndex];
+        const gamepad = this.gamepads[gamepadIndex];
+        if (gamepad)
+            return gamepad.down[buttonIndex];
+        return false;
     },
 
     IsGamepadButtonUp: function(gamepadIndex, buttonIndex) {
-        return this.gamepadButtonUp[buttonIndex];
+        const gamepad = this.gamepads[gamepadIndex];
+        if (gamepad)
+            return gamepad.up[buttonIndex];
+        return false;
     },
 
     IsGamepadButtonPressed: function(gamepadIndex, buttonIndex) {
         const gamepad = this.gamepads[gamepadIndex];
-        if (gamepad && gamepad.buttons[buttonIndex]) {
-            return gamepad.buttons[buttonIndex].pressed;
-        }
+        if (gamepad)
+            return gamepad.pressed[buttonIndex];
         return false;
     },
 
     GetGamepadAxisValue: function(gamepadIndex, axisIndex) {
-        const gamepad = this.gamepads[gamepadIndex];
+        const gamepad = this.gamepads[gamepadIndex]?.gamepad;
         if (gamepad && gamepad.axes[axisIndex] !== undefined) {
             return gamepad.axes[axisIndex];
         }
         return 0;
     },
 
+    GetStickValue: function(gamepadIndex, stickId, axis) {
+        const gamepad = this.gamepads[gamepadIndex]?.gamepad;
+        const axisId = stickId * 2 + axis;
+        if (gamepad && gamepad.axes[axisId] !== undefined) {
+            return gamepad.axes[axisId];
+        }
+        return 0;
+    },
+
     LeftStickValue: function(gamepadIndex, axis) {
-        const gamepad = this.gamepads[gamepadIndex];
-        if (gamepad && gamepad.axes[0 + axis] !== undefined) {
-            return gamepad.axes[0 + axis];
+        const gamepad = this.gamepads[gamepadIndex]?.gamepad;
+        if (gamepad && gamepad.axes[axis] !== undefined) {
+            return gamepad.axes[axis];
         }
         return 0;
     },
 
     RightStickValue: function(gamepadIndex, axis) {
-        const gamepad = this.gamepads[gamepadIndex];
+        const gamepad = this.gamepads[gamepadIndex]?.gamepad;
         if (gamepad && gamepad.axes[2 + axis] !== undefined) {
             return gamepad.axes[2 + axis];
         }
@@ -215,7 +206,7 @@ var Input = {
     },
 
     GetGamepadStickValue: function(gamepadIndex, stick) {
-        const gamepad = this.gamepads[gamepadIndex];
+        const gamepad = this.gamepads[gamepadIndex]?.gamepad;
         if (gamepad) {
             const x = gamepad.axes[stick * 2] || 0;
             const y = gamepad.axes[stick * 2 + 1] || 0;
@@ -225,13 +216,15 @@ var Input = {
     },
 
     GetGamepadTriggerValue: function(gamepadIndex, trigger) {
-        const gamepad = this.gamepads[gamepadIndex];
+        const gamepad = this.gamepads[gamepadIndex]?.gamepad;
         if (gamepad) {
             return gamepad.buttons[trigger].value || 0;
         }
         return 0;
     },
+// #endregion
 
+// #region Update functions
     PostUpdate: function () {
         // clean keyboard keydown events
         for (var property in this.keyboard.keydown) {
@@ -253,10 +246,38 @@ var Input = {
 
         // update gamepads
         this.UpdateGamepads();
+    },
+
+    UpdateGamepads: function() {
+        // update current gamepad connected references
+        const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+        for (let i = 0; i < gamepads.length; i++) {
+            if (gamepads[i]) {
+                this.gamepads[gamepads[i].index].gamepad = gamepads[i];
+            }
+        }
+
+        // Update button down and up states
+        for (let gamepadIndex in this.gamepads) {
+            const gamepad = this.gamepads[gamepadIndex];
+            for (let buttonIndex in gamepad.gamepad.buttons) {
+                const button = gamepad.gamepad.buttons[buttonIndex];
+
+                gamepad.down[buttonIndex] = gamepad.up[buttonIndex] = false;
+
+                if (button.pressed && !gamepad.pressed[buttonIndex]) {
+                    gamepad.down[buttonIndex] = true;
+                }
+                if (!button.pressed && gamepad.pressed[buttonIndex]) {
+                    gamepad.up[buttonIndex] = true;
+                }
+
+                gamepad.pressed[buttonIndex] = button.pressed;
+            }
+        }
     }
+// #endregion
 };
-
-
 
 function MouseDown (event)
 {
