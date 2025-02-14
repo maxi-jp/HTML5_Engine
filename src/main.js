@@ -9,6 +9,7 @@ var time = 0,
     fps = 0,
     framesAcum = 0,
     acumDelta = 0;
+var totalTime = 0.0; // acumulator of the time
 
 // current Game global reference
 var game = null;
@@ -87,6 +88,8 @@ function Loop() {
 
     if (deltaTime > 1)
         return;
+
+    totalTime += deltaTime;
     
     // Game logic ---------
     Update(deltaTime);
@@ -119,11 +122,12 @@ function DrawStats(ctx) {
 
     ctx.fillStyle = "white";
     ctx.textAlign = "start";
+    ctx.textBaseline = "bottom"
     ctx.font = "12px Comic Sans MS regular";
 
-    ctx.fillText("FPS: " + fps, 6, 14);
-    ctx.fillText("FPS (dt): " + (1 / globalDT).toFixed(2), 6, 32);
-    ctx.fillText("deltaTime (ms): " + (globalDT * 1000).toFixed(2), 6, 50);
+    ctx.fillText("FPS: " + fps, 6, 16);
+    ctx.fillText("FPS (dt): " + (1 / globalDT).toFixed(2), 6, 34);
+    ctx.fillText("deltaTime (ms): " + (globalDT * 1000).toFixed(2), 6, 52);
 }
 
 window.onload = Init;
