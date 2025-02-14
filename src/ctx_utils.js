@@ -50,6 +50,26 @@ class Color {
         this.string = this.toString();
     }
 
+    static Black() {
+        return new Color(0, 0, 0, 1);
+    }
+
+    static White() {
+        return new Color(255, 255, 255, 1);
+    }
+
+    static Red() {
+        return new Color(255, 0, 0, 1);
+    }
+
+    static Green() {
+        return new Color(0, 255, 0, 1);
+    }
+
+    static Blue() {
+        return new Color(0, 0, 255, 1);
+    }
+
     static Copy(color) {
         return new Color(color.r, color.g, color.b, color.a);
     }
@@ -125,6 +145,13 @@ class Sprite {
         this.position = position;
         this.rotation = rotation;
         this.scale = scale;
+    }
+
+    get width() {
+        return this.img.width;
+    }
+    get height() {
+        return this.img.height;
     }
 
     Draw(ctx) {
@@ -344,6 +371,16 @@ function DesaturateColor(color, desaturateValue=0.5) {
   
     // Return the desaturated color in RGB format
     return `rgb(${newR}, ${newG}, ${newB})`;
+}
+
+function GetCanvasAbsolutePosition() {
+    const rect = canvas.getBoundingClientRect();
+    const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    return {
+        x: rect.left + scrollLeft,
+        y: rect.top + scrollTop
+    };
 }
 
 // #endgerion

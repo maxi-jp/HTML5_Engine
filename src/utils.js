@@ -27,10 +27,14 @@ function CheckCollisionCircle(point, circlePosition, radius2) {
 }
 
 function CheckCollisionRect (point, rectangle) {
-    return point.x >= (rectangle.position.x) &&
-           point.x <= (rectangle.position.x + rectangle.width) &&
-           point.y >= (rectangle.position.y) &&
-           point.y <= (rectangle.position.y + rectangle.height);
+    return PointInsideRectangle(point.x, point.y, rectangle.position.x, rectangle.position.y, rectangle.width, rectangle.height);
+}
+
+function PointInsideRectangle(px, py, rx, ry, rw, rh) {
+    return px >= (rx) &&
+           px <= (rx + rw) &&
+           py >= (ry) &&
+           py <= (ry + rh);
 }
 
 function CheckCollisionPolygon(point, polygon) {
