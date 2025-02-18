@@ -331,11 +331,9 @@ class FloppyDerp extends Game {
     DrawBg(ctx) {
         // compute the actual background color
         const actualColor = this.bgColors[this.bgColorStep];
-        const nextColor = this.bgColors[(this.bgColorStep + 1) % this.bgColors.length]
-
-        this.bgColorMixed.r = Math.round( (1 - this.bgColorVar) * actualColor.r + (this.bgColorVar) * nextColor.r);
-        this.bgColorMixed.g = Math.round( (1 - this.bgColorVar) * actualColor.g + (this.bgColorVar) * nextColor.g);
-        this.bgColorMixed.b = Math.round( (1 - this.bgColorVar) * actualColor.b + (this.bgColorVar) * nextColor.b);
+        const nextColor = this.bgColors[(this.bgColorStep + 1) % this.bgColors.length];
+        
+        this.bgColorMixed = Color.Lerp(actualColor, nextColor, this.bgColorVar);
 
         var lGrad = ctx.createLinearGradient(320, 0, 320, this.screenWidth);
         lGrad.addColorStop(0.0, '#040311');
@@ -409,9 +407,9 @@ class FloppyDerp extends Game {
 
 class FloppyDerpPlayer extends SSAnimationObject{
     constructor(position, img) {
-        super(position,  0, 1, img, 24, 24, 10, 0.02);
-        this.animationT1 = 0.02; // frame time of animation 1
-        this.animationT2 = 0.1;  // frame time of animation 2
+        super(position,  0, 1, img, 24, 24, [10, 10], 0.01);
+        this.animationT1 = 0.03; // frame time of animation 1
+        this.animationT2 = 0.15;  // frame time of animation 2
         this.framesDuration = this.animationT1;
 
         this.initialPosition = Vector2.Copy(position);
@@ -433,6 +431,8 @@ class FloppyDerpPlayer extends SSAnimationObject{
     }
 
     Update(deltaTime) {
+        super.Update(deltaTime);
+
         if (Input.IsMouseDown() || Input.IsKeyDown(KEY_SPACE)) {
             // jump!
             this.Jump();
@@ -465,7 +465,7 @@ class FloppyDerpPlayer extends SSAnimationObject{
                 break;
                 
             case 2: // dying
-                this.fallVelocity += game.gravityValue * game.gravityAc * 0.15;
+                this.fallVelocity += game.gravityValue * game.gravityAc * deltaTime * 0.25;
                 this.position.y += this.fallVelocity;
             
                 if (this.position.y >= game.screenHeight)
@@ -484,6 +484,9 @@ class FloppyDerpPlayer extends SSAnimationObject{
         this.fallVelocity = 0.0;
         this.jumpVelocity = this.jumpVelocityPower;
         this.state = 0;
+
+        this.PlayAnimationLoop(0);
+        this.framesDuration = this.animationT1;
     }
 
     Jump() {
@@ -499,6 +502,9 @@ class FloppyDerpPlayer extends SSAnimationObject{
 
     Die() {
         this.state = 2;
+
+        this.PlayAnimationLoop(1);
+        this.framesDuration = this.animationT2;
     }
 }
 
