@@ -123,6 +123,17 @@ class Color {
         return Color.FromString(HTMLColorNameToRGB(color));
     }
 
+    static Lerp(from, to, step) {
+        const stepMin1 = 1 - step;
+
+        return new Color(
+            Math.round((stepMin1 * from.r) + (step * to.r)),
+            Math.round((stepMin1 * from.g) + (step * to.g)),
+            Math.round((stepMin1 * from.b) + (step * to.b)),
+            Math.round((stepMin1 * from.a) + (step * to.a))
+        );
+    }
+
     Desaturate(desaturateValue=0.5) {
         const avg = (this.r + this.g + this.b) / 3;
         this.r = Math.round(this.r + (avg - this.r) * desaturateValue);
