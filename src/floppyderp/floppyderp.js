@@ -533,5 +533,5 @@ class FloppyDerpTube extends GameObject {
 }
 
 // initialize the game
-if (game === null)
-    game = new FloppyDerp();
+// if (game === null)
+//     game = new FloppyDerp();
