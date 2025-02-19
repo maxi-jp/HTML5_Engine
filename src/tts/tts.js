@@ -17,6 +17,7 @@ class TTS extends Game {
 
         this.mouseCircle = null;
         this.player = null;
+        this.camera = null;
 
         this.sceneLimits = null;
     }
@@ -39,10 +40,18 @@ class TTS extends Game {
 
         this.player = new PlayerShip(new Vector2(canvas.width / 2, canvas.height / 2), 0, 1, this.graphicAssets.ships.img, this.sceneLimits);
         this.gameObjects.push(this.player);
+
+        this.camera = new FollowCameraBasic(Vector2.Zero(), this.player);
+        this.camera.Start();
+        this.player.Start();
     }
 
     Update(deltaTime) {
+        // update the game objects
         super.Update(deltaTime);
+
+        // update the camera
+        this.camera.Update(deltaTime);
 
         this.mouseCircle.position.Set(Input.mouse.x, Input.mouse.y);
     }
@@ -51,6 +60,8 @@ class TTS extends Game {
         // background
         ctx.fillStyle = this.bgGrad.gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        this.camera.PreDraw(ctx);
 
         // background grid
         // horizontal lines
@@ -68,7 +79,10 @@ class TTS extends Game {
 
         this.sceneLimits.Draw(ctx);
 
+        // draw the game objects
         super.Draw(ctx);
+
+        this.camera.PostDraw(ctx);
 
         // draw the mouse position
         this.mouseCircle.Draw(ctx);
@@ -76,5 +90,5 @@ class TTS extends Game {
 }
 
 // initialize the game
-// if (game === null)
-//     game = new TTS();
+if (game === null)
+    game = new TTS();
