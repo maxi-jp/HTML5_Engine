@@ -233,6 +233,33 @@ class Camera {
     }
 }
 
+class FollowCameraBasic extends Camera {
+    constructor(position, target) {
+        super(position);
+
+        this.target = target;
+    }
+
+    Start() {
+        this.position.Set(
+            this.target.position.x - canvas.width / 2,
+            this.target.position.y - canvas.height / 2
+        );
+    }
+
+    Update(deltaTime) {
+        this.position.Set(
+            this.target.position.x - canvas.width / 2,
+            this.target.position.y - canvas.height / 2
+        );
+    }
+
+    PreDraw(ctx) {
+        super.PreDraw(ctx);
+        ctx.translate(-this.position.x, -this.position.y);
+    }
+}
+
 class FollowCamera extends Camera {
     constructor(position, target, minX, maxX, minY, maxY, smoothingSpeed=5) {
         super(position);
