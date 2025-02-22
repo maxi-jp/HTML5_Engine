@@ -24,9 +24,6 @@ class AudioPlayer {
                 audio.src = assets[asset].path;
                 audio.oncanplaythrough = onload;
 
-                audio.src = assets[asset].path;
-                audio.oncanplaythrough = onload;
-
                 // create a gain node for volume control
                 const gainNode = this.audioContext.createGain();
 
