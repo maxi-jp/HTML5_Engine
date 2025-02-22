@@ -14,6 +14,8 @@ var totalTime = 0.0; // acumulator of the time
 // current Game global reference
 var game = null;
 
+var audioPlayer = null;
+
 function LoadImages(assets, onloaded) {
     if (assets === null || Object.keys(assets).length === 0)
         onloaded();
@@ -39,8 +41,7 @@ function LoadImages(assets, onloaded) {
             img.src = assets[asset].path;
             img.onload = onload;
         }
-     }
-    return assets;
+    }
 }
 
 function Init() {
@@ -54,9 +55,16 @@ function Init() {
     Input.SetupGamepadEvents();
 
     if (game) {
-        LoadImages(game.graphicAssets, ()=>{
-            Start();
-            Loop();
+        LoadImages(game.graphicAssets, () => {
+            console.log(`All image files loaded.`);
+            
+            audioPlayer = new AudioPlayer();
+            audioPlayer.LoadAudio(game.audioAssets, () => {
+                console.log('All audio files loaded');
+                console.log('Starting the game...');
+                Start();
+                Loop();
+            });
         });
     }
 }

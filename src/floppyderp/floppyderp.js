@@ -50,6 +50,17 @@ class FloppyDerp extends Game {
             }
         };
 
+        this.audioAssets = {
+            jump: {
+                path: "./src/floppyderp/assets/jump.m4a",
+                audio: null
+            },
+            dead: {
+                path: "./src/floppyderp/assets/dead.m4a",
+                audio: null
+            }
+        };
+
         this.audioJump; // jump audio
         this.audioDead; // death audio
 
@@ -379,9 +390,8 @@ class FloppyDerp extends Game {
     }
     
     PlayerDead() {
-        // TODO play death sound
-        // if (audioActive)
-        //     audioDead.play();
+        if (this.audioActive)
+            audioPlayer.PlayAudio("dead");
         
         this.player.Die();
     }
@@ -433,7 +443,7 @@ class FloppyDerpPlayer extends SSAnimationObject{
     Update(deltaTime) {
         super.Update(deltaTime);
 
-        if (Input.IsMouseDown() || Input.IsKeyDown(KEY_SPACE)) {
+        if (this.state != 2 && (Input.IsMouseDown() || Input.IsKeyDown(KEY_SPACE))) {
             // jump!
             this.Jump();
         }
@@ -493,11 +503,9 @@ class FloppyDerpPlayer extends SSAnimationObject{
         this.jumpVelocity = this.jumpVelocityPower;
         this.state = 1;
 
-        // TODO play jump audio
-        // audioJump.pause();
-        // audioJump.currentTime = 0;
-        // if (audioActive)
-        //     audioJump.play();
+        if (game.audioActive) {   
+            audioPlayer.PlayFromTheStart("jump");
+        }
     }
 
     Die() {
@@ -533,5 +541,5 @@ class FloppyDerpTube extends GameObject {
 }
 
 // initialize the game
-// if (game === null)
-//     game = new FloppyDerp();
+if (game === null)
+    game = new FloppyDerp();

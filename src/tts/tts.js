@@ -90,5 +90,5 @@ class TTS extends Game {
 }
 
 // initialize the game
-if (game === null)
-    game = new TTS();
+// if (game === null)
+//     game = new TTS();

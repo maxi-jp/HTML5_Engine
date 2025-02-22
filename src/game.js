@@ -17,6 +17,16 @@ class Game {
         //     another_asset_id: ...
         // };
 
+        this.audioAssets = null;
+        // audioAssets format should be:
+        // {
+        //     asset_id: {
+        //         path: "path/to/asset",
+        //         audio: null
+        //     },
+        //     another_asset_id: ...
+        // };
+
         this.gameObjects = [];
 
         this._screenHalfWidth = this._screenWidth / 2;
