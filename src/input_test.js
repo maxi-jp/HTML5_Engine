@@ -104,34 +104,34 @@ class InputTest extends Game {
         };
 
         this.gamepadButtonCircles = [
-            new InputAsset(BUTTON_DPAD_DOWN,  new Vector2(370, 150), 20, 20, "↓"),
-            new InputAsset(BUTTON_DPAD_RIGHT, new Vector2(410, 115), 20, 20, "→"),
-            new InputAsset(BUTTON_DPAD_LEFT,  new Vector2(330, 115), 20, 20, "←"),
-            new InputAsset(BUTTON_DPAD_UP,    new Vector2(370,  80), 20, 20, "↑"),
+            new InputAsset("DPAD_DOWN",  new Vector2(370, 150), 20, 20, "↓"),
+            new InputAsset("DPAD_RIGHT", new Vector2(410, 115), 20, 20, "→"),
+            new InputAsset("DPAD_LEFT",  new Vector2(330, 115), 20, 20, "←"),
+            new InputAsset("DPAD_UP",    new Vector2(370,  80), 20, 20, "↑"),
 
-            new InputAsset(BUTTON_A, new Vector2(520, 150), 20, 20, "A"),
-            new InputAsset(BUTTON_B, new Vector2(560, 115), 20, 20, "B"),
-            new InputAsset(BUTTON_X, new Vector2(480, 115), 20, 20, "X"),
-            new InputAsset(BUTTON_Y, new Vector2(520,  80), 20, 20, "Y"),
+            new InputAsset("FACE_DOWN",  new Vector2(520, 150), 20, 20, "A"),
+            new InputAsset("FACE_RIGHT", new Vector2(560, 115), 20, 20, "B"),
+            new InputAsset("FACE_LEFT",  new Vector2(480, 115), 20, 20, "X"),
+            new InputAsset("FACE_UP",    new Vector2(520,  80), 20, 20, "Y"),
 
-            new InputAsset(BUTTON_BACK,  new Vector2(420, 40), 20, 20, "b"),
-            new InputAsset(BUTTON_START, new Vector2(470, 40), 20, 20, "s"),
+            new InputAsset("BACK",  new Vector2(420, 40), 20, 20, "b"),
+            new InputAsset("START", new Vector2(470, 40), 20, 20, "s"),
 
-            new InputAsset(BUTTON_HOME, new Vector2(445, 170), 20, 20, "H"),
+            new InputAsset("HOME", new Vector2(445, 170), 20, 20, "H"),
 
-            new InputAsset(BUTTON_LB, new Vector2(300, 50), 20, 20, "LB"),
-            new InputAsset(BUTTON_RB, new Vector2(590, 50), 20, 20, "RB"),
+            new InputAsset("LB", new Vector2(300, 50), 20, 20, "LB"),
+            new InputAsset("RB", new Vector2(590, 50), 20, 20, "RB"),
         ];
         
         this.gamepadTriggers = [
-            new InputAsset(BUTTON_LT, new Vector2(260, 76), 40, 60, "LT"),
-            new InputAsset(BUTTON_RT, new Vector2(590, 76), 40, 60, "RT")
+            new InputAsset("LT", new Vector2(260, 76), 40, 60, "LT"),
+            new InputAsset("RT", new Vector2(590, 76), 40, 60, "RT")
         ];
         this.gamepadTriggers[0].pressedColor = this.gamepadTriggers[1].pressedColor = "rgba(0, 255, 0, 0.5)";
 
         this.gamepadStickCircles = [
-            new InputAsset(BUTTON_LS, new Vector2(370, 230), 40, 40, "LS", {x: 0, y: 0}),
-            new InputAsset(BUTTON_RS, new Vector2(520, 230), 40, 40, "RS", {x: 0, y: 0})
+            new InputAsset("LS", new Vector2(370, 230), 40, 40, "LS", {x: 0, y: 0}),
+            new InputAsset("RS", new Vector2(520, 230), 40, 40, "RS", {x: 0, y: 0})
         ];
 
         this.gamepadButtons = [...this.gamepadButtonCircles, ...this.gamepadStickCircles, ...this.gamepadTriggers];
@@ -158,13 +158,12 @@ class InputTest extends Game {
         });
 
         // gamepad sticks values
-        for (let i = 0; i < 2; i++) {
-            const stickCircle = this.gamepadStickCircles[i]
-            
-            stickCircle.value = Input.GetGamepadStickValue(0, i);
-            stickCircle.horizontalValue = Input.GetStickValue(0, i, 0);
-            stickCircle.verticalValue = Input.GetStickValue(0, i, 1);
-        }
+        this.gamepadStickCircles[0].value = Input.GetGamepadStickValue(0, "LS");
+        this.gamepadStickCircles[0].horizontalValue = Input.GetGamepadStickAxisValue(0, "LS", 0);
+        this.gamepadStickCircles[0].verticalValue = Input.GetGamepadStickAxisValue(0, "LS", 1);
+        this.gamepadStickCircles[1].value = Input.GetGamepadStickValue(0, "RS");
+        this.gamepadStickCircles[1].horizontalValue = Input.GetGamepadStickAxisValue(0, "RS", 0);
+        this.gamepadStickCircles[1].verticalValue = Input.GetGamepadStickAxisValue(0, "RS", 1);
 
         // gamepad triggers values
         this.gamepadTriggers.forEach(trigger => {
