@@ -4,7 +4,7 @@ class PlayerShip extends SpriteObject {
 
         this.camera = null;
 
-        this.speed = 300;
+        this.speed = 280;
         this.life = 100;
 
         this.movement = Vector2.Zero();
@@ -28,9 +28,11 @@ class PlayerShip extends SpriteObject {
     }
 
     Update(deltaTime) {
+        const gamepad = Input.gamepads.length > 0;
+
         // rotation
-        if (Input.gamepads[0]) {
-            const rightStickValue = Input.GetGamepadStickValue(0, 1);
+        if (gamepad) {
+            const rightStickValue = Input.GetGamepadStickValue(0, "RS");
             if (Math.abs(rightStickValue.x) > 0.33 || Math.abs(rightStickValue.y) > 0.33) {
                 this.rotation = Math.atan2(
                     rightStickValue.y,
@@ -48,6 +50,12 @@ class PlayerShip extends SpriteObject {
         // movement
         this.movement.Set(0, 0);
 
+        if (gamepad) {
+            const leftStickValue = Input.GetGamepadStickValue(0, "LS");
+            this.movement.x = leftStickValue.x;
+            this.movement.y = leftStickValue.y;
+        }
+
         if (Input.IsKeyPressed(KEY_A)) {
             this.movement.x -= 1;
         }
@@ -61,13 +69,6 @@ class PlayerShip extends SpriteObject {
             this.movement.y += 1;
         }
 
-        if (Input.gamepads[0]) {
-            const leftStickValue = Input.GetGamepadStickValue(0, 0);
-            if (Math.abs(leftStickValue.x) > 0.15 || Math.abs(leftStickValue.y) > 0.15) {
-                this.movement.x += leftStickValue.x;
-                this.movement.y += leftStickValue.y;
-            }
-        }
         //this.movement.Normalize();
 
         // apply the movement
@@ -78,7 +79,7 @@ class PlayerShip extends SpriteObject {
         this.fireRateAux -= deltaTime;
 
         if (this.fireRateAux <= 0 && (
-            Input.IsKeyPressed(KEY_SPACE) || Input.IsMousePressed()
+            Input.IsKeyPressed(KEY_SPACE) || Input.IsMousePressed() || Input.IsGamepadButtonPressed(0, "FACE_DOWN") || Input.IsGamepadButtonPressed(0, "RT")
         )) {
             const bullet = this.bulletPool.Activate();
             if (bullet) {

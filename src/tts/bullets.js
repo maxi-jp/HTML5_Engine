@@ -9,7 +9,7 @@ class Bullet {
         this.rotation = 0;
 
         this.width = 8;
-        this.speed = 400;
+        this.speed = 700;
         this.damage = 1;
         this.owner = null;
 

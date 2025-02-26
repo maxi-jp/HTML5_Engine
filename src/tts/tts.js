@@ -3,11 +3,11 @@ class TTS extends Game {
         super();
         this.graphicAssets = {
             ships: {
-                path: "assets/simpleSpace_sheet.png",
+                path: "src/tts/assets/simpleSpace_sheet.png",
                 img: null
             },
             crosshair: {
-                path: "assets/crosshair060.png",
+                path: "src/tts/assets/crosshair060.png",
                 img: null
             }
         };
@@ -17,6 +17,7 @@ class TTS extends Game {
 
         this.mouseCircle = null;
         this.player = null;
+        this.enemies = [];
         this.camera = null;
 
         this.sceneLimits = null;
@@ -44,6 +45,12 @@ class TTS extends Game {
         this.camera = new FollowCameraBasic(Vector2.Zero(), this.player);
         this.camera.Start();
         this.player.Start();
+
+        // initialize the starting enemies
+        this.enemies = [];
+        const enemy = new Enemy(new Vector2(50, 50), this.graphicAssets.ships.img, this.player, this.sceneLimits);
+        this.enemies.push();
+        this.gameObjects.push(enemy);
     }
 
     Update(deltaTime) {
@@ -90,5 +97,5 @@ class TTS extends Game {
 }
 
 // initialize the game
-// if (game === null)
-//     game = new TTS();
+if (game === null)
+    game = new TTS();
