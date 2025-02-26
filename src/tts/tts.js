@@ -48,7 +48,7 @@ class TTS extends Game {
 
         // initialize the starting enemies
         this.enemies = [];
-        const enemy = new Enemy(new Vector2(50, 50), this.graphicAssets.ships.img, this.player, this.sceneLimits);
+        const enemy = new EnemyKamikaze(new Vector2(50, 50), this.graphicAssets.ships.img, this.player, this.sceneLimits);
         this.enemies.push();
         this.gameObjects.push(enemy);
     }

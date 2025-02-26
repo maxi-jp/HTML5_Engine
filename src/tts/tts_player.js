@@ -68,8 +68,9 @@ class PlayerShip extends SpriteObject {
         if (Input.IsKeyPressed(KEY_S)) {
             this.movement.y += 1;
         }
-
-        //this.movement.Normalize();
+        
+        if (!gamepad)
+            this.movement.Normalize();
 
         // apply the movement
         this.position.x += this.movement.x * this.speed * deltaTime;
