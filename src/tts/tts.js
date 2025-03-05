@@ -49,7 +49,7 @@ class TTS extends Game {
         // initialize the starting enemies
         this.enemies = [];
         const enemy = new EnemyKamikaze(new Vector2(50, 50), this.graphicAssets.ships.img, this.player, this.sceneLimits);
-        this.enemies.push();
+        this.enemies.push(enemy);
         this.gameObjects.push(enemy);
     }
 
@@ -61,6 +61,28 @@ class TTS extends Game {
         this.camera.Update(deltaTime);
 
         this.mouseCircle.position.Set(Input.mouse.x, Input.mouse.y);
+
+        // check bullets-enemies collisions
+        const bullets = this.player.bulletPool.bullets;
+        for (let i = 0; i < bullets.length; i++) {
+            const bullet = bullets[i];
+            if (bullet.active) {
+                for (let j = 0; j < this.enemies.length; j++) {
+                    // check bullets[i] - enemies[j] collision
+                    const collision = CheckCollisionCircle(bullet.position, this.enemies[j].position, this.enemies[j].boundingRadious2);
+
+                    if (collision) {
+                        if (this.enemies[j].Damage(bullet.damage)) {
+                            this.enemies.splice(j, 1);
+                            this.gameObjects.splice(this.gameObjects.indexOf(this.enemies[j]), 1);
+
+                            bullet.active = false;
+                            break; // exit the bullets loop
+                        }
+                    }
+                }
+            }
+        }
     }
 
     Draw(ctx) {

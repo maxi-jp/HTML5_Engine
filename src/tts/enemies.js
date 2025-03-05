@@ -29,6 +29,15 @@ class Enemy extends SpriteObject {
 
         DrawFillCircle(ctx, this.position.x, this.position.y, this.boundingRadious, "rgba(255, 0, 0, 0.25)");
     }
+
+    Damage(damage) {
+        this.life -= damage;
+        if (this.life <= 0) {
+            this.life = 0;
+            return true;
+        }
+        return false;
+    }
 }
 
 const KamikazeState = {
@@ -64,9 +73,13 @@ class EnemyKamikaze extends Enemy {
                     this.player.position.x - this.position.x
                 ) + PIH;
 
+                
+
                 break;
 
             case KamikazeState.kamikaze:
+
+
 
                 break;
         }
