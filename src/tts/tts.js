@@ -21,6 +21,9 @@ class TTS extends Game {
         this.camera = null;
 
         this.sceneLimits = null;
+
+        this.playerScore = 0;
+        this.playerScoreLabel = new TextLabel("0", new Vector2(this.screenWidth / 2, 50), "40px Comic Sans MS", "white", "center", "bottom");
     }
 
     Start() {
@@ -48,9 +51,8 @@ class TTS extends Game {
 
         // initialize the starting enemies
         this.enemies = [];
-        const enemy = new EnemyKamikaze(new Vector2(50, 50), this.graphicAssets.ships.img, this.player, this.sceneLimits);
-        this.enemies.push(enemy);
-        this.gameObjects.push(enemy);
+        const enemy = new EnemyAsteroid(new Vector2(50, 50), this.graphicAssets.ships.img, this.player, this.sceneLimits, new Vector2(2, 1), false);
+        this.AddEnemy(enemy);
     }
 
     Update(deltaTime) {
@@ -73,8 +75,10 @@ class TTS extends Game {
 
                     if (collision) {
                         if (this.enemies[j].Damage(bullet.damage)) {
-                            this.enemies.splice(j, 1);
-                            this.gameObjects.splice(this.gameObjects.indexOf(this.enemies[j]), 1);
+                            this.playerScore += this.enemies[j].score;
+                            this.playerScoreLabel.text = this.playerScore;
+
+                            this.RemoveEnemy(this.enemies[j], j);
 
                             bullet.active = false;
                             break; // exit the bullets loop
@@ -115,6 +119,24 @@ class TTS extends Game {
 
         // draw the mouse position
         this.mouseCircle.Draw(ctx);
+
+        this.playerScoreLabel.Draw(ctx);
+    }
+
+    AddEnemy(enemy) {
+        this.enemies.push(enemy);
+        this.gameObjects.push(enemy);
+    }
+
+    RemoveEnemy(enemy, index) {
+        if (index === undefined) {
+            this.enemies.splice(this.enemies.indexOf(enemy), 1);
+            this.gameObjects.splice(this.gameObjects.indexOf(enemy), 1);
+        }
+        else {
+            this.gameObjects.splice(this.gameObjects.indexOf(this.enemies[index]), 1);
+            this.enemies.splice(index, 1);
+        }
     }
 }
 
