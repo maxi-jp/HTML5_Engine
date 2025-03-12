@@ -156,6 +156,14 @@ class EnemyAsteroid extends Enemy {
         // move forwards
         this.position.x += this.direction.x * this.speed * deltaTime;
         this.position.y += this.direction.y * this.speed * deltaTime;
+
+        // remove it if its too far from the scene
+        if ((this.position.x < this.sceneLimits.position.x - 200) || // west
+            (this.position.x > this.sceneLimits.position.x + this.sceneLimits.width + 200) || // east
+            (this.position.y < this.sceneLimits.position.y - 200) || // north
+            (this.position.y > this.sceneLimits.position.y + this.sceneLimits.height + 200)) { // south
+            game.RemoveEnemy(this);
+        }
     }
 
     Draw(ctx) {

@@ -20,7 +20,18 @@ class TTS extends Game {
         this.enemies = [];
         this.camera = null;
 
-        this.sceneLimits = null;
+        this.sceneLimits = new Rectangle(Vector2.Zero(), 800, 640, "white", true);
+
+        this.timeToSpawnEnemy = 1;
+        this.timeToSpawnEnemyAux = 0;
+        this.enemiesSpawnPoints = [
+            new Vector2(50, 50),
+            new Vector2(this.sceneLimits.width - 50, 50),
+            new Vector2(50, this.sceneLimits.height - 50),
+            new Vector2(this.sceneLimits.width - 50, this.sceneLimits.height - 50),
+            new Vector2(this.sceneLimits.width / 2, 50),
+            new Vector2(this.sceneLimits.width / 2, this.sceneLimits.height - 50)
+        ]
 
         this.playerScore = 0;
         this.playerScoreLabel = new TextLabel("0", new Vector2(this.screenWidth / 2, 50), "40px Comic Sans MS", "white", "center", "bottom");
@@ -39,8 +50,6 @@ class TTS extends Game {
         ]);
 
         this.mouseCircle = new Circumference(new Vector2(0, 0), 5, 'red', 1);
-
-        this.sceneLimits = new Rectangle(Vector2.Zero(), canvas.width, canvas.height - 100, "white", true);
 
         this.player = new PlayerShip(new Vector2(canvas.width / 2, canvas.height / 2), 0, 1, this.graphicAssets.ships.img, this.sceneLimits);
         this.gameObjects.push(this.player);
@@ -86,6 +95,27 @@ class TTS extends Game {
                     }
                 }
             }
+        }
+
+        // check player enemies collisions
+        for (let i = 0; i < this.enemies.length; i++) {
+            const difX = this.enemies[i].position.x - this.player.position.x;
+            const difY = this.enemies[i].position.y - this.player.position.y;
+            let pointToCircleDistance2 = difX * difX + difY * difY;
+
+            if(pointToCircleDistance2 < this.enemies[i].boundingRadious2 + this.player.boundingRadious2) {
+                this.playerScore -= this.enemies[i].score;
+                this.playerScoreLabel.text = this.playerScore;
+                this.RemoveEnemy(this.enemies[i], i);
+            }
+
+        }
+
+        // enemy spawning
+        this.timeToSpawnEnemyAux += deltaTime;
+        if (this.timeToSpawnEnemyAux >= this.timeToSpawnEnemy) {
+            this.timeToSpawnEnemyAux = 0;
+            this.SpawnRandomEnemy();
         }
     }
 
@@ -137,6 +167,27 @@ class TTS extends Game {
             this.gameObjects.splice(this.gameObjects.indexOf(this.enemies[index]), 1);
             this.enemies.splice(index, 1);
         }
+    }
+
+    SpawnRandomEnemy() {
+        const random = Math.random();
+        let enemy = null;
+        const spawnPoint = this.enemiesSpawnPoints[RandomBetweenInt(0, this.enemiesSpawnPoints.length)];
+        if (random < 0.33) {
+            enemy = new Enemy(spawnPoint, this.graphicAssets.ships.img, this.player, this.sceneLimits);
+        }
+        else if (random < 0.66) {
+            enemy = new EnemyKamikaze(spawnPoint, this.graphicAssets.ships.img, this.player, this.sceneLimits);
+        }
+        else {
+            enemy = new EnemyAsteroid(spawnPoint, this.graphicAssets.ships.img, this.player, this.sceneLimits);
+        }
+
+        this.timeToSpawnEnemy *= 0.95;
+        if (this.timeToSpawnEnemy < 0.15)
+            this.timeToSpawnEnemy = 0.15
+
+        this.AddEnemy(enemy);
     }
 }
 
