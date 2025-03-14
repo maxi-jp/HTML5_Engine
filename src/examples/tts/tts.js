@@ -3,11 +3,11 @@ class TTS extends Game {
         super();
         this.graphicAssets = {
             ships: {
-                path: "src/tts/assets/simpleSpace_sheet.png",
+                path: "src/examples/tts/assets/simpleSpace_sheet.png",
                 img: null
             },
             crosshair: {
-                path: "src/tts/assets/crosshair060.png",
+                path: "src/examples/tts/assets/crosshair060.png",
                 img: null
             }
         };
@@ -172,7 +172,7 @@ class TTS extends Game {
     SpawnRandomEnemy() {
         const random = Math.random();
         let enemy = null;
-        const spawnPoint = this.enemiesSpawnPoints[RandomBetweenInt(0, this.enemiesSpawnPoints.length)];
+        const spawnPoint = this.enemiesSpawnPoints[RandomBetweenInt(0, this.enemiesSpawnPoints.length - 1)];
         if (random < 0.33) {
             enemy = new Enemy(spawnPoint, this.graphicAssets.ships.img, this.player, this.sceneLimits);
         }
@@ -192,5 +192,5 @@ class TTS extends Game {
 }
 
 // initialize the game
-if (game === null)
-    game = new TTS();
+// if (game === null)
+//     game = new TTS();

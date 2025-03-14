@@ -17,46 +17,46 @@ class FloppyDerp extends Game {
         this.showDebug = true;
         this.graphicAssets = {
             player: {
-                path: "./src/floppyderp/assets/player_sprites.png",
+                path: "./src/examples/floppyderp/assets/player_sprites.png",
                 img: null
             },
             title: {
-                path: "./src/floppyderp/assets/Title_logo.png",
+                path: "./src/examples/floppyderp/assets/Title_logo.png",
                 img: null
             },
             credits: {
-                path: "./src/floppyderp/assets/Title_credits.png",
+                path: "./src/examples/floppyderp/assets/Title_credits.png",
                 img: null
             },
             gameover: {
-                path: "./src/floppyderp/assets/game_over.png",
+                path: "./src/examples/floppyderp/assets/game_over.png",
                 img: null
             },
             soundMute: {
-                path: "./src/floppyderp/assets/sound_mute.png",
+                path: "./src/examples/floppyderp/assets/sound_mute.png",
                 img: null
             },
             tube1: {
-                path: "./src/floppyderp/assets/tube1.png", // top sprite of the tube
+                path: "./src/examples/floppyderp/assets/tube1.png", // top sprite of the tube
                 img: null
             },
             tube2: {
-                path: "./src/floppyderp/assets/tube2.png", // bottom sprite of the tube
+                path: "./src/examples/floppyderp/assets/tube2.png", // bottom sprite of the tube
                 img: null
             },
             tube3: {
-                path: "./src/floppyderp/assets/tube3.png", // middle sprite of the tube
+                path: "./src/examples/floppyderp/assets/tube3.png", // middle sprite of the tube
                 img: null
             }
         };
 
         this.audioAssets = {
             jump: {
-                path: "./src/floppyderp/assets/jump.m4a",
+                path: "./src/examples/floppyderp/assets/jump.m4a",
                 audio: null
             },
             dead: {
-                path: "./src/floppyderp/assets/dead.m4a",
+                path: "./src/examples/floppyderp/assets/dead.m4a",
                 audio: null
             }
         };
