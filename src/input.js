@@ -189,8 +189,7 @@ var Input = {
             Input.keyboard.keypressed[e.keyCode] = false;
         } );
     
-        function AddEvent (element, eventName, func)
-        {
+        function AddEvent (element, eventName, func) {
             if (element.addEventListener)
                 element.addEventListener(eventName, func, false);
             else if (element.attachEvent) // IE9

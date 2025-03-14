@@ -233,8 +233,21 @@ class Rectangle {
     }
 }
 
+class Circle {
+    constructor(position, radius, color, stroke=false) {
+        this.position = position;
+        this.radius = radius;
+        this.color = color;
+        this.stroke = stroke;
+    }
+
+    Draw(ctx) {
+        DrawCircle(ctx, this.position.x, this.position.y, this.radius, this.color, this.stroke);
+    }
+}
+
 class TextLabel {
-    constructor(text, position, font, color="black", align="center", baseline="middle", stroke=false) {
+    constructor(text, position, font, color="black", align="center", baseline="bottom", stroke=false) {
         this.text = text;
         this.position = position;
         this.font = font;
@@ -246,6 +259,23 @@ class TextLabel {
 
     Draw(ctx) {
         DrawText(ctx, this.text, this.position.x, this.position.y, this.font, this.color, this.align, this.baseline, this.stroke);
+    }
+}
+
+class TextLabelFillAndStroke {
+    constructor(text, position, font, fillColor="white", strokeColor="black", align="center", baseline="bottom") {
+        this.text = text;
+        this.position = position;
+        this.font = font;
+        this.fillColor = fillColor;
+        this.strokeColor = strokeColor;
+        this.align = align;
+        this.baseline = baseline;
+    }
+
+    Draw(ctx) {
+        DrawText(ctx, this.text, this.position.x, this.position.y, this.font, this.fillColor, this.align, this.baseline, false);
+        DrawText(ctx, this.text, this.position.x, this.position.y, this.font, this.strokeColor, this.align, this.baseline, true);
     }
 }
 

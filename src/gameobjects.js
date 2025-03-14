@@ -59,49 +59,6 @@ class RectangleGO extends GameObject {
     }
 }
 
-class Circle extends GameObject {
-    constructor(position, radious, color) {
-        super(position);
-        this.radious = radious;
-        this.color = color;
-    }
-
-    Draw(ctx) {
-        ctx.fillStyle = this.color;
-        ctx.save();
-        ctx.translate(this._position.x, this._position.y);
-        ctx.rotate(this._rotation);
-        ctx.beginPath();
-        ctx.arc(0, 0, this.radious, 0, PI2, false);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
-    }
-}
-
-class Circumference extends GameObject {
-    constructor(position, radious, color, lineWidth) {
-        super(position);
-        this.radious = radious;
-        this.color = color;
-        this.lineWidth = lineWidth
-    }
-
-    Draw(ctx) {
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = this.lineWidth;
-        ctx.save();
-        ctx.translate(this._position.x, this._position.y);
-        ctx.rotate(this._rotation);
-        ctx.beginPath();
-        ctx.arc(0, 0, this.radious, 0, PI2, false);
-        ctx.closePath();
-        ctx.stroke();
-        ctx.restore();
-        ctx.lineWidth = 1;
-    }
-}
-
 class SpriteObject extends GameObject {
     constructor(position, rotation, scale, img) {
         super(position);
