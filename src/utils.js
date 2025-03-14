@@ -109,6 +109,22 @@ function IntersectionBetweenLines(l1p1, l1p2, l2p1, l2p2) {
     return result;
 }
 
+function DotProduct(vec1, vec2) {
+    return vec1.x * vec2.x + vec1.y * vec2.y;
+}
+
+function AngleBetweenVectors(vec1, vec2) {
+    // vec1 and vec2 should be normalized
+
+    // a · b = |a| × |b| × cos(θ)
+    // cos(θ) = (a · b) / |a| × |b|
+    // θ = arccos[(a · b) / |a| × |b|]
+    // si a y b son unitarios: θ = arccos(a · b)
+
+    const dotProduct = DotProduct(vec1, vec2);
+    return Math.acos(dotProduct);
+}
+
 // normalize an angle to the range -PI to PI
 function NormalizeAngle(angle) {
     angle = angle % PI2;
