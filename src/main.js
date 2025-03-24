@@ -11,6 +11,8 @@ var time = 0,
     acumDelta = 0;
 var totalTime = 0.0; // acumulator of the time
 
+var drawStats = true;
+
 // current Game global reference
 var game = null;
 
@@ -121,7 +123,8 @@ function Draw(/** @type {CanvasRenderingContext2D} */ctx) {
     game.Draw(ctx);
 
     // draw stats
-    DrawStats(ctx);
+    if (drawStats)
+        DrawStats(ctx);
 }
 
 function DrawStats(ctx) {

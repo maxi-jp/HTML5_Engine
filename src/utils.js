@@ -193,6 +193,10 @@ class Vector2 {
         return x2 + y2;
     }
 
+    IsZero() {
+        return this.x === 0 && this.y === 0;
+    }
+
     static Magnitude(v1, v2) {
         return Math.sqrt(SqrMagnitude(v1, v2));
     }
