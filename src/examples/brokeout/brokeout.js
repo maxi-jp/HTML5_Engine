@@ -319,5 +319,5 @@ class Brick extends GameObject {
 }
 
 // initialize the game
-// if (game === null)
-//     game = new BrokeOut();
+if (game === null)
+    game = new BrokeOut();

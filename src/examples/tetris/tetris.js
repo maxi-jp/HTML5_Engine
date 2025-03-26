@@ -547,5 +547,5 @@ class Tetris extends Game {
 }
 
 // initialize the game
-// if (game === null)
-//     game = new Tetris();
+if (game === null)
+    game = new Tetris();

@@ -315,5 +315,5 @@ class SimpleTetris extends Game {
 }
 
 // initialize the game
-// if (game === null)
-//     game = new SimpleTetris();
+if (game === null)
+    game = new SimpleTetris();

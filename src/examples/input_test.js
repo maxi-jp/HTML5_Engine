@@ -224,5 +224,5 @@ class InputTest extends Game {
 }
 
 // initialize the game
-// if (game === null)
-//     game = new InputTest();
+if (game === null)
+    game = new InputTest();
