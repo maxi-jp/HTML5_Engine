@@ -149,6 +149,8 @@ class Color {
 }
 
 class Sprite {
+    _scale = new Vector2(1, 1);
+
     constructor(img, position, rotation, scale) {
         this.img = img;
         this.img.halfWidth = img.width / 2;
@@ -164,13 +166,25 @@ class Sprite {
     get height() {
         return this.img.height;
     }
+    get scale() {
+        return this._scale;
+    }
+
+    set scale(scale) {
+        if (typeof scale === "number") {
+            this._scale = new Vector2(scale, scale);
+        }
+        else {
+            this._scale = scale;
+        }
+    }
 
     Draw(ctx) {
         ctx.save();
 
         ctx.translate(this.position.x, this.position.y);
         ctx.rotate(this.rotation);
-        ctx.scale(this.scale, this.scale);
+        ctx.scale(this._scale.x, this._scale.y);
 
         ctx.drawImage(this.img, -this.img.halfWidth, -this.img.halfHeight);
 
@@ -182,7 +196,7 @@ class Sprite {
 
         ctx.translate(this.position.x, this.position.y);
         ctx.rotate(this.rotation);
-        ctx.scale(this.scale, this.scale);
+        ctx.scale(this._scale.x, this._scale.y);
         
         // ctx.strokeStyle = "red";
         // ctx.strokeRect(-sw/2, -sh/2, sw, sh);
@@ -220,7 +234,7 @@ class RadialGradient {
 }
 
 class Rectangle {
-    constructor(position, width, height, color, stroke=false) {
+    constructor(position, width, height, color="black", stroke=false) {
         this.position = position;
         this.width = width;
         this.height = height;

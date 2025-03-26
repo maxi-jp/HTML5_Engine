@@ -272,3 +272,12 @@ class Vector2 {
         this.y = Lerp(this.y, otherVector.y, interpolationFactor);
     }
 }
+
+class Rect {
+    constructor(x, y, width, height) {
+        this.x = x;
+        this.y = y;
+        this.w = width;
+        this.h = height;
+    }
+}

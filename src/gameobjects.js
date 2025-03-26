@@ -2,7 +2,7 @@ class GameObject {
     _active = true;
     _position;
     _rotation = 0;
-    _scale = 1;
+    _scale = new Vector2(1, 1);
 
     constructor(position) {
         this._position = Vector2.Copy(position);
@@ -31,7 +31,10 @@ class GameObject {
         this._rotation = value;
     }
     set scale(value) {
-        this._scale = value;
+        if (typeof(value) === 'number')
+            this._scale.Set(value, value);
+        else
+            this._scale = value;
     }
 
     Start() {}
@@ -62,10 +65,10 @@ class RectangleGO extends GameObject {
 class SpriteObject extends GameObject {
     constructor(position, rotation, scale, img) {
         super(position);
-        this._rotation = rotation;
-        this._scale = scale;
-
+        
         this.sprite = new Sprite(img, this._position, this._rotation, this._scale);
+        this._rotation = rotation;
+        this.scale = scale;
     }
 
     get position() {
@@ -95,7 +98,10 @@ class SpriteObject extends GameObject {
     }
 
     set scale(newScale) {
-        this._scale = newScale;
+        if (typeof(newScale) === 'number')
+            this._scale.Set(newScale, newScale);
+        else
+            this._scale = newScale;
         this.sprite.scale = this._scale;
     }
 
@@ -111,7 +117,7 @@ class SpriteObject extends GameObject {
     }
 }
 
-class SSAnimationObject extends SpriteObject {
+class SSAnimationObjectBasic extends SpriteObject {
     constructor(position, rotation, scale, img, frameWidth, frameHeight, frameCount, framesDuration)     {
         super(position, rotation, scale, img);
 
@@ -146,6 +152,47 @@ class SSAnimationObject extends SpriteObject {
         // reset the frame count
         this.actualFrame = 0;
         this.actualFrameCountTime = 0;
+    }
+}
+
+class SSAnimationObjectComplex extends SpriteObject {
+    constructor(position, rotation, scale, img, animationsRectangles, framesDurations) {
+        super(position, rotation, scale, img);
+
+        this.animationsRectangles = animationsRectangles;
+        this.framesDurations = framesDurations;
+        
+        this.actualAnimationIndex = 0;
+        this.actualFrame = 0;
+        this.actualRectFrame = this.animationsRectangles[this.actualAnimationIndex][this.actualFrame];
+        this.actualFrameCountTime = 0;
+    }
+    
+    Start() {}
+
+    Update(deltaTime) {
+        this.actualFrameCountTime += deltaTime;
+        if (this.actualFrameCountTime >= this.framesDurations[this.actualAnimationIndex]) {
+            // update the animation with the new frame
+            this.actualFrame = (this.actualFrame + 1) % this.animationsRectangles[this.actualAnimationIndex].length;
+            this.actualRectFrame = this.animationsRectangles[this.actualAnimationIndex][this.actualFrame];
+
+            this.actualFrameCountTime = 0;
+        }
+    }
+
+    Draw(ctx) {
+        this.sprite.DrawSection(ctx, this.actualRectFrame.x, this.actualRectFrame.y, this.actualRectFrame.w, this.actualRectFrame.h, 0, 0, this.actualRectFrame.w, this.actualRectFrame.h);
+    }
+
+    PlayAnimationLoop(animationId) {
+        this.actualAnimationIndex = animationId;
+
+        // reset the frame count
+        this.actualFrame = 0;
+        this.actualFrameCountTime = 0;
+
+        this.actualRectFrame = this.animationsRectangles[this.actualAnimationIndex][this.actualFrame];
     }
 }
 
