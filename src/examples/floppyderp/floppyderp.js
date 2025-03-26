@@ -415,7 +415,7 @@ class FloppyDerp extends Game {
     }
 }
 
-class FloppyDerpPlayer extends SSAnimationObject{
+class FloppyDerpPlayer extends SSAnimationObjectBasic {
     constructor(position, img) {
         super(position,  0, 1, img, 24, 24, [10, 10], 0.01);
         this.animationT1 = 0.03; // frame time of animation 1
