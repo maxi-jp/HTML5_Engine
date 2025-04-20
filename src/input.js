@@ -11,7 +11,7 @@ const KEY_LSHIFT = 16;
 const KEY_LCTRL  = 17;
 const KEY_TAB    = 9;
 
-const KEY_Q = 81, KEY_W = 87, KEY_E = 69, KEY_R = 82, KEY_T = 84, KEY_Y = 89, KEY_U = 85;
+const KEY_Q = 81, KEY_W = 87, KEY_E = 69, KEY_R = 82, KEY_T = 84, KEY_Y = 89, KEY_U = 85, KEY_I= 73, KEY_O = 79, KEY_P = 80;
 const KEY_A = 65, KEY_S = 83, KEY_D = 68, KEY_F = 70, KEY_G = 71, KEY_H = 72, KEY_J = 74;
 const KEY_Z = 90, KEY_X = 88, KEY_C = 67, KEY_V = 86, KEY_B = 66, KEY_N = 78, KEY_M = 77;
 
@@ -154,13 +154,15 @@ var Input = {
         y: 0,
         down: false,
         up: false,
-        pressed: false
+        pressed: false,
+        moved: false
     },
 
     keyboard: {
         keyup: {},
         keypressed: {},
-        keydown: {}
+        keydown: {},
+        anyKeyPressed: false
     },
     gamepads: [
         // gamepad object structure:
@@ -176,11 +178,12 @@ var Input = {
 // #region Setup Functions
     SetupKeyboardEvents: function() {
         AddEvent(document, "keydown", function(e) {
-            //console.log(e.keyCode);
+            console.log(e.keyCode);
             // avoid when the key is being held down such that it is automatically repeating
             if (!e.repeat) {
                 Input.keyboard.keydown[e.keyCode] = true;
                 Input.keyboard.keypressed[e.keyCode] = true;
+                Input.keyboard.anyKeyPressed = true;
             }
         } );
     
@@ -376,6 +379,10 @@ var Input = {
         this.mouse.down = false;
         this.mouse.up = false;
 
+        // Reset mouse.moved and keyboard.anyKeyPressed flags
+        this.mouse.moved = false;
+        this.keyboard.anyKeyPressed = false;
+
         // update gamepads
         this.UpdateGamepads();
     },
@@ -463,5 +470,6 @@ function MouseMove(event) {
     let rect = canvas.getBoundingClientRect();
     Input.mouse.x = event.clientX - rect.left;
     Input.mouse.y = event.clientY - rect.top;
+    Input.mouse.moved = true;
     //console.log(Input.mouse);
 }
