@@ -2,6 +2,12 @@ class AudioTest extends Game {
     constructor() {
         super();
 
+        this.config = {
+            audioAnalyzer: true,
+            analyzerfftSize: 64,
+            analyzerSmoothing: 0.9,
+        };
+
         this.audioAssets = {
             backgroundMusic: { path: "./src/examples/audio_test/assets/Pixelated Dreams.mp3" },
             laserSound: { path: "./src/examples/audio_test/assets/laser.wav" },
@@ -26,12 +32,31 @@ class AudioTest extends Game {
         this.panLabel           = new TextLabel("Pan: ", new Vector2(10, 200), "16px Arial", "black", "left");
         this.volumeLabel        = new TextLabel("Volume: ", new Vector2(10, 220), "16px Arial", "black", "left");
         this.pitchLabel         = new TextLabel("Pitch: ", new Vector2(10, 240), "16px Arial", "black", "left");
+
+        this.spectrumBarWidth = 0;
+        this.spectrumBarHeightMultiplier = 0;
+
+        this.audioBarsRectangles = [];
     }
 
     Start() {
         super.Start();
 
+        this.screenWidth = 480;
+        this.screenHeight = 480;
+
         drawStats = false;
+
+        const numberOfBars = this.config.analyzerfftSize / 2;
+        this.spectrumBarWidth = this.screenWidth / numberOfBars;
+        this.spectrumBarHeightMultiplier = this.screenHeight / 256;
+
+        // setup the bars for the audio spectrum
+        this.audioBarsRectangles = [];
+        for (let i = 0; i < numberOfBars; i++) {
+            const rect = new Rectangle(new Vector2(i * this.spectrumBarWidth, 0), this.spectrumBarWidth, this.screenHeight, 'red');
+            this.audioBarsRectangles.push(rect);
+        }
     }
 
     Update(deltaTime) {
@@ -64,15 +89,25 @@ class AudioTest extends Game {
             audioPlayer.StopAudio(this.currentAudio);
             console.log(`Stopped: ${this.currentAudio}`);
         }
+        if (Input.IsMouseDown()) {
+            if (audioPlayer.IsPlaying(this.currentAudio)) {
+                audioPlayer.StopAudio(this.currentAudio);
+                console.log(`Stopped: ${this.currentAudio}`);
+            }
+            else {
+                audioPlayer.PlayAudio(this.currentAudio, this.pan, this.volume, this.pitch);
+                console.log(`Playing: ${this.currentAudio}`);
+            }
+        }
 
         // Adjust the pitch using ←/→ keys
-        if (Input.IsKeyDown(KEY_LEFT)) {
-            this.pitch = Math.min(this.pitch + 0.1, 3); // Increase pitch
+        if (Input.IsKeyDown(KEY_RIGHT)) {
+            this.pitch = Math.min(this.pitch + 0.05, 3); // Increase pitch
             audioPlayer.SetPitch(this.currentAudio, this.pitch);
             console.log(`Pitch: ${this.pitch}`);
         }
-        if (Input.IsKeyDown(KEY_RIGHT)) {
-            this.pitch = Math.max(this.pitch - 0.1, 0.5); // Decrease pitch
+        if (Input.IsKeyDown(KEY_LEFT)) {
+            this.pitch = Math.max(this.pitch - 0.05, 0.5); // Decrease pitch
             audioPlayer.SetPitch(this.currentAudio, this.pitch);
             console.log(`Pitch: ${this.pitch}`);
         }
@@ -90,14 +125,30 @@ class AudioTest extends Game {
         this.panLabel.text = `Pan: ${this.pan.toFixed(2)}`;
         this.volumeLabel.text = `Volume: ${this.volume.toFixed(2)}`;
         this.pitchLabel.text = `Pitch: ${this.pitch.toFixed(2)}`;
+
+        // update the bars for the audio spectrum
+        const frequencyData = audioPlayer.GetFrequencyData();
+
+        for (let i = 0; i < frequencyData.length; i++) {
+            this.audioBarsRectangles[i].height = frequencyData[i] * this.spectrumBarHeightMultiplier;
+            this.audioBarsRectangles[i].position.x = i * this.spectrumBarWidth;
+            this.audioBarsRectangles[i].position.y = this.screenHeight - this.audioBarsRectangles[i].height;
+            this.audioBarsRectangles[i].color = `rgb(${255 * this.audioBarsRectangles[i].height / this.screenHeight}, 50, 150)`;
+        }
     }
 
     Draw(ctx) {
         super.Draw(ctx);
 
+        // Draw the bar graph for the audio spectrum
+        this.audioBarsRectangles.forEach(rect => rect.Draw(ctx));
+
         DrawSegment(ctx, this.screenHalfWidth, 0, this.screenHalfWidth, this.screenHeight, "grey");
         DrawSegment(ctx, 0, this.screenHalfHeight, this.screenWidth, this.screenHalfHeight, "grey");
+
         DrawCircle(ctx, Input.mouse.x, Input.mouse.y, 12, "red");
+        DrawSegment(ctx, Input.mouse.x, 0, Input.mouse.x, this.screenHeight, "#BBBBBB");
+        DrawSegment(ctx, 0, Input.mouse.y, this.screenWidth, Input.mouse.y, "#BBBBBB");
 
         // Display instructions
         this.titleLabel.Draw(ctx);

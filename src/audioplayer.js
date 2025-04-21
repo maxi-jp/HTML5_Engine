@@ -1,7 +1,28 @@
 class AudioPlayer {
-    constructor() {
+    constructor(analyzer=false, analyzerfftSize=128, analyzerSmoothing=0.5) {
         this.audioAssets = {};
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        this.analyzer = analyzer;
+        if (this.analyzer) {
+            this.analyzerNode = this.audioContext.createAnalyser();
+
+            if (analyzerfftSize < 32 || analyzerfftSize > 2048) {
+                const analyzerfftSizeCap = Math.max(32, Math.min(2048, analyzerfftSize));
+                console.warn(`Invalid fftSize value: ${analyzerfftSize}, is outside the range [32, 32768]. Setting it to ${analyzerfftSizeCap}.`);
+                analyzerfftSize = analyzerfftSizeCap;
+            }
+            this.analyzerNode.fftSize = analyzerfftSize;
+
+            if (analyzerSmoothing < 0 || analyzerSmoothing > 0.99) {
+                const analyzerSmoothingCap = Math.max(0, Math.min(0.99, analyzerSmoothing));
+                console.warn(`Invalid smoothingTimeConstant value: ${analyzerSmoothing}, is outside the range [0, 0.99]. Setting it to ${analyzerSmoothingCap}.`);
+                analyzerSmoothing = analyzerSmoothingCap;
+            }
+            this.analyzerNode.smoothingTimeConstant = analyzerSmoothing;
+
+            this.frequencyData = new Uint8Array(this.analyzerNode.frequencyBinCount);
+        }
     }
 
     LoadAudio(assets, onloaded) {
@@ -30,9 +51,15 @@ class AudioPlayer {
                 // create a panner node for stereo localization
                 const panner = this.audioContext.createStereoPanner();
 
-                // connect the audio element to the panner node and then to the audio context
                 const track = this.audioContext.createMediaElementSource(audio);
-                track.connect(gainNode).connect(panner).connect(this.audioContext.destination);
+                
+                // connect the audio element to the panner node and then to the audio context
+                if (this.analyzer) {
+                    track.connect(gainNode).connect(panner).connect(this.analyzerNode).connect(this.audioContext.destination);
+                }
+                else {
+                    track.connect(gainNode).connect(panner).connect(this.audioContext.destination);
+                }
 
                 this.audioAssets[asset] = { audio, gainNode, panner };
             }
@@ -122,5 +149,19 @@ class AudioPlayer {
         else {
             console.warn(`Audio asset "${name}" not found.`);
         }
+    }
+
+    IsPlaying(name) {
+        if (this.audioAssets[name]) {
+            return !this.audioAssets[name].audio.paused;
+        } else {
+            console.warn(`Audio asset "${name}" not found.`);
+            return false;
+        }
+    }
+
+    GetFrequencyData() {
+        this.analyzerNode.getByteFrequencyData(this.frequencyData);        
+        return this.frequencyData;
     }
 }

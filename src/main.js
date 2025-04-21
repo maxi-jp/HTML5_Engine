@@ -60,33 +60,18 @@ function Init() {
         LoadImages(game.graphicAssets, () => {
             console.log(`All image files loaded.`);
             
-            // Wait for the first user interaction to initialize the AudioPlayer
-            const checkFirstInteraction = () => {
-                if (!audioPlayer && (Input.mouse.moved || Input.keyboard.anyKeyPressed)) {
-                    audioPlayer = new AudioPlayer();
-                    audioPlayer.LoadAudio(game.audioAssets, () => {
-                        console.log("All audio files loaded.");
-                        console.log("Starting the game...");
-                        Start();
-                        Loop();
-                    });
-
-                    // Resume the AudioContext if it's suspended
-                    if (audioPlayer.audioContext.state === "suspended") {
-                        audioPlayer.audioContext.resume().then(() => {
-                            console.log("Audio context resumed.");
-                        }).catch((err) => {
-                            console.error("Failed to resume AudioContext:", err);
-                        });
-                    }
-                } else {
-                    // Keep checking until interaction is detected
-                    requestAnimationFrame(checkFirstInteraction);
-                }
-            };
-
-            // Start checking for the first interaction
-            checkFirstInteraction();
+            if (game.config.audioAnalyzer) {
+                audioPlayer = new AudioPlayer(true, game.config.analyzerfftSize, game.config.analyzerSmoothing);
+            }
+            else {
+                audioPlayer = new AudioPlayer();
+            }
+            audioPlayer.LoadAudio(game.audioAssets, () => {
+                console.log("All audio files loaded.");
+                console.log("Starting the game...");
+                Start();
+                Loop();
+            });
         });
     }
 }
@@ -120,6 +105,11 @@ function Loop() {
         return;
 
     totalTime += deltaTime;
+
+    // resume audio context if suspended
+    if (Input.keyboard.anyKeyPressed || Input.mouse.pressed) {
+        ResumeAudioContext();
+    }
     
     // Game logic ---------
     Update(deltaTime);
@@ -159,6 +149,16 @@ function DrawStats(ctx) {
     ctx.fillText("FPS: " + fps, 6, 16);
     ctx.fillText("FPS (dt): " + (1 / globalDT).toFixed(2), 6, 34);
     ctx.fillText("deltaTime (ms): " + (globalDT * 1000).toFixed(2), 6, 52);
+}
+
+function ResumeAudioContext() {
+    if (audioPlayer.audioContext.state === "suspended") {
+        audioPlayer.audioContext.resume().then(() => {
+            console.log("Audio context resumed.");
+        }).catch((err) => {
+            console.error("Failed to resume AudioContext:", err);
+        });
+    }
 }
 
 window.onload = Init;

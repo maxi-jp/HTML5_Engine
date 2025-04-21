@@ -178,7 +178,7 @@ var Input = {
 // #region Setup Functions
     SetupKeyboardEvents: function() {
         AddEvent(document, "keydown", function(e) {
-            console.log(e.keyCode);
+            //console.log(e.keyCode);
             // avoid when the key is being held down such that it is automatically repeating
             if (!e.repeat) {
                 Input.keyboard.keydown[e.keyCode] = true;
@@ -263,11 +263,11 @@ var Input = {
         return this.keyboard.keydown[keycode];
     },
 
-    IsKeyUp: function (keycode) {
+    IsKeyUp: function(keycode) {
         return this.keyboard.keyup[keycode];
     },
 
-    IsMousePressed: function () {
+    IsMousePressed: function() {
         return this.mouse.pressed;
     },
 

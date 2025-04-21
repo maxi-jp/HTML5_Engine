@@ -7,6 +7,14 @@ class Game {
     _audioActive = true;
 
     constructor() {
+        this.config = {};
+        // config example:
+        // {
+        //     audioAnalyzer: true,    // if true it will create an audio analyzer when loading the audio assets
+        //     analyzerfftSize: 128,   // size of the audio analyzer fft, default is 128
+        //     analyzerSmoothing: 0.5, // smoothing of the audio analyzer, default is 0.5
+        // };
+
         this.graphicAssets = null;
         // graphicAssets format should be:
         // {
