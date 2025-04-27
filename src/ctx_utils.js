@@ -349,7 +349,22 @@ function DrawSegment(ctx, x1, y1, x2, y2, color, lineWidth=1) {
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
     ctx.stroke();
+}
+
+function DrawPolygon(ctx, coordinates, strokeColor="black", lineWidth=1, fill=false, fillColor="black") {
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    ctx.moveTo(coordinates[0].x, coordinates[0].y);
+    for (let i = 1; i < coordinates.length; i++) {
+        ctx.lineTo(coordinates[i].x, coordinates[i].y);
+    }
     ctx.closePath();
+    if (fill) {
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+    }
+    ctx.stroke();
 }
 
 function DrawFillCircle(ctx, x, y, radius, color) {

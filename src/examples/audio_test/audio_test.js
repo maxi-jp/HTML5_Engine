@@ -143,10 +143,30 @@ class AudioTest extends Game {
         // Draw the bar graph for the audio spectrum
         this.audioBarsRectangles.forEach(rect => rect.Draw(ctx));
 
+        // lines pointing at the center of the screen
         DrawSegment(ctx, this.screenHalfWidth, 0, this.screenHalfWidth, this.screenHeight, "grey");
         DrawSegment(ctx, 0, this.screenHalfHeight, this.screenWidth, this.screenHalfHeight, "grey");
 
-        DrawCircle(ctx, Input.mouse.x, Input.mouse.y, 12, "red");
+        if (audioPlayer.IsPlaying(this.currentAudio)) {
+            // Draw a triangle facing right when playing
+            DrawPolygon(ctx, [
+                {x: Input.mouse.x - 10, y: Input.mouse.y - 10}, // Top vertex
+                {x: Input.mouse.x - 10, y: Input.mouse.y + 10}, // Bottom vertex
+                {x: Input.mouse.x + 10, y: Input.mouse.y}       // Right vertex
+            ], "black", 1, true, "green");
+        }
+        else if (!audioPlayer.IsPlaying(this.currentAudio) && this.audioAssets[this.currentAudio]?.audio.currentTime > 0) {
+            // Draw two vertical lines if paused
+            DrawFillRectangle(ctx, Input.mouse.x - 8, Input.mouse.y - 10, 4, 20, "orange");
+            DrawFillRectangle(ctx, Input.mouse.x + 4, Input.mouse.y - 10, 4, 20, "orange");
+        }
+        else {
+            // Draw a square when stopped
+            DrawFillRectangle(ctx, Input.mouse.x - 10, Input.mouse.y - 10, 20, 20, "red");
+        }
+        
+        //DrawCircle(ctx, Input.mouse.x, Input.mouse.y, 12, "red");
+        // mouse coordinates
         DrawSegment(ctx, Input.mouse.x, 0, Input.mouse.x, this.screenHeight, "#BBBBBB");
         DrawSegment(ctx, 0, Input.mouse.y, this.screenWidth, Input.mouse.y, "#BBBBBB");
 

@@ -62,6 +62,7 @@ class AudioPlayer {
                 }
 
                 this.audioAssets[asset] = { audio, gainNode, panner };
+                assets[asset].audio = this.audioAssets[asset].audio;
             }
         }
     }
@@ -71,7 +72,10 @@ class AudioPlayer {
             this.audioAssets[name].panner.pan.value = pan;
             this.audioAssets[name].gainNode.gain.value = volume;
             this.audioAssets[name].audio.playbackRate = pitch;
-            this.audioAssets[name].audio.play();
+            this.audioAssets[name].audio.loop = false;
+            this.audioAssets[name].audio.playPromise = this.audioAssets[name].audio.play();
+            
+            return this.audioAssets[name].audio.playPromise;
         }
         else {
             console.warn(`Audio asset "${name}" not found.`);
@@ -80,7 +84,13 @@ class AudioPlayer {
 
     PauseAudio(name) {
         if (this.audioAssets[name]) {
-            this.audioAssets[name].audio.pause();
+            if (this.audioAssets[name].audio.playPromise != undefined) {
+                this.audioAssets[name].audio.playPromise.then(() => {
+                    this.audioAssets[name].audio.pause();
+                }).catch((error) => {
+                    console.warn("Error stopping audio:", error);
+                });
+            }
         }
         else {
             console.warn(`Audio asset "${name}" not found.`);
@@ -89,8 +99,14 @@ class AudioPlayer {
 
     StopAudio(name) {
         if (this.audioAssets[name]) {
-            this.audioAssets[name].audio.pause();
-            this.audioAssets[name].audio.currentTime = 0;
+            if (this.audioAssets[name].audio.playPromise != undefined) {
+                this.audioAssets[name].audio.playPromise.then(() => {
+                    this.audioAssets[name].audio.pause();
+                    this.audioAssets[name].audio.currentTime = 0;
+                }).catch((error) => {
+                    console.warn("Error stopping audio:", error);
+                });
+            }
         }
         else {
             console.warn(`Audio asset "${name}" not found.`);
@@ -103,7 +119,10 @@ class AudioPlayer {
             this.audioAssets[name].gainNode.gain.value = volume;
             this.audioAssets[name].audio.playbackRate = pitch;
             this.audioAssets[name].audio.currentTime = 0;
-            this.audioAssets[name].audio.play();
+            this.audioAssets[name].audio.loop = false;
+            this.audioAssets[name].audio.playPromise = this.audioAssets[name].audio.play();
+
+            return this.audioAssets[name].audio.playPromise;
         }
         else {
             console.warn(`Audio asset "${name}" not found.`);
@@ -117,7 +136,9 @@ class AudioPlayer {
             this.audioAssets[name].audio.playbackRate = pitch;
             this.audioAssets[name].audio.currentTime = 0;
             this.audioAssets[name].audio.loop = true;
-            this.audioAssets[name].audio.play();
+            this.audioAssets[name].audio.playPromise = this.audioAssets[name].audio.play();
+            
+            return this.audioAssets[name].audio.playPromise;
         }
         else {
             console.warn(`Audio asset "${name}" not found.`);
