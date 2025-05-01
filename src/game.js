@@ -10,6 +10,7 @@ class Game {
         this.config = {};
         // config example:
         // {
+        //     imageSmoothingEnabled: true, // enable/disable image smoothing on the canvas context
         //     audioAnalyzer: true,    // if true it will create an audio analyzer when loading the audio assets
         //     analyzerfftSize: 128,   // size of the audio analyzer fft, default is 128
         //     analyzerSmoothing: 0.5, // smoothing of the audio analyzer, default is 0.5
@@ -61,11 +62,17 @@ class Game {
         this._screenWidth = value;
         this._screenHalfWidth = this._screenWidth / 2;
         canvas.width = this._screenWidth;
+        if (this.config.imageSmoothingEnabled !== undefined) {
+            ctx.imageSmoothingEnabled = this.config.imageSmoothingEnabled;
+        }
     }
     set screenHeight(value) {
         this._screenHeight = value;
         this._screenHalfHeight = this._screenHeight / 2;
         canvas.height = this._screenHeight;
+        if (this.config.imageSmoothingEnabled !== undefined) {
+            ctx.imageSmoothingEnabled = this.config.imageSmoothingEnabled;
+        }
     }
     set audioActive(value) {
         this._audioActive = value;
@@ -74,6 +81,11 @@ class Game {
     Start() {
         canvas.width = this._screenWidth;
         canvas.height = this._screenHeight;
+
+        if (this.config.imageSmoothingEnabled !== undefined) {
+            ctx.imageSmoothingEnabled = this.config.imageSmoothingEnabled;
+        }
+        
         this.gameObjects = [];
     }
     
