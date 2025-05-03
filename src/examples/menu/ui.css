@@ -1,0 +1,34 @@
+#ingameUI {
+    background: rgba(0, 0, 255, 0.209);
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px;
+    box-sizing: border-box;
+    transition: bottom 2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#ingameUI.hidden {
+    bottom: -80px;
+}
+
+.upgrade {
+    width: 60px;
+    height: 60px;
+    background-color: yellow;
+    border-radius: 12px;
+    box-shadow: black 0px 1px 6px;
+    cursor: pointer;
+}
+
+.upgradeTitle {
+    font-size: 14px;
+    margin: 8px auto;
+}
+
+.upgradeCost {
+    font-size: 15px;
+}

@@ -44,17 +44,17 @@ canvas {
 }
 
 #credits {
-    visibility: hidden;
+    display: none;
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     background-color: blue;
-    padding: 120px 160px;
+    padding: 160px 160px;
+    margin-bottom: 200px;
     box-sizing: border-box;
-    animation: CreditsMovement 10s linear 1 normal;
-    animation-fill-mode: both;
-    transition: opacity 1s ease-in-out;
+    animation: CreditsMovement 14s linear 1 normal both paused;
+    transition: opacity 2s ease-in-out;
     opacity: 0;
 }
 
@@ -63,7 +63,6 @@ canvas {
 }
 
 #credits.show {
-    visibility: visible;
     opacity: 1;
 }
 
@@ -76,5 +75,5 @@ canvas {
 
 @keyframes CreditsMovement {
     0% {top: 0px}
-    100% {top: -400px}
+    100% {top: -1000px}
 }

@@ -1,5 +1,5 @@
 class HTMLMenu {
-    constructor(game, menuContainerSelector, canvasContainerSelector, canvas) {
+    constructor(game, menuContainerSelector, canvasContainerSelector, canvas, coverCanvas = false) {
         this.game = game;
 
         this.container = document.querySelector(menuContainerSelector);
@@ -8,14 +8,17 @@ class HTMLMenu {
         this.elements = [];
         this.buttons = [];
         this.canvas = canvas;
+        this.coverCanvas = coverCanvas;
     }
 
     Start() {
         this.buttons = [];
 
         // setup the size
-        this.container.setAttribute('style', `width: ${this.canvas.width}px; height: ${this.canvas.height}px;`);
-        this.canvasContainer.setAttribute('style', `width: ${this.canvas.width}px; height: ${this.canvas.height}px;`);
+        if (this.coverCanvas) {
+            this.container.setAttribute('style', `width: ${this.canvas.width}px; height: ${this.canvas.height}px;`);
+            this.canvasContainer.setAttribute('style', `width: ${this.canvas.width}px; height: ${this.canvas.height}px;`);
+        }
     }
 
     SetupElements(elementsSelectors) {

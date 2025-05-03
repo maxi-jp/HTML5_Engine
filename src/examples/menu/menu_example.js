@@ -45,7 +45,7 @@ class MenuExample extends Game {
 
 class MainMenu extends HTMLMenu {
     constructor(game, canvas) {
-        super(game, "#mainMenu", "#container", canvas);
+        super(game, "#mainMenu", "#container", canvas, true);
     }
 
     Start() {
@@ -73,11 +73,19 @@ class MainMenu extends HTMLMenu {
     }
 
     ShowCredits() {
-        this.elements["#credits"].setAttribute('style', 'display: block;');
-        this.elements["#credits"].classList.add('show');
-        this.elements["#credits"].onanimationend = () => {
-            this.elements["#credits"].classList.remove('show');
-            this.elements["#credits"].setAttribute('style', 'display: none');
+        const creditsElement = this.elements["#credits"];
+
+        const transitionDuration = parseFloat(window.getComputedStyle(creditsElement).transitionDuration) * 1000 || 1000;
+
+        creditsElement.setAttribute('style', 'display: block; animation-play-state: running;');
+        setTimeout(() => creditsElement.classList.add('show'), 0);
+
+        creditsElement.onanimationend = () => {
+            creditsElement.classList.remove('show');
+            creditsElement.setAttribute('style', 'display: block; animation-play-state: paused;');
+            setTimeout(() => {
+                creditsElement.setAttribute('style', 'display: none; animation-play-state: paused;');
+            }, transitionDuration);
         };
     }
 }
