@@ -170,19 +170,16 @@ function DrawWorldDebug(ctx, world) {
 }
 
 function OnContactDetected(contact) {
-    let userDataA = contact.GetFixtureA().GetBody().GetUserData();
-    let userDataB = contact.GetFixtureB().GetBody().GetUserData();
+    const userDataA = contact.GetFixtureA().GetBody().GetUserData();
+    const userDataB = contact.GetFixtureB().GetBody().GetUserData();
 
-    if (userDataA != null && userDataB != null &&
-        typeof(userDataA) !== 'undefined' &&
-        typeof(userDataB) !== 'undefined') {
-        console.log("collision between " + userDataA + " and " + userDataB);
+    // console.log("collision between " + userDataA + " and " + userDataB);
 
-        /*if ((userDataA === "ball" && userDataB === "basket") || (userDataA === "basket" && userDataB === "ball")) {
-            if (ball.body.GetLinearVelocity().y < 0 && lastBallLaunchPosition.x < 5) {
-                points++;
-            }
-        }*/
+    if (userDataA?.OnContactDetectedBox2D) {
+        userDataA.OnContactDetectedBox2D(userDataB);
+    }
+    if (userDataB?.OnContactDetectedBox2D) {
+        userDataB.OnContactDetectedBox2D(userDataA);
     }
 }
 

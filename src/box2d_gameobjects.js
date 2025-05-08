@@ -6,6 +6,10 @@ class Box2DGameObject extends GameObject {
 
         // Create the Box2D body
         this.body = CreatePhysicsObject(physicsWorld, type, position.x / physicsWorld.scale, position.y / physicsWorld.scale, bodyOptions);
+        this.body.SetUserData(this);
+
+        this.hasContact = false; // true if the body has colide with another object
+        this.contactUserData = null; // the user data of the object that has colide with this object
     }
 
     get position() {
@@ -31,7 +35,23 @@ class Box2DGameObject extends GameObject {
         const pos = this.body.GetPosition();
         this._position.Set(pos.x * this.world.scale, canvas.height - (pos.y * this.world.scale));
         this._rotation = -this.body.GetAngle();
+
+        if (this.hasContact) {
+            // Consume the contact
+            this.hasContact = false;
+            this.OnContactDetected(this.contactUserData);
+        }
     }
+
+    OnContactDetectedBox2D(other) {
+        if (this.hasContact)
+            return; // already detected a contact
+
+        this.contactUserData = other;
+        this.hasContact = true;
+    }
+
+    OnContactDetected(other) { }
 }
 
 class Box2DRectangleGO extends Box2DGameObject {

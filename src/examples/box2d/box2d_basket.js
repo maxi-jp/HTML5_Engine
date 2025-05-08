@@ -122,6 +122,13 @@ class Ball extends Box2DSpriteObject {
         }
     }
 
+    OnContactDetected(other) {
+        if (other === "basket") {
+            // reset the ball position
+            this.Reset();
+        }
+    }
+
     Reset() {
         this.body.SetPosition(new b2Vec2(Math.random() + 1, Math.random() + 2));
         this.body.SetAngularVelocity(0);
