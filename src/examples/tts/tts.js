@@ -49,7 +49,7 @@ class TTS extends Game {
             [1, "#274f98"]
         ]);
 
-        this.mouseCircle = new Circumference(new Vector2(0, 0), 5, 'red', 1);
+        this.mouseCircle = new Circle(new Vector2(0, 0), 5, 'red', 1);
 
         this.player = new PlayerShip(new Vector2(canvas.width / 2, canvas.height / 2), 0, 1, this.graphicAssets.ships.img, this.sceneLimits);
         this.gameObjects.push(this.player);
@@ -192,5 +192,5 @@ class TTS extends Game {
 }
 
 // initialize the game
-// if (game === null)
-//     game = new TTS();
+if (game === null)
+    game = new TTS();
