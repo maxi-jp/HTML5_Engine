@@ -102,4 +102,19 @@ class Game {
                 gameObject.Draw(ctx);
         });
     }
+
+    Destroy(gameObject) {
+        const index = this.gameObjects.indexOf(gameObject);
+        if (index !== -1) {
+            if (typeof gameObject.Destroy === "function") {
+                gameObject.Destroy();
+            }
+
+            gameObject.active = false;
+
+            this.gameObjects.splice(index, 1);
+        }
+        else
+            console.warn("Error when destroying the gameObjet: GO not found in the gameObjects array.", gameObject);
+    }
 }

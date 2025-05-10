@@ -2,21 +2,37 @@ class Box2DPlatformer extends Box2DGame {
     constructor() {
         super(100, { x: 0, y: -9.8 }, false); // 1 pixel = 1/100 meter, gravity in m/s^2, allow bodies to sleep
 
+        debugMode = false;
+
+        this.config = { imageSmoothingEnabled: false };
+
         this.graphicAssets = {
-            ball: {
-                path: "src/examples/box2d/assets/ball.png",
+            mario: {
+                path: "src/examples/box2d/assets/SuperMarioBrosCrossover_Mario_SML2.png",
+                img: null
+            },
+            blocks: {
+                path: "src/examples/box2d/assets/SMB1_AS_blocks.png",
                 img: null
             }
         };
 
         this.player = null;
+        this.coins = [];
+
+        // game state variables
+        this.coinsCounter = 0;
+
+        // UI
+        this.coinsCounterSprite = null;
+        this.coinsCounterLabel = null;
     }
 
     Start() {
         // create the physics simulated this.physicsWorld
         super.Start();
 
-        // phisics objects
+        // physic objects
         // static floor
         this.floor = CreateEdge(
             this.physicsWorld,
@@ -27,7 +43,8 @@ class Box2DPlatformer extends Box2DGame {
                 p1y: 0,    // start point y
                 p2x: 3.2,  // end point x,
                 p2y: 0,    // end point y
-                type: b2Body.b2_staticBody
+                type: b2Body.b2_staticBody,
+                friction: 5
             } // physic options
         );
         this.floor.SetUserData("floor");
@@ -48,22 +65,46 @@ class Box2DPlatformer extends Box2DGame {
             type: b2Body.b2_staticBody
         });
 
+        // game state variables
+        this.coinsCounter = 0;
+
         // create the player
-        this.player = new Player(new Vector2(100, 200), this.graphicAssets.ball.img, this.physicsWorld, new Vector2(0.33, 0.33));
+        this.player = new Player(new Vector2(100, 200), this.graphicAssets.mario.img, this.physicsWorld);
         this.player.Start();
+        this.gameObjects.push(this.player);
+
+        // create a coin
+        const coin = new Coin(new Vector2(300, 150), this.graphicAssets.blocks.img, this.physicsWorld);
+        this.coins.push(coin);
+        this.gameObjects.push(coin);
+
+        // UI
+        this.coinsCounterSprite = new SSAnimationObjectComplex(new Vector2(275, 26), 0, 2, this.graphicAssets.blocks.img, [[new Rect(70, 38, 10, 14), new Rect(81, 38, 10, 14), new Rect(92, 38, 10, 14)]], [1/4]);
+        this.coinsCounterLabel = new TextLabel(this.coinsCounter.toString(), new Vector2(this.coinsCounterSprite.position.x + 20, this.coinsCounterSprite.position.y + 4), "30px Comic Sans MS", "white", "start", "middle");
     }
 
     Update(deltaTime) {
         // update physics and gameObjects
         super.Update(deltaTime);
-        
-        this.player.Update(deltaTime);
+
+        // UI
+        this.coinsCounterSprite.Update(deltaTime);
     }
 
     Draw(ctx) {
+        // draw the gameObjects
         super.Draw(ctx);
 
-        this.player.Draw(ctx);
+        // UI
+        this.coinsCounterSprite.Draw(ctx);
+        this.coinsCounterLabel.Draw(ctx);
+    }
+
+    PlayerTookCoin(coin) {
+        this.coinsCounter++;
+        this.coinsCounterLabel.text = this.coinsCounter.toString();
+
+        this.Destroy(coin);
     }
 }
 
@@ -73,11 +114,17 @@ const PlayerAnimationState = {
     JUMP : 2
 }
 
-class Player extends Box2DSpriteObject {
+class Player extends Box2DSSAnimationObjectComplex {
     constructor(position, img, physicsWorld) {
-        super(position, 0, 0.25, img, PhysicsObjectType.Box, physicsWorld, {
+        super(position, 0, 3, img, [
+            [new Rect(37, 1, 32, 26)], // idle
+            [new Rect(72, 1, 32, 26), new Rect(107, 1, 32, 26), new Rect(142, 1, 32, 26)], // run
+            [new Rect(212, 30, 32, 24)], // jump
+        ], [
+            1 / 8, 1 / 8, 1 / 8
+        ], PhysicsObjectType.Box, physicsWorld, {
             width: 0.4,
-            height: 0.5,
+            height: 0.6,
             type: b2Body.b2_dynamicBody,
             density: 1.0,
             friction: 0.5,
@@ -100,14 +147,12 @@ class Player extends Box2DSpriteObject {
         this.moveRight = false;
 
         this.canJump = false;
-
-        // player animation state machine
-        this.animState = PlayerAnimationState.IDLE;
-        this.animLastState = PlayerAnimationState.IDLE;
     }
 
     Start() {
         super.Start();
+
+        this.PlayAnimationLoop(PlayerAnimationState.IDLE);
     }
 
     Update(deltaTime) {
@@ -124,35 +169,27 @@ class Player extends Box2DSpriteObject {
 
         this.moving = this.moveLeft || this.moveRight;
 
-        if (Input.IsKeyPressed(KEY_UP) || Input.IsKeyPressed(KEY_W) || Input.IsKeyPressed(KEY_SPACE)) {
+        if (Input.IsKeyDown(KEY_UP) || Input.IsKeyDown(KEY_W) || Input.IsKeyDown(KEY_SPACE)) {
             // want to begin jump during this frame
             this.Jump();
         }
 
         // movement
         if (this.moveRight) {
-            // move animation (only if idle animation running)
-            if (this.animState === PlayerAnimationState.IDLE) {
-                // copy the past state
-                this.animLastState = this.animState;
-                this.animState = PlayerAnimationState.MOVE;
-
-                // this.animation.PlayAnimationLoop(PlayerAnimationState.MOVE);
+            // move animation
+            if (this.onFloor) {
+                this.PlayAnimationLoop(PlayerAnimationState.MOVE, false);
             }
-
+            
             this.ApplyVelocity(new b2Vec2(1, 0));
             this.moveRight = false;
             this.isGoingLeft = false;
         }
 
         if (this.moveLeft) {
-            // move animation (only if idle animation running)
-            if (this.animState === PlayerAnimationState.IDLE) {
-                // copy the past state
-                this.animLastState = this.animState;
-                this.animState = PlayerAnimationState.MOVE;
-
-                // this.animation.PlayAnimationLoop(PlayerAnimationState.MOVE);
+            // move animation
+            if (this.onFloor) {
+                this.PlayAnimationLoop(PlayerAnimationState.MOVE, false);
             }
 
             this.ApplyVelocity(new b2Vec2(-1, 0));
@@ -161,20 +198,17 @@ class Player extends Box2DSpriteObject {
         }
 
         // return to idle (if !moving && !jumping && !attacking && !dying && !onWard)
-        if (!this.jumping && !this.moving && this.animState !== PlayerAnimationState.IDLE)
-        {
-            // copy the past state
-            this.animLastState = this.animState;
-            // new state: idle
-            this.animState = PlayerAnimationState.IDLE;
-
+        if (!this.jumping && !this.moving) {
             // play the idle animation
-            // this.animation.PlayAnimationLoop(PlayerAnimationState.IDLE);
+            this.PlayAnimationLoop(PlayerAnimationState.IDLE);
         }
+
+        // if going left -> flip the sprite
+        this.animation.flipX = this.isGoingLeft;
     }
 
     Draw(ctx) {
-        //super.Draw(ctx);
+        super.Draw(ctx);
     }
 
     OnContactDetected(other) {
@@ -188,11 +222,11 @@ class Player extends Box2DSpriteObject {
 
             this.jumping = false;
 
-            this.animLastState = this.animState;
-            this.animState = PlayerAnimationState.IDLE;
-
             // play the idle animation
-            // this.animation.PlayAnimationLoop(PlayerAnimationState.IDLE);
+            this.PlayAnimationLoop(PlayerAnimationState.IDLE);
+        }
+        if (other instanceof Coin) {
+            game.PlayerTookCoin(other);
         }
     }
 
@@ -220,9 +254,28 @@ class Player extends Box2DSpriteObject {
         this.ApplyVelocity(new b2Vec2(0, this.jumpForce));
         this.onFloor = false;
         this.jumping = true;
+        
+        this.PlayAnimationLoop(PlayerAnimationState.JUMP);
+    }
+}
 
-        this.animState = PlayerAnimationState.JUMP;
-        // this.animation.PlayAnimationLoop(PlayerAnimationState.JUMP);
+class Coin extends Box2DSSAnimationObjectComplex {
+    constructor(position, img, physicsWorld) {
+        super(position, 0, 2, img,
+            [ [new Rect(6, 52, 14, 18), new Rect(26, 52, 14, 18), new Rect(46, 52, 14, 18), new Rect(68, 52, 14, 18)] ],
+            [1 / 8],
+            PhysicsObjectType.Box, physicsWorld, {
+                width: 0.3,
+                height: 0.3,
+                type: b2Body.b2_kinematicBody,
+                density: 1.0,
+                friction: 0.5,
+                restitution: 0.0,
+                linearDamping: 1,
+                fixedRotation: true,
+                isSensor: true
+            }
+        );
     }
 }
 

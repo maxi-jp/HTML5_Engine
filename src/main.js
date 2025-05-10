@@ -12,6 +12,7 @@ var time = 0,
 var totalTime = 0.0; // acumulator of the time
 
 var drawStats = true;
+var debugMode = false;
 
 // current Game global reference
 var game = null;

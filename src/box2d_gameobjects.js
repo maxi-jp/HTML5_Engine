@@ -52,6 +52,11 @@ class Box2DGameObject extends GameObject {
     }
 
     OnContactDetected(other) { }
+
+    Destroy() {
+        this.world.DestroyBody(this.body);
+        this.body = null;
+    }
 }
 
 class Box2DRectangleGO extends Box2DGameObject {
@@ -83,9 +88,17 @@ class Box2DRectangleGO extends Box2DGameObject {
 
 class Box2DSpriteObject extends Box2DGameObject {
     constructor(position, rotation, scale, img, type, physicsWorld, bodyOptions) {
+        // TODO remove rotation parameter
         super(position, physicsWorld, type, bodyOptions);
         
         this.sprite = new Sprite(img, this.position, this.rotation, scale);
+    }
+
+    get scale() {
+        return this.sprite.scale;
+    }
+    set scale(value) {
+        this.sprite.scale = value;
     }
 
     Update(deltaTime) {
@@ -101,12 +114,12 @@ class Box2DSpriteObject extends Box2DGameObject {
 
 class Box2DSSAnimationObjectBasic extends Box2DGameObject {
     constructor(position, rotation, scale, img, frameWidth, frameHeight, frameCount, framesDuration, type, physicsWorld, bodyOptions) {
-        super(position, type, physicsWorld, bodyOptions);
+        super(position, physicsWorld, type, bodyOptions);
 
         this.animation = new SSAnimationObjectBasic(
             this.position,
-            this.rotation,
-            new Vector2(1, 1),
+            rotation,
+            scale,
             img,
             frameWidth,
             frameHeight,
@@ -115,6 +128,13 @@ class Box2DSSAnimationObjectBasic extends Box2DGameObject {
         );
     }
 
+    get scale() {
+        return this.animation.scale;
+    }
+    set scale(value) {
+        this.animation.scale = value;
+    }
+
     Update(deltaTime) {
         super.Update(deltaTime);
         this.animation.position = this.position;
@@ -125,22 +145,33 @@ class Box2DSSAnimationObjectBasic extends Box2DGameObject {
     Draw(ctx) {
         this.animation.Draw(ctx);
     }
+
+    PlayAnimationLoop(animationId, resetToFrame0=true) {
+        this.animation.PlayAnimationLoop(animationId, resetToFrame0);
+    }
 }
 
 class Box2DSSAnimationObjectComplex extends Box2DGameObject {
-    constructor(position, rotation, scale, animationsRectangles, framesDuration, type, physicsWorld, bodyOptions) {
-        super(position, type, physicsWorld, bodyOptions);
+    constructor(position, rotation, scale, img, animationsRectangles, framesDuration, type, physicsWorld, bodyOptions) {
+        super(position, physicsWorld, type, bodyOptions);
 
         this.animation = new SSAnimationObjectComplex(
             this.position,
-            this.rotation,
-            new Vector2(1, 1),
+            rotation,
+            scale,
             img,
             animationsRectangles,
             framesDuration
         );
     }
 
+    get scale() {
+        return this.animation.scale;
+    }
+    set scale(value) {
+        this.animation.scale = value;
+    }
+
     Update(deltaTime) {
         super.Update(deltaTime);
         this.animation.position = this.position;
@@ -150,5 +181,9 @@ class Box2DSSAnimationObjectComplex extends Box2DGameObject {
 
     Draw(ctx) {
         this.animation.Draw(ctx);
+    }
+
+    PlayAnimationLoop(animationId, resetToFrame0=true) {
+        this.animation.PlayAnimationLoop(animationId, resetToFrame0);
     }
 }

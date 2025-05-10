@@ -138,6 +138,10 @@ function CreatePhysicsObject(world, type, x, y, options) {
     }
 }
 
+function RemoveBody(world, body) {
+    world.DestroyBody(body);
+}
+
 // Create a Box2D world object
 function CreateBox2DWorld(ctx, gravity, doSleep, scale) {
     const grav = new b2Vec2(gravity.x, gravity.y);

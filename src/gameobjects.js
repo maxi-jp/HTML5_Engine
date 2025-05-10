@@ -69,6 +69,9 @@ class SpriteObject extends GameObject {
         this.sprite = new Sprite(img, this._position, this._rotation, this._scale);
         this._rotation = rotation;
         this.scale = scale;
+
+        this.flipX = false;
+        this.flipY = false;
     }
 
     get position() {
@@ -105,6 +108,13 @@ class SpriteObject extends GameObject {
         this.sprite.scale = this._scale;
     }
 
+    set flipX(value) {
+        this.sprite.flipX = value;
+    }
+    set flipY(value) {
+        this.sprite.flipY = value;
+    }
+
     Start() {}
     Update(deltaTime) {}
 
@@ -128,6 +138,8 @@ class SSAnimationObjectBasic extends SpriteObject {
         this.actualAnimation = 0;
         this.actualFrame = 0;
         this.actualFrameCountTime = 0;
+
+        this.spritePosition = new Vector2(0, 0);
     }
     
     Start() {}
@@ -140,18 +152,30 @@ class SSAnimationObjectBasic extends SpriteObject {
 
             this.actualFrameCountTime = 0;
         }
+
+        this.spritePosition.Set(
+            this.position.x - this.actualRectFrame.w * this.scale.x * 0.5,
+            this.position.y - this.actualRectFrame.h * this.scale.y * 0.5
+        );
     }
 
     Draw(ctx) {
         this.sprite.DrawSection(ctx, this.actualFrame * this.frameWidth, this.actualAnimation * this.frameHeight, this.frameWidth, this.frameHeight, 0, 0, this.frameWidth, this.frameHeight);
+
+        if (debugMode) {
+            ctx.strokeStyle = "red";
+            ctx.strokeRect(this.spritePosition.x, this.spritePosition.y, this.actualRectFrame.w * this.scale.x, this.actualRectFrame.h * this.scale.y);
+        }
     }
 
-    PlayAnimationLoop(animationId) {
+    PlayAnimationLoop(animationId, resetToFrame0=true) {
         this.actualAnimation = animationId;
 
-        // reset the frame count
-        this.actualFrame = 0;
-        this.actualFrameCountTime = 0;
+        if (resetToFrame0 || this.actualFrame >= this.frameCount[this.actualAnimation].length) {
+            // reset the frame count
+            this.actualFrame = 0;
+            this.actualFrameCountTime = 0;
+        }
     }
 }
 
@@ -166,6 +190,8 @@ class SSAnimationObjectComplex extends SpriteObject {
         this.actualFrame = 0;
         this.actualRectFrame = this.animationsRectangles[this.actualAnimationIndex][this.actualFrame];
         this.actualFrameCountTime = 0;
+
+        this.spritePosition = new Vector2(0, 0);
     }
     
     Start() {}
@@ -179,18 +205,30 @@ class SSAnimationObjectComplex extends SpriteObject {
 
             this.actualFrameCountTime = 0;
         }
+
+        this.spritePosition.Set(
+            this.position.x - this.actualRectFrame.w * this.scale.x * 0.5,
+            this.position.y - this.actualRectFrame.h * this.scale.y * 0.5
+        );
     }
 
     Draw(ctx) {
         this.sprite.DrawSection(ctx, this.actualRectFrame.x, this.actualRectFrame.y, this.actualRectFrame.w, this.actualRectFrame.h, 0, 0, this.actualRectFrame.w, this.actualRectFrame.h);
+
+        if (debugMode) {
+            ctx.strokeStyle = "red";
+            ctx.strokeRect(this.spritePosition.x, this.spritePosition.y, this.actualRectFrame.w * this.scale.x, this.actualRectFrame.h * this.scale.y);
+        }
     }
 
-    PlayAnimationLoop(animationId) {
+    PlayAnimationLoop(animationId, resetToFrame0=true) {
         this.actualAnimationIndex = animationId;
 
-        // reset the frame count
-        this.actualFrame = 0;
-        this.actualFrameCountTime = 0;
+        if (resetToFrame0 || this.actualFrame >= this.animationsRectangles[this.actualAnimationIndex].length) {
+            // reset the frame count
+            this.actualFrame = 0;
+            this.actualFrameCountTime = 0;
+        }
 
         this.actualRectFrame = this.animationsRectangles[this.actualAnimationIndex][this.actualFrame];
     }

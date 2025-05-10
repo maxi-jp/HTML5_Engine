@@ -150,6 +150,9 @@ class Color {
 
 class Sprite {
     _scale = new Vector2(1, 1);
+    _flipX = false;
+    _flipY = false;
+    _computedScale = new Vector2(1, 1);
 
     constructor(img, position, rotation, scale) {
         this.img = img;
@@ -158,6 +161,10 @@ class Sprite {
         this.position = position;
         this.rotation = rotation;
         this.scale = scale;
+        
+        this._computedScale = new Vector2(this._scale.x, this._scale.y);
+        this._computedScale.x *= this._flipX ? -1 : 1;
+        this._computedScale.y *= this._flipY ? -1 : 1;
     }
 
     get width() {
@@ -170,12 +177,34 @@ class Sprite {
         return this._scale;
     }
 
+    set flipX(value) {
+        if (this._flipX !== value) {
+            this._flipX = value;
+            this._computedScale.x = value ? -this._scale.x : this._scale.x;
+        }
+    }
+
+    set flipY(value) {
+        if (this._flipY !== value) {
+            this._flipY = value;
+            this._computedScale.y = value ? -this._scale.y : this._scale.y;
+        }
+    }
+
     set scale(scale) {
         if (typeof scale === "number") {
             this._scale = new Vector2(scale, scale);
+
+            this._computedScale.Set(scale, scale);
+            this._computedScale.x *= this._flipX ? -1 : 1;
+            this._computedScale.y *= this._flipY ? -1 : 1;
         }
         else {
             this._scale = scale;
+
+            this._computedScale.Set(scale.x, scale.y);
+            this._computedScale.x *= this._flipX ? -1 : 1;
+            this._computedScale.y *= this._flipY ? -1 : 1;
         }
     }
 
@@ -184,7 +213,7 @@ class Sprite {
 
         ctx.translate(this.position.x, this.position.y);
         ctx.rotate(this.rotation);
-        ctx.scale(this._scale.x, this._scale.y);
+        ctx.scale(this._computedScale.x, this._computedScale.y);
 
         ctx.drawImage(this.img, -this.img.halfWidth, -this.img.halfHeight);
 
@@ -196,10 +225,12 @@ class Sprite {
 
         ctx.translate(this.position.x, this.position.y);
         ctx.rotate(this.rotation);
-        ctx.scale(this._scale.x, this._scale.y);
+        ctx.scale(this._computedScale.x, this._computedScale.y);
         
-        // ctx.strokeStyle = "red";
-        // ctx.strokeRect(-sw/2, -sh/2, sw, sh);
+        if (debugMode) {
+            ctx.strokeStyle = "red";
+            ctx.strokeRect(-sw/2, -sh/2, sw, sh);
+        }
 
         ctx.drawImage(this.img, sx, sy, sw, sh, -sw/2, -sh/2, sw, sh);
 
