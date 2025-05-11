@@ -88,8 +88,9 @@ class Box2DRectangleGO extends Box2DGameObject {
 
 class Box2DSpriteObject extends Box2DGameObject {
     constructor(position, rotation, scale, img, type, physicsWorld, bodyOptions) {
-        // TODO remove rotation parameter
         super(position, physicsWorld, type, bodyOptions);
+
+        this.rotation = rotation;
         
         this.sprite = new Sprite(img, this.position, this.rotation, scale);
     }
@@ -109,6 +110,10 @@ class Box2DSpriteObject extends Box2DGameObject {
 
     Draw(ctx) {
         this.sprite.Draw(ctx);
+    }
+
+    DrawSection(ctx, sx, sy, sw, sh) {
+        this.sprite.DrawSection(ctx, sx, sy, sw, sh);
     }
 }
 

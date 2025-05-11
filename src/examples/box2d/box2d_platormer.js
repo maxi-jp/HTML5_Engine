@@ -1,3 +1,15 @@
+const blocks = [
+    {x: 10, y: 6, t: 1},
+    {x: 14, y: 6, t: 0},
+    {x: 15, y: 6, t: 1},
+    {x: 16, y: 6, t: 0},
+    {x: 16, y: 10, t: 1},
+    {x: 17, y: 6, t: 1},
+    {x: 18, y: 6, t: 0},
+];
+
+const blockSize = 42;
+
 class Box2DPlatformer extends Box2DGame {
     constructor() {
         super(100, { x: 0, y: -9.8 }, false); // 1 pixel = 1/100 meter, gravity in m/s^2, allow bodies to sleep
@@ -19,6 +31,7 @@ class Box2DPlatformer extends Box2DGame {
 
         this.player = null;
         this.coins = [];
+        this.blocks = [];
 
         // game state variables
         this.coinsCounter = 0;
@@ -36,15 +49,16 @@ class Box2DPlatformer extends Box2DGame {
         // static floor
         this.floor = CreateEdge(
             this.physicsWorld,
-            3.2, // x coordinate
-            0.5, // y coordinate
+            0, // x coordinate
+            0, // y coordinate
             {
-                p1x: -3.2, // start point x
-                p1y: 0,    // start point y
-                p2x: 3.2,  // end point x,
-                p2y: 0,    // end point y
+                p1x: 0, // start point x
+                p1y: blockSize * 2 / this.physicsScale, // start point y
+                p2x: 6.4,  // end point x,
+                p2y: blockSize * 2 / this.physicsScale, // end point y
                 type: b2Body.b2_staticBody,
-                friction: 5
+                friction: 5,
+                restitution: 0
             } // physic options
         );
         this.floor.SetUserData("floor");
@@ -52,7 +66,8 @@ class Box2DPlatformer extends Box2DGame {
         CreateEdge(this.physicsWorld, 0, 0, {
             p1x: 0, p1y: 0, p2x: 0, p2y: 4.8,
             type: b2Body.b2_staticBody,
-            friction: 0.02
+            friction: 0.02,
+            retitution: 0
         });
         // right wall
         CreateEdge(this.physicsWorld, 6.4, 0, {
@@ -77,6 +92,17 @@ class Box2DPlatformer extends Box2DGame {
         const coin = new Coin(new Vector2(300, 150), this.graphicAssets.blocks.img, this.physicsWorld);
         this.coins.push(coin);
         this.gameObjects.push(coin);
+
+        // scene blocks
+        blocks.forEach(block => {
+            let newBlock;
+            if (block.t == 0)
+                newBlock = new Block(new Vector2(block.x * blockSize, block.y * blockSize), this.graphicAssets.blocks.img, this.physicsWorld);
+            else if (block.t == 1)
+                newBlock = new BlockSpecial(new Vector2(block.x * blockSize, block.y * blockSize), this.graphicAssets.blocks.img, this.physicsWorld);
+            this.blocks.push(newBlock);
+            this.gameObjects.push(newBlock);
+        });
 
         // UI
         this.coinsCounterSprite = new SSAnimationObjectComplex(new Vector2(275, 26), 0, 2, this.graphicAssets.blocks.img, [[new Rect(70, 38, 10, 14), new Rect(81, 38, 10, 14), new Rect(92, 38, 10, 14)]], [1/4]);
@@ -128,7 +154,7 @@ class Player extends Box2DSSAnimationObjectComplex {
             type: b2Body.b2_dynamicBody,
             density: 1.0,
             friction: 0.5,
-            restitution: 0.0,
+            restitution: 0,
             linearDamping: 1,
             fixedRotation: true
         });
@@ -140,7 +166,7 @@ class Player extends Box2DSSAnimationObjectComplex {
         // movement attr
         this.maxHorizontalVel = 3;
         this.maxVerticalVel = 10;
-        this.jumpForce = 6;
+        this.jumpForce = 8;
 
         // movement flags
         this.moveLeft = false;
@@ -268,14 +294,36 @@ class Coin extends Box2DSSAnimationObjectComplex {
                 width: 0.3,
                 height: 0.3,
                 type: b2Body.b2_kinematicBody,
-                density: 1.0,
-                friction: 0.5,
-                restitution: 0.0,
-                linearDamping: 1,
                 fixedRotation: true,
                 isSensor: true
             }
         );
+    }
+}
+
+class Block extends Box2DSpriteObject {
+    constructor(position, img, physicsWorld) {
+        super(position, 0, 3, img, PhysicsObjectType.Box, physicsWorld, {
+            width: blockSize / physicsWorld.scale,
+            height: blockSize / physicsWorld.scale,
+            friction: 5,
+            restitution: 0,
+            type: b2Body.b2_staticBody
+        });
+    }
+
+    Draw(ctx) {
+        this.DrawSection(ctx, 20, 113, 16, 16)
+    }
+}
+
+class BlockSpecial extends Block {
+    constructor(position, img, physicsWorld) {
+        super(position, img, physicsWorld);
+    }
+
+    Draw(ctx) {
+        this.DrawSection(ctx, 2, 96, 16, 16)
     }
 }
 
