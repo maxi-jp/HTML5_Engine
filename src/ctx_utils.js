@@ -176,6 +176,12 @@ class Sprite {
     get scale() {
         return this._scale;
     }
+    get flipX() {
+        return this._flipX;
+    }
+    get flipY() {
+        return this._flipY;
+    }
 
     set flipX(value) {
         if (this._flipX !== value) {
@@ -183,7 +189,6 @@ class Sprite {
             this._computedScale.x = value ? -this._scale.x : this._scale.x;
         }
     }
-
     set flipY(value) {
         if (this._flipY !== value) {
             this._flipY = value;

@@ -74,7 +74,7 @@ class TTS extends Game {
         this.mouseCircle.position.Set(Input.mouse.x, Input.mouse.y);
 
         // check bullets-enemies collisions
-        const bullets = this.player.bulletPool.bullets;
+        const bullets = this.player.bulletPool.objects;
         for (let i = 0; i < bullets.length; i++) {
             const bullet = bullets[i];
             if (bullet.active) {

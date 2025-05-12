@@ -86,6 +86,13 @@ class SpriteObject extends GameObject {
         return this._scale;
     }
 
+    get flipX() {
+        return this.sprite.flipX;
+    }
+    get flipY() {
+        return this.sprite.flipY;
+    }
+
     set img(newImg) {
         this.sprite.img = newImg;
     }
@@ -370,5 +377,80 @@ class FollowCamera extends Camera {
         this.shakingSpeed = speed;
         this.shakingSize = size;
         this.shakeInitRandom.Random();
+    }
+}
+
+class Pool {
+    constructor(owner, maxSize, objectConstructor, constructorParams=[]) {
+        this.owner = owner;
+        this.maxSize = maxSize;
+        this.objectConstructor = objectConstructor;
+        this.constructorParams = constructorParams;
+
+        this.objects = [];
+
+        this.drawDebug = false;
+
+        // initialize the bullet pool array
+        for (let i = maxSize; i > 0; i--) {
+            const object = new this.objectConstructor(...constructorParams);
+            object.owner = this.owner;
+
+            this.objects.push(object);
+        }
+    }
+
+    Update(deltaTime) {
+        this.objects.forEach(object => {
+            if (object.active)
+                object.Update(deltaTime);
+        });
+    }
+
+    Draw(ctx) {
+        this.objects.forEach(object => {
+            if (object.active)
+                object.Draw(ctx);
+        });
+
+        if (this.drawDebug) {
+            // draw the state of the object pool
+            ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+            ctx.strokeStyle = "white";
+            for (let i = 0; i < this.objects.length; i++) {
+                if (this.objects[i].active) {
+                    ctx.fillRect(10 + 20 * i, 10, 20, 20);
+                }
+                ctx.strokeRect(10 + 20 * i, 10, 20, 20);
+            }
+        }
+    }
+
+    Activate() {
+        let object = null;
+
+        // search for the first object in the objects array no-activated
+        let i = 0;
+        while(object == null && i < this.objects.length) {
+            if (!this.objects[i].active) {
+                object = this.objects[i];
+            }
+            else {
+                i++;
+            }
+        }
+        
+        if (object == null) {
+            // theres is no object non-active in the pool
+            // lets create a new one
+            object = this.objectConstructor(...this.constructorParams);
+            object.owner = this.owner;
+
+            this.objects.push(object);
+        }
+
+        object.active = true;
+        
+        return object;
     }
 }

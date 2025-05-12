@@ -17,7 +17,7 @@ class PlayerShip extends SpriteObject {
 
         this.cannonOffset = new Vector2(24, 0);
 
-        this.bulletPool = new BulletPool(this, 10);
+        this.bulletPool = new Pool(this, 10, Bullet, []);
 
         this.sceneLimits = sceneLimits;
     }
@@ -103,7 +103,7 @@ class PlayerShip extends SpriteObject {
         this.bulletPool.Update(deltaTime);
 
         // check bullets scene limits
-        this.bulletPool.bullets.forEach(bullet => {
+        this.bulletPool.objects.forEach(bullet => {
             if (bullet.active) {
                 if (bullet.position.x < this.sceneLimits.position.x ||
                     bullet.position.x > this.sceneLimits.position.x + this.sceneLimits.width ||
