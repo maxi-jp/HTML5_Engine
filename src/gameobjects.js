@@ -276,23 +276,24 @@ class Camera {
 }
 
 class FollowCameraBasic extends Camera {
-    constructor(position, target) {
+    constructor(position, target, offset=Vector2.Zero()) {
         super(position);
 
         this.target = target;
+        this.offset = offset;
     }
 
     Start() {
         this.position.Set(
-            this.target.position.x - canvas.width / 2,
-            this.target.position.y - canvas.height / 2
+            this.target.position.x - (canvas.width / 2) + this.offset.x,
+            this.target.position.y - (canvas.height / 2) + this.offset.y
         );
     }
 
     Update(deltaTime) {
         this.position.Set(
-            this.target.position.x - canvas.width / 2,
-            this.target.position.y - canvas.height / 2
+            this.target.position.x - (canvas.width / 2) + this.offset.x,
+            this.target.position.y - (canvas.height / 2) + this.offset.y
         );
     }
 

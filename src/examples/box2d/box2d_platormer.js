@@ -26,10 +26,19 @@ class Box2DPlatformer extends Box2DGame {
             blocks: {
                 path: "src/examples/box2d/assets/SMB1_AS_blocks.png",
                 img: null
+            },
+            bg0: {
+                path: "src/examples/box2d/assets/SMB1_AS_bg0.png",
+                img: null
+            },
+            bg1: {
+                path: "src/examples/box2d/assets/SMB1_AS_bg1.png",
+                img: null
             }
         };
 
         this.player = null;
+        this.camera = null;
         this.coins = [];
         this.blocks = [];
 
@@ -88,6 +97,10 @@ class Box2DPlatformer extends Box2DGame {
         this.player.Start();
         this.gameObjects.push(this.player);
 
+        // create the camera
+        this.camera = new FollowCameraBasic(Vector2.Zero(), this.player, new Vector2(100, -160));
+        this.camera.Start();
+
         // create a coin
         const coin = new Coin(new Vector2(300, 150), this.graphicAssets.blocks.img, this.physicsWorld);
         this.coins.push(coin);
@@ -104,6 +117,11 @@ class Box2DPlatformer extends Box2DGame {
             this.gameObjects.push(newBlock);
         });
 
+        // background
+        background.layer0.img = this.graphicAssets.bg0.img;
+        background.layer1.img = this.graphicAssets.bg1.img;
+        background.Start();
+
         // UI
         this.coinsCounterSprite = new SSAnimationObjectComplex(new Vector2(275, 26), 0, 2, this.graphicAssets.blocks.img, [[new Rect(70, 38, 10, 14), new Rect(81, 38, 10, 14), new Rect(92, 38, 10, 14)]], [1/4]);
         this.coinsCounterLabel = new TextLabel(this.coinsCounter.toString(), new Vector2(this.coinsCounterSprite.position.x + 20, this.coinsCounterSprite.position.y + 4), "30px Comic Sans MS", "white", "start", "middle");
@@ -113,13 +131,22 @@ class Box2DPlatformer extends Box2DGame {
         // update physics and gameObjects
         super.Update(deltaTime);
 
+        // update the camera
+        this.camera.Update(deltaTime);
+
         // UI
         this.coinsCounterSprite.Update(deltaTime);
     }
 
     Draw(ctx) {
+        this.camera.PreDraw(ctx);
+
+        background.Draw(ctx, this.camera);
+
         // draw the gameObjects
         super.Draw(ctx);
+
+        this.camera.PostDraw(ctx);
 
         // UI
         this.coinsCounterSprite.Draw(ctx);
@@ -223,8 +250,12 @@ class Player extends Box2DSSAnimationObjectComplex {
             this.isGoingLeft = true;
         }
 
+        // check if falling
+        if (this.body.GetLinearVelocity().y < -0.1) {
+            this.PlayAnimationLoop(PlayerAnimationState.JUMP, false);
+        }
         // return to idle (if !moving && !jumping && !attacking && !dying && !onWard)
-        if (!this.jumping && !this.moving) {
+        else if (!this.jumping && !this.moving) {
             // play the idle animation
             this.PlayAnimationLoop(PlayerAnimationState.IDLE);
         }
@@ -238,7 +269,7 @@ class Player extends Box2DSSAnimationObjectComplex {
     }
 
     OnContactDetected(other) {
-        if (other === "floor") {
+        if (other === "floor" || (other instanceof Block && other.body.GetPosition().y < this.body.GetPosition().y)) {
             const playerLinearVelocity = this.body.GetLinearVelocity();
         
             this.body.SetLinearVelocity(new b2Vec2(playerLinearVelocity.x, 0));
@@ -324,6 +355,64 @@ class BlockSpecial extends Block {
 
     Draw(ctx) {
         this.DrawSection(ctx, 2, 96, 16, 16)
+    }
+}
+
+const background = {
+    layer0: {
+        img: null,
+        position: {x: 0, y: 0},
+        speed: -0.9,
+        sprite: null,
+        Start: function() {
+            this.sprite = new Sprite(this.img, new Vector2(this.position.x, this.position.y), 0, 3);
+        },
+        Draw: function (ctx, camera) {
+            this.sprite.position.x = - (camera.position.x * this.speed);
+            this.sprite.position.y = 100+ canvas.height - this.img.height - (camera.position.y * this.speed);
+            this.sprite.DrawSection(ctx, 18, 18, 1000, 256);
+            // ctx.drawImage(
+            //     this.img,
+            //     18, 18,
+            //     1000,
+            //     256,
+            //     this.position.x - (camera.position.x * this.speed),
+            //     this.position.y + canvas.height - this.img.height - (camera.position.y * this.speed),
+            //     1000,
+            //     256,
+            // );
+        }
+    },
+    layer1: {
+        img: null,
+        position: {x: 0, y: 0},
+        speed: -0.75,
+        sprite: null,
+        Start: function() {
+            this.sprite = new Sprite(this.img, new Vector2(this.position.x, this.position.y), 0, 3);
+        },
+        Draw: function (ctx, camera) {
+            this.sprite.position.x = - (camera.position.x * this.speed);
+            this.sprite.position.y = 190+ canvas.height - this.img.height - (camera.position.y * this.speed);
+            this.sprite.DrawSection(ctx, 18, 18, 1000, 256);
+            // ctx.drawImage(
+            //     this.img,
+            //     this.position.x - (camera.position.x * this.speed),
+            //     this.position.y + canvas.height - this.img.height - (camera.position.y * this.speed)
+            // );
+        }
+    },
+    layers: [],
+
+    Start: function() {
+        this.layer0.Start();
+        this.layer1.Start();
+        this.layers = [this.layer0, this.layer1];
+    },
+
+    Draw: function(ctx, camera) {
+        for (let i = 0; i < this.layers.length; i++)
+            this.layers[i].Draw(ctx, camera);
     }
 }
 

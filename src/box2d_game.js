@@ -25,9 +25,7 @@ class Box2DGame extends Game {
         super.Update(deltaTime);
     }
 
-    Draw(ctx) {        
-        DrawRectangle(ctx, 0, 0, this.screenWidth, this.screenHeight, "black");
-        
+    Draw(ctx) {
         // box2d world debug
         DrawWorldDebug(ctx, this.physicsWorld);
 
