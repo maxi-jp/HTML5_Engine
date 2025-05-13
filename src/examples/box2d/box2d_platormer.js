@@ -39,6 +39,8 @@ class Box2DPlatformer extends Box2DGame {
 
         this.player = null;
         this.camera = null;
+        this.background = null;
+
         this.coins = [];
         this.blocks = [];
 
@@ -63,7 +65,7 @@ class Box2DPlatformer extends Box2DGame {
             {
                 p1x: 0, // start point x
                 p1y: blockSize * 2 / this.physicsScale, // start point y
-                p2x: 6.4,  // end point x,
+                p2x: blockSize * 200 / this.physicsScale,  // end point x,
                 p2y: blockSize * 2 / this.physicsScale, // end point y
                 type: b2Body.b2_staticBody,
                 friction: 5,
@@ -79,15 +81,15 @@ class Box2DPlatformer extends Box2DGame {
             retitution: 0
         });
         // right wall
-        CreateEdge(this.physicsWorld, 6.4, 0, {
-            p1x: 0, p1y: 0, p2x: 0, p2y: 4.8,
-            type: b2Body.b2_staticBody
-        });
+        // CreateEdge(this.physicsWorld, 6.4, 0, {
+        //     p1x: 0, p1y: 0, p2x: 0, p2y: 4.8,
+        //     type: b2Body.b2_staticBody
+        // });
         // top wall
-        CreateEdge(this.physicsWorld, 3.2, 4.8, {
-            p1x: -3.2, p1y: 0, p2x: 3.2, p2y: 0,
-            type: b2Body.b2_staticBody
-        });
+        // CreateEdge(this.physicsWorld, 3.2, 4.8, {
+        //     p1x: -3.2, p1y: 0, p2x: 3.2, p2y: 0,
+        //     type: b2Body.b2_staticBody
+        // });
 
         // game state variables
         this.coinsCounter = 0;
@@ -100,6 +102,12 @@ class Box2DPlatformer extends Box2DGame {
         // create the camera
         this.camera = new FollowCameraBasic(Vector2.Zero(), this.player, new Vector2(100, -160));
         this.camera.Start();
+
+        // create the background
+        const bgLayer0 = new SpriteBackgroundLayer(this.graphicAssets.bg0.img, new Vector2(-100, -200), 0, 3, new Vector2(0.02, 0.01), new Rect(18, 18, 1000, 256));
+        const bgLayer1 = new SpriteBackgroundLayer(this.graphicAssets.bg1.img, new Vector2(-100, -160), 0, 3, new Vector2(0.1, 0.015), new Rect(18, 18, 1000, 214));
+        this.background = new BackgroundLayers(this.camera, [bgLayer0, bgLayer1]);
+        this.background.Start();
 
         // create a coin
         const coin = new Coin(new Vector2(300, 150), this.graphicAssets.blocks.img, this.physicsWorld);
@@ -117,11 +125,6 @@ class Box2DPlatformer extends Box2DGame {
             this.gameObjects.push(newBlock);
         });
 
-        // background
-        background.layer0.img = this.graphicAssets.bg0.img;
-        background.layer1.img = this.graphicAssets.bg1.img;
-        background.Start();
-
         // UI
         this.coinsCounterSprite = new SSAnimationObjectComplex(new Vector2(275, 26), 0, 2, this.graphicAssets.blocks.img, [[new Rect(70, 38, 10, 14), new Rect(81, 38, 10, 14), new Rect(92, 38, 10, 14)]], [1/4]);
         this.coinsCounterLabel = new TextLabel(this.coinsCounter.toString(), new Vector2(this.coinsCounterSprite.position.x + 20, this.coinsCounterSprite.position.y + 4), "30px Comic Sans MS", "white", "start", "middle");
@@ -134,6 +137,9 @@ class Box2DPlatformer extends Box2DGame {
         // update the camera
         this.camera.Update(deltaTime);
 
+        // update the background
+        this.background.Update(deltaTime);
+
         // UI
         this.coinsCounterSprite.Update(deltaTime);
     }
@@ -141,7 +147,8 @@ class Box2DPlatformer extends Box2DGame {
     Draw(ctx) {
         this.camera.PreDraw(ctx);
 
-        background.Draw(ctx, this.camera);
+        // draw the background
+        this.background.Draw(ctx);
 
         // draw the gameObjects
         super.Draw(ctx);
@@ -355,64 +362,6 @@ class BlockSpecial extends Block {
 
     Draw(ctx) {
         this.DrawSection(ctx, 2, 96, 16, 16)
-    }
-}
-
-const background = {
-    layer0: {
-        img: null,
-        position: {x: 0, y: 0},
-        speed: -0.9,
-        sprite: null,
-        Start: function() {
-            this.sprite = new Sprite(this.img, new Vector2(this.position.x, this.position.y), 0, 3);
-        },
-        Draw: function (ctx, camera) {
-            this.sprite.position.x = - (camera.position.x * this.speed);
-            this.sprite.position.y = 100+ canvas.height - this.img.height - (camera.position.y * this.speed);
-            this.sprite.DrawSection(ctx, 18, 18, 1000, 256);
-            // ctx.drawImage(
-            //     this.img,
-            //     18, 18,
-            //     1000,
-            //     256,
-            //     this.position.x - (camera.position.x * this.speed),
-            //     this.position.y + canvas.height - this.img.height - (camera.position.y * this.speed),
-            //     1000,
-            //     256,
-            // );
-        }
-    },
-    layer1: {
-        img: null,
-        position: {x: 0, y: 0},
-        speed: -0.75,
-        sprite: null,
-        Start: function() {
-            this.sprite = new Sprite(this.img, new Vector2(this.position.x, this.position.y), 0, 3);
-        },
-        Draw: function (ctx, camera) {
-            this.sprite.position.x = - (camera.position.x * this.speed);
-            this.sprite.position.y = 190+ canvas.height - this.img.height - (camera.position.y * this.speed);
-            this.sprite.DrawSection(ctx, 18, 18, 1000, 256);
-            // ctx.drawImage(
-            //     this.img,
-            //     this.position.x - (camera.position.x * this.speed),
-            //     this.position.y + canvas.height - this.img.height - (camera.position.y * this.speed)
-            // );
-        }
-    },
-    layers: [],
-
-    Start: function() {
-        this.layer0.Start();
-        this.layer1.Start();
-        this.layers = [this.layer0, this.layer1];
-    },
-
-    Draw: function(ctx, camera) {
-        for (let i = 0; i < this.layers.length; i++)
-            this.layers[i].Draw(ctx, camera);
     }
 }
 

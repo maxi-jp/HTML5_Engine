@@ -454,3 +454,54 @@ class Pool {
         return object;
     }
 }
+
+class SpriteBackgroundLayer extends Sprite {
+    constructor(img, position, rotation, scale, speed=Vector2.Zero(), section=null) {
+        super(img, position, rotation, scale);
+
+        this.initialPosition = new Vector2(position.x, position.y);
+        this.speed = speed;
+        this.section = section;
+        this.camera = null;
+    }
+
+    Update(deltaTime) {
+        this.position.x = this.initialPosition.x + (this.camera.position.x * (1 - this.speed.x));
+        this.position.y = this.initialPosition.y + (this.camera.position.y * (1 - this.speed.y));
+    }
+
+    Draw(ctx) {
+        if (this.section == null)
+            this.DrawBasic(ctx);
+        else
+            this.DrawSectionBasic(ctx, this.section.x, this.section.y, this.section.w, this.section.h);
+    }
+}
+
+class BackgroundLayers {
+    constructor(camera, layers=[]) {
+        this.camera = camera;
+        this.layers = layers;
+    }
+
+    InsertLayer(layer) {
+        this.layers.push(layer);
+        layer.camera = this.camera;
+    }
+
+    Start() {
+        this.layers.forEach(layer => {
+            layer.camera = this.camera;
+            if (layer.Start)
+                layer.Start()
+        });
+    }
+
+    Update(deltaTime) {
+        this.layers.forEach(layer => layer.Update(deltaTime));
+    }
+
+    Draw(ctx) {
+        this.layers.forEach(layer => layer.Draw(ctx));
+    }
+}

@@ -225,6 +225,10 @@ class Sprite {
         ctx.restore();
     }
 
+    DrawBasic(ctx) {
+        ctx.drawImage(this.img, this.position.x, this.position.y, this.img.width * this.scale.x, this.img.height * this.scale.y);
+    }
+
     DrawSection(ctx, sx, sy, sw, sh) {
         ctx.save();
 
@@ -240,6 +244,10 @@ class Sprite {
         ctx.drawImage(this.img, sx, sy, sw, sh, -sw/2, -sh/2, sw, sh);
 
         ctx.restore();
+    }
+
+    DrawSectionBasic(ctx, sx, sy, sw, sh) {
+        ctx.drawImage(this.img, sx, sy, sw, sh, this.position.x, this.position.y, sw * this.scale.x, sh * this.scale.y);
     }
 }
 
