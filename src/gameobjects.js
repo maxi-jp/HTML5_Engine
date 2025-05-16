@@ -43,9 +43,9 @@ class GameObject {
 }
 
 class RectangleGO extends GameObject {
-    constructor(position) {
+    constructor(position, width=100, height=100, color='red') {
         super(position);
-        this.rectangle = new Rectangle(this._position, 100, 100, 'red');
+        this.rectangle = new Rectangle(this._position, width, height, color);
     }
 
     Start() { }
@@ -259,6 +259,12 @@ class Camera {
     get scale() {
         return this._scale;
     }
+    get x() {
+        return this._position.x;
+    }
+    get y() {
+        return this._position.y;
+    }
 
     set position(value) {
         this._position = Vector2.Copy(value);
@@ -455,11 +461,59 @@ class Pool {
     }
 }
 
+class BackgroundLayer {
+    constructor(position, speed) {
+        this.position = position;
+        this.speed = speed;
+        this.camera = null;
+
+        this.initialPosition = new Vector2(position.x, position.y);
+    }
+
+    Update(deltaTime) {
+        this.position.x = this.initialPosition.x + (this.camera.position.x * (1 - this.speed.x));
+        this.position.y = this.initialPosition.y + (this.camera.position.y * (1 - this.speed.y));
+    }
+
+    Draw(ctx) {}
+}
+
+class StaticColorLayer {
+    constructor(color) {
+        this.color = color;
+        this.camera = null;
+    }
+
+    Update() {}
+
+    Draw(ctx) {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.camera.x, this.camera.y, canvas.width, canvas.height);
+    }
+}
+
+class StaticGradientLayer {
+    constructor(direction, colorStops) {
+        direction.Normalize();
+        this.gradient = new LinearGradient(0, 0, direction.x * canvas.width, direction.y * canvas.height, colorStops);
+        this.camera = null;
+    }
+
+    Update() {}
+
+    Draw(ctx) {
+        ctx.fillStyle = this.gradient.gradient;
+        ctx.fillRect(this.camera.x, this.camera.y, canvas.width, canvas.height);
+    }
+}
+
 class SpriteBackgroundLayer extends Sprite {
     constructor(img, position, rotation, scale, speed=Vector2.Zero(), section=null) {
+    // TODO make all the layers to inherit BackgroundLayer class
         super(img, position, rotation, scale);
 
         this.initialPosition = new Vector2(position.x, position.y);
+        this.position = position;
         this.speed = speed;
         this.section = section;
         this.camera = null;
@@ -475,6 +529,74 @@ class SpriteBackgroundLayer extends Sprite {
             this.DrawBasic(ctx);
         else
             this.DrawSectionBasic(ctx, this.section.x, this.section.y, this.section.w, this.section.h);
+    }
+}
+
+class MultispritesBackgroundLayer extends BackgroundLayer {
+    constructor(position, sprites, speed=Vector2.Zero()) {
+        super(position, speed);
+
+        this.initialPosition = new Vector2(position.x, position.y);
+        this.sprites = sprites;
+    }
+
+    Start() {
+        this.sprites.forEach(sprite => {
+            sprite.initialPosition = new Vector2(sprite.x, sprite.y);
+        });
+    }
+
+    Update(deltaTime) {
+        super.Update(deltaTime);
+
+        this.sprites.forEach(sprite => {
+            sprite.position.Set(sprite.initialPosition.x + this.position.x, sprite.initialPosition.y + this.position.y);
+        });
+    }
+
+    Draw(ctx) {
+        this.sprites.forEach(sprite => {
+            sprite.DrawBasic(ctx);
+        });
+    }
+}
+
+class TilesetBackgroundLayer extends Sprite {
+    constructor(img, position, scale, speed=Vector2.Zero()) {
+    // TODO make all the layers to inherit BackgroundLayer class
+        super(img, position, rotation, scale);
+
+        this.initialPosition = new Vector2(position.x, position.y);
+        this.position = position;
+        this.speed = speed;
+        this.camera = null;
+
+        this.tilesetConfig = {
+            1: {
+                name: '',
+                rect: new Rect(0, 0, 16, 16)
+            }
+        }
+
+        this.tilesetMap = [
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1],
+            [0, 0, 0, 1, 1, 0]
+        ];
+    }
+
+    Update(deltaTime) {
+        this.position.x = this.initialPosition.x + (this.camera.position.x * (1 - this.speed.x));
+        this.position.y = this.initialPosition.y + (this.camera.position.y * (1 - this.speed.y));
+    }
+
+    Draw(ctx) {
+        this.tilesetMap.forEach(tileRow => {
+            tileRow.forEach(tile => {
+                const rect = this.tilesetConfig[tile].rect;
+                this.DrawSectionBasic(ctx, rect.x, rect.y, rect.w, rect.h);
+            })
+        });
     }
 }
 

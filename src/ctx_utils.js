@@ -176,6 +176,12 @@ class Sprite {
     get scale() {
         return this._scale;
     }
+    get x() {
+        return this.position.x;
+    }
+    get y() {
+        return this.position.y;
+    }
     get flipX() {
         return this._flipX;
     }
@@ -248,6 +254,22 @@ class Sprite {
 
     DrawSectionBasic(ctx, sx, sy, sw, sh) {
         ctx.drawImage(this.img, sx, sy, sw, sh, this.position.x, this.position.y, sw * this.scale.x, sh * this.scale.y);
+    }
+}
+
+class SpriteSection extends Sprite {
+    constructor(img, position, rotation, scale, rect=new Rect(0, 0, img.width, img.height)) {
+        super(img, position, rotation, scale);
+
+        this.rect = rect;
+    }
+
+    Draw(ctx) {
+        this.DrawSection(ctx, this.rect.x, this.rect.y, this.rect.w, this.rect.h);
+    }
+
+    DrawBasic(ctx) {
+        this.DrawSectionBasic(ctx, this.rect.x, this.rect.y, this.rect.w, this.rect.h);
     }
 }
 
