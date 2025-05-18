@@ -19,14 +19,25 @@ function GetRandomColor() {
 
 function CheckCollisionCircle(point, circlePosition, radius2) {
     // d^2 = (p.x - c.x)^2 + (p.y - c.y)^2
+    // c = d < r
     const difX = point.x - circlePosition.x;
     const difY = point.y - circlePosition.y;
-    let pointToCircleDistance2 = difX * difX + difY * difY;
+    const pointToCircleDistance2 = difX * difX + difY * difY;
 
     return pointToCircleDistance2 < radius2;
 }
 
-function CheckCollisionRect (point, rectangle) {
+function CheckCollisionTwoCircles(positionA, radius2A, positionB, radius2B) {
+    // d^2 = (p.x - c.x)^2 + (p.y - c.y)^2
+    // c = d < (rA + rB)
+    const difX = positionA.x - positionB.x;
+    const difY = positionA.y - positionB.y;
+    const pointToCircleDistance2 = difX * difX + difY * difY;
+
+    return pointToCircleDistance2 < (radius2A + radius2B);
+}
+
+function CheckCollisionRect(point, rectangle) {
     return PointInsideRectangle(point.x, point.y, rectangle.position.x, rectangle.position.y, rectangle.width, rectangle.height);
 }
 
