@@ -281,6 +281,12 @@ class Camera {
     set scale(value) {
         this._scale = value;
     }
+    set x(value) {
+        this._position.x = value;
+    }
+    set y(value) {
+        this._position.y = value;
+    }
 
     Start() {}
     Update(deltaTime) {}
