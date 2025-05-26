@@ -10,6 +10,10 @@ class Box2DGameObject extends GameObject {
 
         this.hasContact = false; // true if the body has colide with another object
         this.contactUserData = null; // the user data of the object that has colide with this object
+        this.hasContactEnded = false; // true if the body has end the collision with another object
+        this.contactEndedUserData = null; // the user data of the object that has ended a collision with this object
+
+        this.objectsColliding = []; // TODO insert colliding objects into this array when colliding and removing when contactEnded
     }
 
     get position() {
@@ -30,19 +34,31 @@ class Box2DGameObject extends GameObject {
         this.body.SetAngle(-value);
     }
 
+    Start() {
+        this.objectsColliding = [];
+    }
+
     Update(deltaTime) {
         // Sync the GameObject's position and rotation with the Box2D body
         const pos = this.body.GetPosition();
         this._position.Set(pos.x * this.world.scale, canvas.height - (pos.y * this.world.scale));
         this._rotation = -this.body.GetAngle();
 
+        // consume Box2D collision events
         if (this.hasContact) {
             // Consume the contact
             this.hasContact = false;
             this.OnContactDetected(this.contactUserData);
         }
+
+        if (this.hasContactEnded) {
+            // Consume the contact ended
+            this.hasContactEnded = false;
+            this.OnContactDetectEnded(this.contactEndedUserData);
+        }
     }
 
+    // DO NOT OVERRIDE: Used internally by Box2D contact system
     OnContactDetectedBox2D(other) {
         if (this.hasContact)
             return; // already detected a contact
@@ -51,7 +67,17 @@ class Box2DGameObject extends GameObject {
         this.hasContact = true;
     }
 
+    // DO NOT OVERRIDE: Used internally by Box2D contact system
+    OnEndContactDetectedBox2D(other) {
+        if (this.hasContactEnded)
+            return;
+
+        this.contactEndedUserData = other;
+        this.hasContactEnded = true;
+    }
+
     OnContactDetected(other) { }
+    OnContactDetectEnded(other) { }
 
     Destroy() {
         this.world.DestroyBody(this.body);

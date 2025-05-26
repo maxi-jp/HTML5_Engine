@@ -20,6 +20,12 @@ class GameObject {
     get scale() {
         return this._scale;
     }
+    get x() {
+        return this._position.x;
+    }
+    get y() {
+        return this._position.y;
+    }
 
     set active(value) {
         this._active = value;
@@ -161,17 +167,17 @@ class SSAnimationObjectBasic extends SpriteObject {
         }
 
         this.spritePosition.Set(
-            this.position.x - this.actualRectFrame.w * this.scale.x * 0.5,
-            this.position.y - this.actualRectFrame.h * this.scale.y * 0.5
+            this.position.x - this.frameWidth * this.scale.x * 0.5,
+            this.position.y - this.frameHeight * this.scale.y * 0.5
         );
     }
 
     Draw(ctx) {
         this.sprite.DrawSection(ctx, this.actualFrame * this.frameWidth, this.actualAnimation * this.frameHeight, this.frameWidth, this.frameHeight, 0, 0, this.frameWidth, this.frameHeight);
-
+        
         if (debugMode) {
             ctx.strokeStyle = "red";
-            ctx.strokeRect(this.spritePosition.x, this.spritePosition.y, this.actualRectFrame.w * this.scale.x, this.actualRectFrame.h * this.scale.y);
+            ctx.strokeRect(this.spritePosition.x, this.spritePosition.y, this.frameWidth * this.scale.x, this.frameHeight * this.scale.y);
         }
     }
 
@@ -298,14 +304,14 @@ class FollowCameraBasic extends Camera {
 
     Start() {
         this.position.Set(
-            this.target.position.x - (canvas.width / 2) + this.offset.x,
+            this.target.position.x - (canvas.width  / 2) + this.offset.x,
             this.target.position.y - (canvas.height / 2) + this.offset.y
         );
     }
 
     Update(deltaTime) {
         this.position.Set(
-            this.target.position.x - (canvas.width / 2) + this.offset.x,
+            this.target.position.x - (canvas.width  / 2) + this.offset.x,
             this.target.position.y - (canvas.height / 2) + this.offset.y
         );
     }
@@ -317,7 +323,7 @@ class FollowCameraBasic extends Camera {
 }
 
 class FollowCamera extends Camera {
-    constructor(position, target, minX, maxX, minY, maxY, smoothingSpeed=5) {
+    constructor(position, target, minX, maxX, minY, maxY, smoothingSpeed=5, offset=Vector2.Zero()) {
         super(position);
 
         this.target = target;
@@ -329,6 +335,7 @@ class FollowCamera extends Camera {
         this.maxY = maxY;
 
         this.smoothingSpeed = smoothingSpeed;
+        this.offset = offset;
 
         // shake
         this.shakingValue = Vector2.Zero();
@@ -340,8 +347,8 @@ class FollowCamera extends Camera {
 
     Start() {
         this.position.Set(
-            this.target.position.x - canvas.width / 2,
-            this.target.position.y - canvas.height / 2
+            this.target.position.x - (canvas.width  / 2) + this.offset.x,
+            this.target.position.y - (canvas.height / 2) + this.offset.y
         );
     }
 
@@ -369,6 +376,7 @@ class FollowCamera extends Camera {
 
         const smoothStep = this.smoothingSpeed * deltaTime;
 
+        // TODO apply offset
         this.position.x += ((this.targetPosition.x - this.position.x) * smoothStep) + this.shakingValue.x;
         this.position.y += ((this.targetPosition.y - this.position.y) * smoothStep) + this.shakingValue.y;
     }
@@ -507,36 +515,26 @@ class StaticGradientLayer {
     }
 }
 
-class SpriteBackgroundLayer extends Sprite {
+class SpriteBackgroundLayer extends BackgroundLayer {
     constructor(img, position, rotation, scale, speed=Vector2.Zero(), section=null) {
-    // TODO make all the layers to inherit BackgroundLayer class
-        super(img, position, rotation, scale);
+        super(position, speed);
 
-        this.initialPosition = new Vector2(position.x, position.y);
-        this.position = position;
-        this.speed = speed;
-        this.section = section;
-        this.camera = null;
-    }
-
-    Update(deltaTime) {
-        this.position.x = this.initialPosition.x + (this.camera.position.x * (1 - this.speed.x));
-        this.position.y = this.initialPosition.y + (this.camera.position.y * (1 - this.speed.y));
+        this.sprite = null;
+        if (section === null)
+            this.sprite = new Sprite(img, position, rotation, scale);
+        else
+            this.sprite = new SpriteSection(img, position, rotation, scale, section);
     }
 
     Draw(ctx) {
-        if (this.section == null)
-            this.DrawBasic(ctx);
-        else
-            this.DrawSectionBasic(ctx, this.section.x, this.section.y, this.section.w, this.section.h);
+        this.sprite.DrawBasic(ctx);
     }
 }
 
 class MultispritesBackgroundLayer extends BackgroundLayer {
     constructor(position, sprites, speed=Vector2.Zero()) {
         super(position, speed);
-
-        this.initialPosition = new Vector2(position.x, position.y);
+        
         this.sprites = sprites;
     }
 
@@ -561,15 +559,11 @@ class MultispritesBackgroundLayer extends BackgroundLayer {
     }
 }
 
-class TilesetBackgroundLayer extends Sprite {
+class TilesetBackgroundLayer extends BackgroundLayer {
     constructor(img, position, scale, speed=Vector2.Zero()) {
-    // TODO make all the layers to inherit BackgroundLayer class
-        super(img, position, rotation, scale);
+        super(position, speed);
 
-        this.initialPosition = new Vector2(position.x, position.y);
-        this.position = position;
-        this.speed = speed;
-        this.camera = null;
+        this.sprite = new Sprite(img, position, 0, scale);
 
         this.tilesetConfig = {
             1: {

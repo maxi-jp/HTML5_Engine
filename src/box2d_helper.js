@@ -160,6 +160,7 @@ function CreateBox2DWorld(ctx, gravity, doSleep, scale) {
 
     // prepare the collision event function
     Box2D.Dynamics.b2ContactListener.prototype.BeginContact = OnContactDetected;
+    Box2D.Dynamics.b2ContactListener.prototype.EndContact = OnEndContactDetected;
 
     return world;
 }
@@ -184,6 +185,18 @@ function OnContactDetected(contact) {
     }
     if (userDataB?.OnContactDetectedBox2D) {
         userDataB.OnContactDetectedBox2D(userDataA);
+    }
+}
+
+function OnEndContactDetected(contact) {
+    const userDataA = contact.GetFixtureA().GetBody().GetUserData();
+    const userDataB = contact.GetFixtureB().GetBody().GetUserData();
+
+    if (userDataA?.OnEndContactDetectedBox2D) {
+        userDataA.OnEndContactDetectedBox2D(userDataB);
+    }
+    if (userDataB?.OnEndContactDetectedBox2D) {
+        userDataB.OnEndContactDetectedBox2D(userDataA);
     }
 }
 
