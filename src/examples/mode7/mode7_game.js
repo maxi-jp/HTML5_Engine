@@ -6,6 +6,10 @@ class Mode7Game extends Game {
             ground: {
                 path: "./src/examples/mode7/assets/SNES - F-Zero - Mute City I.png",
                 img: null
+            },
+            horizon: {
+                path: "./src/examples/mode7/assets/horizon.png",
+                img: null
             }
         };
 
@@ -26,7 +30,8 @@ class Mode7Game extends Game {
             horizon: 80,
             cameraHeight: 120,
             scale: 1,
-            angle: 0
+            angle: 0,
+            horizonImg: this.graphicAssets.horizon.img
         });
 
         this.mode7Layer.Start();
@@ -83,11 +88,13 @@ class Mode7Layer {
         this.cameraHeight = options.cameraHeight || 120;
         this.scale = options.scale || 1;
         this.angle = options.angle || 0;
-        this.enabled = true;
-
+        this.horizonImg = options.horizonImg || null;
+        
         this.offscreenCanvas = null;
         this.offscreenCtx = null;
         this.imgData = null;
+
+        this.enabled = false;
     }
 
     Start() {
@@ -97,6 +104,8 @@ class Mode7Layer {
         this.offscreenCtx = this.offscreenCanvas.getContext('2d');
         this.offscreenCtx.drawImage(this.img, 0, 0);
         this.imgData = this.offscreenCtx.getImageData(0, 0, this.img.width, this.img.height).data;
+
+        this.enabled = true;
     }
 
     Update(deltaTime) {
@@ -104,14 +113,17 @@ class Mode7Layer {
     }
 
     Draw(ctx) {
+        this.DrawHorizon(ctx, this.horizonImg, this.angle);
+
         if (!this.enabled || !this.img.complete) return;
 
         const width = ctx.canvas.width;
         const height = ctx.canvas.height;
         const img = this.img;
+        const groundHeight = height - this.horizon;
 
         // Create output ImageData
-        let output = ctx.createImageData(width, height);
+        let output = ctx.createImageData(width, groundHeight);
         let data = output.data;
 
         const cos = Math.cos(this.angle);
@@ -143,8 +155,9 @@ class Mode7Layer {
         // }
 
         // alt: rendering using offscreen canvas
-        for (let screenY = this.horizon; screenY < height; screenY++) {
-            const perspective = this.cameraHeight / (screenY - this.horizon + 1);
+        for (let screenY = 0; screenY < groundHeight; screenY++) {
+            const y = screenY + this.horizon;
+            const perspective = this.cameraHeight / (y - this.horizon + 1);
 
             const dx = -sin * perspective * this.scale;
             const dy =  cos * perspective * this.scale;
@@ -169,7 +182,25 @@ class Mode7Layer {
             }
         }
 
-        ctx.putImageData(output, 0, 0);
+        ctx.putImageData(output, 0, this.horizon);
+    }
+
+    DrawHorizon(ctx, horizonImg, angle) {
+        if (!horizonImg || !horizonImg.complete) return;
+
+        const width = ctx.canvas.width;
+        const height = this.horizon; // Height of the horizon area
+        const imgWidth = horizonImg.width;
+        const imgHeight = horizonImg.height;
+
+        // Calculate horizontal offset based on angle
+        // One full rotation (2*PI) pans the entire image once
+        let offset = (angle / (2 * Math.PI)) * imgWidth;
+        offset = ((offset % imgWidth) + imgWidth) % imgWidth; // Ensure positive wrap
+
+        // Draw the horizon image twice for seamless wrapping
+        ctx.drawImage(horizonImg, offset, 0, imgWidth - offset, imgHeight, 0, 0, width * (1 - offset / imgWidth), height);
+        ctx.drawImage(horizonImg, 0, 0, offset, imgHeight, width * (1 - offset / imgWidth), 0, width * (offset / imgWidth), height);
     }
 }
 
