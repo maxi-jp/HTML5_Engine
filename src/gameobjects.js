@@ -49,22 +49,17 @@ class GameObject {
 }
 
 class RectangleGO extends GameObject {
-    constructor(position, width=100, height=100, color='red') {
+    constructor(position, width=100, height=100, color=Color.Red(), stroke=false, lineWidth=1) {
         super(position);
-        this.rectangle = new Rectangle(this._position, width, height, color);
+        this.rectangle = new Rectangle(this._position, width, height, color, stroke, lineWidth);
     }
 
     Start() { }
 
     Update(deltaTime) { }
 
-    Draw(ctx) {
-        ctx.fillStyle = this.rectangle.color;
-        ctx.save();
-        ctx.translate(this._position.x, this._position.y);
-        ctx.rotate(this._rotation);
-        ctx.fillRect(-this.rectangle.width / 2, -this.rectangle.height / 2, this.rectangle.width, this.rectangle.height);
-        ctx.restore();
+    Draw(renderer) {
+        renderer.DrawRectangle(this.position.x, this.position.y, this.rectangle.width, this.rectangle.height, this.rectangle.color, this.rectangle.stroke, this.rectangle.lineWidth, this.rotation);
     }
 }
 

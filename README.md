@@ -8,6 +8,7 @@ Engine and examples presents on this project are active on github pages: https:/
 
 - **Game Loop**: Built-in main loop with update and draw phases.
 - **GameObject System**: Easily create and manage game objects with position, rotation, scale, and custom logic.
+- **HTML5 Canvas**: Render the graphics using the canvas from HTML5.
 - **Sprite & Animation Support**: Render static sprites, sprite sections, and both basic and complex sprite sheet animations.
 - **Physics Integration**: Box2D physics support with easy-to-use Box2DGameObject classes for rectangles, sprites, and animated objects.
 - **Input Handling**: Keyboard, mouse, and gamepad input support.

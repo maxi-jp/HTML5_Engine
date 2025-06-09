@@ -1,73 +1,78 @@
 // #region Helper CTX classes
 
 class Color {
-    _r = 0;
-    _g = 0;
-    _b = 0;
-    _a = 1;
+    _rgba = [0, 0, 0, 1];
 
     constructor(r, g, b, a=1) {
         this._r = r;
         this._g = g;
         this._b = b;
         this._a = a;
+        this._rgba = [r, g, b, a];
         this.string = this.toString();
     }
 
     get r() {
-        return this._r;
+        return this._rgba[0];
     }
 
     get g() {
-        return this._g;
+        return this._rgba[1];
     }
 
     get b() {
-        return this._b;
+        return this._rgba[2];
     }
 
     get a() {
-        return this._a;
+        return this._rgba[3];
+    }
+
+    get rgba() {
+        return this._rgba;
     }
 
     set r(value) {
         this._r = value;
+        this._rgba[0] = value;
         this.string = this.toString();
     }
 
     set g(value) {
         this._g = value;
+        this._rgba[1] = value;
         this.string = this.toString();
     }
 
     set b(value) {
         this._b = value;
+        this._rgba[2] = value;
         this.string = this.toString();
     }
 
     set a(value) {
         this._a = value;
+        this._rgba[3] = value;
         this.string = this.toString();
     }
 
     static Black() {
         return new Color(0, 0, 0, 1);
     }
-
     static White() {
-        return new Color(255, 255, 255, 1);
+        return new Color(1, 1, 1, 1);
     }
-
     static Red() {
-        return new Color(255, 0, 0, 1);
+        return new Color(1, 0, 0, 1);
     }
-
     static Green() {
-        return new Color(0, 255, 0, 1);
+        return new Color(0, 1, 0, 1);
     }
-
     static Blue() {
-        return new Color(0, 0, 255, 1);
+        return new Color(0, 0, 1, 1);
+    }
+    static Yellow() {
+        return new Color(1, 1, 0, 1);
     }
 
     static Copy(color) {
@@ -75,24 +80,24 @@ class Color {
     }
 
     static FromRGB(r, g, b) {
-        return new Color(r, g, b);
+        return new Color(r / 255, g / 255, b / 255);
     }
 
     static FromRGBA(r, g, b, a) {
-        return new Color(r, g, b, a);
+        return new Color(r / 255, g / 255, b / 255, a);
     }
 
     static FromHex(hex) {
-        let r = parseInt(hex.substring(1, 3), 16);
-        let g = parseInt(hex.substring(3, 5), 16);
-        let b = parseInt(hex.substring(5, 7), 16);
+        let r = parseInt(hex.substring(1, 3), 16) / 255;
+        let g = parseInt(hex.substring(3, 5), 16) / 255;
+        let b = parseInt(hex.substring(5, 7), 16) / 255;
         return new Color(r, g, b);
     }
 
     static FromHexA(hex) {
-        let r = parseInt(hex.substring(1, 3), 16);
-        let g = parseInt(hex.substring(3, 5), 16);
-        let b = parseInt(hex.substring(5, 7), 16);
+        let r = parseInt(hex.substring(1, 3), 16) / 255;
+        let g = parseInt(hex.substring(3, 5), 16) / 255;
+        let b = parseInt(hex.substring(5, 7), 16) / 255;
         let a = parseInt(hex.substring(7, 9), 16) / 255;
         return new Color(r, g, b, a);
     }
@@ -144,7 +149,7 @@ class Color {
     }
 
     toString() {
-        return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
+        return `rgba(${this.r * 255}, ${this.g * 255}, ${this.b * 255}, ${this.a})`;
     }
 }
 
@@ -219,20 +224,12 @@ class Sprite {
         }
     }
 
-    Draw(ctx) {
-        ctx.save();
-
-        ctx.translate(this.position.x, this.position.y);
-        ctx.rotate(this.rotation);
-        ctx.scale(this._computedScale.x, this._computedScale.y);
-
-        ctx.drawImage(this.img, -this.img.halfWidth, -this.img.halfHeight);
-
-        ctx.restore();
+    Draw(renderer) {
+        renderer.DrawImage(this.img, this.position.x, this.position.y, this._computedScale.x, this._computedScale.y, this.rotation);
     }
 
-    DrawBasic(ctx) {
-        ctx.drawImage(this.img, this.position.x, this.position.y, this.img.width * this.scale.x, this.img.height * this.scale.y);
+    DrawBasic(renderer) {
+        renderer.DrawImageBasic(this.img, this.position.x, this.position.y, this.img.width * this.scale.x, this.img.height * this.scale.y);
     }
 
     DrawSection(ctx, sx, sy, sw, sh) {
@@ -300,16 +297,17 @@ class RadialGradient {
 }
 
 class Rectangle {
-    constructor(position, width, height, color="black", stroke=false) {
+    constructor(position, width, height, color=Color.Black(), stroke=false, lineWidth=1) {
         this.position = position;
         this.width = width;
         this.height = height;
         this.color = color;
         this.stroke = stroke;
+        this.lineWidth = lineWidth;
     }
 
-    Draw(ctx) {
-        DrawRectangle(ctx, this.position.x, this.position.y, this.width, this.height, this.color, this.stroke);
+    Draw(renderer) {
+        renderer.DrawRectangle(this.position.x, this.position.y, this.width, this.height, this.color, this.stroke, this.lineWidth);
     }
 }
 
@@ -362,8 +360,10 @@ class TextLabelFillAndStroke {
 // #endregion
 
 // #region HelperCTXFunctions
+// TODO WIP moving these to the renderer
 
 function DrawRectangle(ctx, x, y, width, height, color, stroke=false, lineWidth=1) {
+    // TODO moved to the renderer: delete it
     if (stroke) {
         DrawStrokeRectangle(ctx, x, y, width, height, color, lineWidth);
     }
@@ -373,11 +373,13 @@ function DrawRectangle(ctx, x, y, width, height, color, stroke=false, lineWidth=
 }
 
 function DrawFillRectangle(ctx, x, y, width, height, color) {
+    // TODO moved to the renderer: delete it
     ctx.fillStyle = color;
     ctx.fillRect(x, y, width, height);
 }
 
 function DrawStrokeRectangle(ctx, x, y, width, height, color, lineWidth=1) {
+    // TODO moved to the renderer: delete it
     ctx.strokeStyle = color;
     ctx.lineWidth = lineWidth;
     ctx.strokeRect(x, y, width, height);
@@ -409,6 +411,7 @@ function DrawStrokeText(ctx, text, x, y, font, color="black", align="center", ba
 }
 
 function DrawSegment(ctx, x1, y1, x2, y2, color, lineWidth=1) {
+    // TODO delete it, already done in the renderer
     ctx.strokeStyle = color;
     ctx.lineWidth = lineWidth;
     ctx.beginPath();

@@ -6,7 +6,7 @@ class Game {
 
     _audioActive = true;
 
-    constructor() {
+    constructor(renderer) {
         this.config = {};
         // config example:
         // {
@@ -36,6 +36,8 @@ class Game {
         //     another_asset_id: ...
         // };
 
+        this.renderer = renderer;
+
         this.gameObjects = [];
 
         this._screenHalfWidth = this._screenWidth / 2;
@@ -61,30 +63,20 @@ class Game {
     set screenWidth(value) {
         this._screenWidth = value;
         this._screenHalfWidth = this._screenWidth / 2;
-        canvas.width = this._screenWidth;
-        if (this.config.imageSmoothingEnabled !== undefined) {
-            ctx.imageSmoothingEnabled = this.config.imageSmoothingEnabled;
-        }
+        this.renderer.width = this._screenWidth;
     }
     set screenHeight(value) {
         this._screenHeight = value;
         this._screenHalfHeight = this._screenHeight / 2;
-        canvas.height = this._screenHeight;
-        if (this.config.imageSmoothingEnabled !== undefined) {
-            ctx.imageSmoothingEnabled = this.config.imageSmoothingEnabled;
-        }
+        this.renderer.height = this._screenHeight;
     }
     set audioActive(value) {
         this._audioActive = value;
     }
 
     Start() {
-        canvas.width = this._screenWidth;
-        canvas.height = this._screenHeight;
-
-        if (this.config.imageSmoothingEnabled !== undefined) {
-            ctx.imageSmoothingEnabled = this.config.imageSmoothingEnabled;
-        }
+        this.renderer.width = this._screenWidth;
+        this.renderer.height = this._screenHeight;
         
         this.gameObjects = [];
     }
@@ -96,10 +88,10 @@ class Game {
         });
     }
     
-    Draw(ctx) {
+    Draw() {
         this.gameObjects.forEach((gameObject) => {
             if (gameObject.active)
-                gameObject.Draw(ctx);
+                gameObject.Draw(this.renderer);
         });
     }
 

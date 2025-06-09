@@ -3,6 +3,8 @@ var canvas = /** @type {HTMLCanvasElement} */(null);
 var ctx = /** @type {CanvasRenderingContext2D} */(null);
 var requestAnimationFrameID = -1;
 
+var renderer = null
+
 var targetDT = 1/60; // 60fps
 var globalDT;
 var time = 0,
@@ -47,33 +49,47 @@ function LoadImages(assets, onloaded) {
     }
 }
 
-function Init() {
+function Init(GameClass) {
     canvas = document.getElementById("myCanvas");
-    ctx = canvas.getContext("2d");
+
+    if (window.location.search.includes("webgl")) {
+        const gl = canvas.getContext("webgl2");
+        if (!gl) {
+            // fallback to webgl 1
+            gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        }
+        renderer = gl ? new WebGLRenderer(canvas, gl) : new Canvas2DRenderer(canvas);
+    }
+    else {
+        renderer = new Canvas2DRenderer(canvas);
+        ctx = renderer.ctx; // TODO remove this and fix the bugs
+    }
 
     // input setup
     Input.SetupKeyboardEvents();
     Input.SetupMouseEvents(canvas);
     Input.SetupGamepadEvents();
 
-    if (game) {
-        LoadImages(game.graphicAssets, () => {
-            console.log(`All image files loaded.`);
-            
-            if (game.config.audioAnalyzer) {
-                audioPlayer = new AudioPlayer(true, game.config.analyzerfftSize, game.config.analyzerSmoothing);
-            }
-            else {
-                audioPlayer = new AudioPlayer();
-            }
-            audioPlayer.LoadAudio(game.audioAssets, () => {
-                console.log("All audio files loaded.");
-                console.log("Starting the game...");
-                Start();
-                Loop();
-            });
-        });
+    if (!game) {
+        game = new GameClass(renderer);
     }
+
+    LoadImages(game.graphicAssets, () => {
+        console.log(`All image files loaded.`);
+        
+        if (game.config.audioAnalyzer) {
+            audioPlayer = new AudioPlayer(true, game.config.analyzerfftSize, game.config.analyzerSmoothing);
+        }
+        else {
+            audioPlayer = new AudioPlayer();
+        }
+        audioPlayer.LoadAudio(game.audioAssets, () => {
+            console.log("All audio files loaded.");
+            console.log("Starting the game...");
+            Start();
+            Loop();
+        });
+    });
 }
 
 function Start() {
@@ -127,10 +143,10 @@ function Update(deltaTime) {
 }
 
 function Draw(/** @type {CanvasRenderingContext2D} */ctx) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    renderer.Clear();
 
     // draw the game
-    game.Draw(ctx);
+    game.Draw();
 
     // draw stats
     if (drawStats)
@@ -138,6 +154,9 @@ function Draw(/** @type {CanvasRenderingContext2D} */ctx) {
 }
 
 function DrawStats(ctx) {
+    if (!ctx)
+        return; // TODO remove this
+    
     ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.fillRect(2, 2, 132, 54);
 
@@ -161,4 +180,4 @@ function ResumeAudioContext() {
     }
 }
 
-window.onload = Init;
+// window.onload = Init;
