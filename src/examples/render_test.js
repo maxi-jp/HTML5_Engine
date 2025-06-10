@@ -18,6 +18,8 @@ class BasicGame extends Game {
 
         // other objects
         this.blackRect = null;
+        this.blueCircle = null;
+        this.pinkCircle = null;
         this.snakeSprite = null;
         this.portalSprite = null;
 
@@ -38,6 +40,11 @@ class BasicGame extends Game {
 
         // big black background rectangle
         this.blackRect = new Rectangle(new Vector2(0, this.screenHalfHeight), this.screenWidth, this.screenHalfHeight);
+        
+        // blue fill circle
+        this.blueCircle = new Circle(new Vector2(400, 100), 40, Color.Blue(), );
+        // purple stroke circle
+        this.pinkCircle = new Circle(new Vector2(400, 100), 40, new Color(1, 0, 1, 1), true, 4);
 
         // Snake sprite
         this.snakeSprite = new Sprite(this.graphicAssets.snake.img, new Vector2(100, 100), 0, 1);
@@ -52,6 +59,8 @@ class BasicGame extends Game {
         this.yellowRect.rotation -= 1.5 * deltaTime;
 
         this.portalSprite.rotation += 0.33 * deltaTime;
+
+        this.pinkCircle.radius = (Math.sin(totalTime) + 1) * this.blueCircle.radius * 0.5;
     }
 
     Draw() {
@@ -63,5 +72,8 @@ class BasicGame extends Game {
 
         this.snakeSprite.DrawBasic(this.renderer);
         this.portalSprite.Draw(this.renderer);
+
+        this.blueCircle.Draw(this.renderer);
+        this.pinkCircle.Draw(this.renderer);
     }
 }

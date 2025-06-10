@@ -312,15 +312,16 @@ class Rectangle {
 }
 
 class Circle {
-    constructor(position, radius, color, stroke=false) {
+    constructor(position, radius, color, stroke=false, lineWidth=1) {
         this.position = position;
         this.radius = radius;
         this.color = color;
         this.stroke = stroke;
+        this.lineWidth = lineWidth;
     }
 
-    Draw(ctx) {
-        DrawCircle(ctx, this.position.x, this.position.y, this.radius, this.color, this.stroke);
+    Draw(renderer) {
+        renderer.DrawCircle(this.position.x, this.position.y, this.radius, this.color, this.stroke, this.lineWidth);
     }
 }
 
@@ -421,6 +422,7 @@ function DrawSegment(ctx, x1, y1, x2, y2, color, lineWidth=1) {
 }
 
 function DrawPolygon(ctx, coordinates, strokeColor="black", lineWidth=1, fill=false, fillColor="black") {
+    // TODO delete it, already done in the renderer
     ctx.strokeStyle = strokeColor;
     ctx.lineWidth = lineWidth;
     ctx.beginPath();
@@ -437,6 +439,7 @@ function DrawPolygon(ctx, coordinates, strokeColor="black", lineWidth=1, fill=fa
 }
 
 function DrawFillCircle(ctx, x, y, radius, color) {
+    // TODO delete it, already done in the renderer
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, PI2, false);
@@ -445,6 +448,7 @@ function DrawFillCircle(ctx, x, y, radius, color) {
 }
 
 function DrawStrokeCircle(ctx, x, y, radius, color, lineWidth=1) {
+    // TODO delete it, already done in the renderer
     ctx.strokeStyle = color;
     ctx.lineWidth = lineWidth;
     ctx.beginPath();
@@ -454,6 +458,7 @@ function DrawStrokeCircle(ctx, x, y, radius, color, lineWidth=1) {
 }
 
 function DrawCircle(ctx, x, y, radius, color, stroke=false, lineWidth=1) {
+    // TODO delete it, already done in the renderer
     if (stroke) {
         DrawStrokeCircle(ctx, x, y, radius, color, lineWidth);
     }
