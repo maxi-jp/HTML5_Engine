@@ -39,6 +39,8 @@ class Renderer {
     DrawCircle(x, y, radius, color, stroke=false, lineWidth=1) {}
     DrawFillCircle(x, y, radius, color) {}
     DrawStrokeCircle(x, y, radius, color, lineWidth=1) {}
+    DrawFillText(text, x, y, font, color=Color.Black(), align="center", baseline="alphabetic") {}
+    DrawStrokeText(text, x, y, font, color=Color.Black(), align="center", baseline="alphabetic") {}
 
     // Draw sprites
     DrawImage(img, x, y, scaleX, scaleY, rot=0) {}
@@ -164,6 +166,22 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.closePath();
     }
 
+    DrawFillText(text, x, y, font, color=Color.Black(), align="center", baseline="alphabetic") {
+        this.ctx.font = font;
+        this.ctx.textAlign = align;
+        this.ctx.textBaseline = baseline;
+        this.ctx.fillStyle = color;
+        this.ctx.fillText(text, x, y);
+    }
+
+    DrawStrokeText(text, x, y, font, color=Color.Black(), align="center", baseline="alphabetic") {
+        this.ctx.font = font;
+        this.ctx.textAlign = align;
+        this.ctx.textBaseline = baseline;
+        this.ctx.strokeStyle = color;
+        this.ctx.strokeText(text, x, y);
+    }
+
     DrawImage(img, x, y, scaleX, scaleY, rot=0) {
         this.ctx.save();
 
@@ -187,152 +205,12 @@ class WebGLRenderer extends Renderer {
         super(canvas, config);
         this.gl = gl;
 
-        // auxiliar structures -----------------------------------------------
-        // Rectangle from (-0.5, -0.5) to (0.5, 0.5)
-        this.quadVerts = [
-            -0.5, -0.5,
-             0.5, -0.5,
-            -0.5,  0.5,
-            -0.5,  0.5,
-             0.5, -0.5,
-             0.5,  0.5,
-        ];
-
-        // Quad texture coordinates
-        this.texcoords = [
-            0, 0,
-            1, 0,
-            0, 1,
-            0, 1,
-            1, 0,
-            1, 1,
-        ];
-
-// #region WebGL Shaders
-        // Shaders -----------------------------------------------------------
-        // Vertex shader (solid color)
-        this.vsQuadSource = `
-            attribute vec2 a_position;
-            uniform vec2 u_resolution;
-            uniform vec2 u_translation;
-            uniform float u_rotation;
-            uniform vec2 u_size;
-            void main() {
-                // Rotate
-                float cosR = cos(u_rotation);
-                float sinR = sin(u_rotation);
-                vec2 rotated = vec2(
-                    a_position.x * cosR - a_position.y * sinR,
-                    a_position.x * sinR + a_position.y * cosR
-                );
-                // Scale and translate to screen
-                vec2 pos = rotated * u_size + u_translation;
-                // Convert to clipspace
-                vec2 zeroToOne = pos / u_resolution;
-                vec2 zeroToTwo = zeroToOne * 2.0;
-                vec2 clipSpace = zeroToTwo - 1.0;
-                gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
-            }
-        `;
-
-        // Fragment shader (solid color)
-        this.fsSolidColorSource = `
-            precision mediump float;
-            uniform vec4 u_color;
-            void main() {
-                gl_FragColor = u_color;
-            }
-        `;
-
-        // Vertex shader for textured quad
-        this.vsTextureSource = `
-            attribute vec2 a_position;
-            attribute vec2 a_texcoord;
-            uniform vec2 u_resolution;
-            uniform vec2 u_translation;
-            uniform float u_rotation;
-            uniform vec2 u_size;
-            varying vec2 v_texcoord;
-            void main() {
-                // Rotate
-                float cosR = cos(u_rotation);
-                float sinR = sin(u_rotation);
-                vec2 rotated = vec2(
-                    a_position.x * cosR - a_position.y * sinR,
-                    a_position.x * sinR + a_position.y * cosR
-                );
-                // Scale and translate to screen
-                vec2 pos = rotated * u_size + u_translation;
-                // Convert to clipspace
-                vec2 zeroToOne = pos / u_resolution;
-                vec2 zeroToTwo = zeroToOne * 2.0;
-                vec2 clipSpace = zeroToTwo - 1.0;
-                gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
-                v_texcoord = a_texcoord;
-            }
-        `;
-
-        // Fragment shader for textured quad
-        this.fsTextureSource = `
-            precision mediump float;
-            varying vec2 v_texcoord;
-            uniform sampler2D u_texture;
-            void main() {
-                vec4 c = texture2D(u_texture, v_texcoord);
-                gl_FragColor = c;
-                // If alpha is very low, force RGB to black
-                //if (c.a < 0.9) c.rgb = vec3(0.0);
-                //gl_FragColor = vec4(c.rgb * c.a, 1.0 - c.a);
-            }
-        `;
-        
         // enable blending for pngs transparency
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-// #endregion
         
-        // Compile shaders and link program
-        this.basicColorProgram = CreateProgram(this.gl, this.vsQuadSource, this.fsSolidColorSource);
-        this.textureProgram = CreateProgram(this.gl, this.vsTextureSource, this.fsTextureSource);
-        
-        // this.basicRectShader = new BasicRectShader(this.gl);
-        // this.spriteShader = new SpriteShader(this.gl);
-
-        // Rectangles auxiliar structures        
-
-        // Look up locations
-        this.positionLoc = this.gl.getAttribLocation(this.basicColorProgram, "a_position");
-        this.resolutionLoc = this.gl.getUniformLocation(this.basicColorProgram, "u_resolution");
-        this.translationLoc = this.gl.getUniformLocation(this.basicColorProgram, "u_translation");
-        this.rotationLoc = this.gl.getUniformLocation(this.basicColorProgram, "u_rotation");
-        this.sizeLoc = this.gl.getUniformLocation(this.basicColorProgram, "u_size");
-        this.colorLoc = this.gl.getUniformLocation(this.basicColorProgram, "u_color");
-
-        // Create a buffer for a unit rectangle centered at (0,0)
-        this.buffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
-        
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.quadVerts), this.gl.STATIC_DRAW);
-
-        // Sprites auxiliar structures
-        this.texPositionLoc = this.gl.getAttribLocation(this.textureProgram, "a_position");
-        this.texTexcoordLoc = this.gl.getAttribLocation(this.textureProgram, "a_texcoord");
-        this.texResolutionLoc = this.gl.getUniformLocation(this.textureProgram, "u_resolution");
-        this.texTranslationLoc = this.gl.getUniformLocation(this.textureProgram, "u_translation");
-        this.texRotationLoc = this.gl.getUniformLocation(this.textureProgram, "u_rotation");
-        this.texSizeLoc = this.gl.getUniformLocation(this.textureProgram, "u_size");
-        this.texSamplerLoc = this.gl.getUniformLocation(this.textureProgram, "u_texture");
-
-        // Create a buffer for quad positions
-        this.texBuffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texBuffer);
-        
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.quadVerts), this.gl.STATIC_DRAW);
-
-        // Texture coordinates buffer
-        this.texcoordBuffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texcoordBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.texcoords), this.gl.STATIC_DRAW);
+        this.basicRectShader = new BasicRectShader(this.gl);
+        this.spriteShader = new SpriteShader(this.gl);
     }
 
     GetTexture(img) {
@@ -361,32 +239,29 @@ class WebGLRenderer extends Renderer {
     DrawLine(x1, y1, x2, y2, color=Color.Black(), lineWidth=1) {
         const gl = this.gl;
 
-        // reuse the rectangle shader but with different buffer data
-
         // buffer for the two points
         const vertices = new Float32Array([
             x1, y1,
             x2, y2
         ]);
+
         const buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STREAM_DRAW);
+        
+        this.basicRectShader.UseForCustomBuffer(gl, buffer);
 
-        gl.useProgram(this.basicColorProgram);
+        // Set viewport and clear if needed
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
 
-        // Set up attributes
-        gl.enableVertexAttribArray(this.positionLoc);
-        gl.vertexAttribPointer(this.positionLoc, 2, gl.FLOAT, false, 0, 0);
-
         // Set uniforms (no rotation/scale, just pass through)
-        gl.uniform2f(this.resolutionLoc, this.canvas.width, this.canvas.height);
-        gl.uniform2f(this.translationLoc, 0, 0);
-        gl.uniform1f(this.rotationLoc, 0);
-        gl.uniform2f(this.sizeLoc, 1, 1);
+        gl.uniform2f(this.basicRectShader.resolutionLoc, this.canvas.width, this.canvas.height);
+        gl.uniform2f(this.basicRectShader.translationLoc, 0, 0);
+        gl.uniform1f(this.basicRectShader.rotationLoc, 0);
+        gl.uniform2f(this.basicRectShader.sizeLoc, 1, 1);
 
         // Color
-        gl.uniform4fv(this.colorLoc, color.rgba);
+        gl.uniform4fv(this.basicRectShader.colorLoc, color.rgba);
 
         // Set line width (ignored on some platforms)
         gl.lineWidth(lineWidth);
@@ -438,30 +313,26 @@ class WebGLRenderer extends Renderer {
     }
 
     DrawFillRectangle(x, y, w, h, color, rot=0) {
+        const gl = this.gl;
+
         if (rot === 0) {
             x += w/2;
             y += h/2;
         }
 
-        const gl = this.gl;
-        gl.useProgram(this.basicColorProgram);
-
+        this.basicRectShader.Use(this.gl);
+        
         // Set viewport and clear if needed
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
 
-        // Set up attributes
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-        gl.enableVertexAttribArray(this.positionLoc);
-        gl.vertexAttribPointer(this.positionLoc, 2, gl.FLOAT, false, 0, 0);
-
         // Set uniforms
-        gl.uniform2f(this.resolutionLoc, this.canvas.width, this.canvas.height);
-        gl.uniform2f(this.translationLoc, x, y);
-        gl.uniform1f(this.rotationLoc, rot);
-        gl.uniform2f(this.sizeLoc, w, h);
+        gl.uniform2f(this.basicRectShader.resolutionLoc, this.canvas.width, this.canvas.height);
+        gl.uniform2f(this.basicRectShader.translationLoc, x, y);
+        gl.uniform1f(this.basicRectShader.rotationLoc, rot);
+        gl.uniform2f(this.basicRectShader.sizeLoc, w, h);
 
         // Color
-        gl.uniform4fv(this.colorLoc, color.rgba);
+        gl.uniform4fv(this.basicRectShader.colorLoc, color.rgba);
 
         // Draw
         gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -490,18 +361,15 @@ class WebGLRenderer extends Renderer {
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STREAM_DRAW);
 
-        gl.useProgram(this.basicColorProgram);
-        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        // Use the shader with this custom buffer
+        this.basicRectShader.UseForCustomBuffer(gl, buffer);
 
-        gl.enableVertexAttribArray(this.positionLoc);
-        gl.vertexAttribPointer(this.positionLoc, 2, gl.FLOAT, false, 0, 0);
-
-        // Set uniforms (no rotation/scale, just pass through)
-        gl.uniform2f(this.resolutionLoc, this.canvas.width, this.canvas.height);
-        gl.uniform2f(this.translationLoc, 0, 0);
-        gl.uniform1f(this.rotationLoc, 0);
-        gl.uniform2f(this.sizeLoc, 1, 1);
-        gl.uniform4fv(this.colorLoc, color.rgba);
+        // Set uniforms using the shader's locations
+        gl.uniform2f(this.basicRectShader.resolutionLoc, this.canvas.width, this.canvas.height);
+        gl.uniform2f(this.basicRectShader.translationLoc, 0, 0);
+        gl.uniform1f(this.basicRectShader.rotationLoc, 0);
+        gl.uniform2f(this.basicRectShader.sizeLoc, 1, 1);
+        gl.uniform4fv(this.basicRectShader.colorLoc, color.rgba);
 
         gl.drawArrays(gl.TRIANGLE_FAN, 0, verts.length / 2);
 
@@ -521,18 +389,15 @@ class WebGLRenderer extends Renderer {
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STREAM_DRAW);
 
-        gl.useProgram(this.basicColorProgram);
-        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        // Use the shader with this custom buffer
+        this.basicRectShader.UseForCustomBuffer(gl, buffer);
 
-        gl.enableVertexAttribArray(this.positionLoc);
-        gl.vertexAttribPointer(this.positionLoc, 2, gl.FLOAT, false, 0, 0);
-
-        // Set uniforms (no rotation/scale, just pass through)
-        gl.uniform2f(this.resolutionLoc, this.canvas.width, this.canvas.height);
-        gl.uniform2f(this.translationLoc, 0, 0);
-        gl.uniform1f(this.rotationLoc, 0);
-        gl.uniform2f(this.sizeLoc, 1, 1);
-        gl.uniform4fv(this.colorLoc, color.rgba);
+        // Set uniforms using the shader's locations
+        gl.uniform2f(this.basicRectShader.resolutionLoc, this.canvas.width, this.canvas.height);
+        gl.uniform2f(this.basicRectShader.translationLoc, 0, 0);
+        gl.uniform1f(this.basicRectShader.rotationLoc, 0);
+        gl.uniform2f(this.basicRectShader.sizeLoc, 1, 1);
+        gl.uniform4fv(this.basicRectShader.colorLoc, color.rgba);
 
         gl.lineWidth(lineWidth); // May be ignored on most platforms
         gl.drawArrays(gl.LINE_STRIP, 0, verts.length / 2);
@@ -540,31 +405,85 @@ class WebGLRenderer extends Renderer {
         gl.deleteBuffer(buffer);
     }
 
+    DrawFillText(text, x, y, font, color=Color.Black(), align="center", baseline="alphabetic") {
+        // TODO refactor this method
+        // 1. Create an offscreen canvas
+        const textCanvas = document.createElement('canvas');
+        const ctx = textCanvas.getContext('2d');
+        ctx.font = font;
+        ctx.textAlign = align;
+        ctx.textBaseline = baseline;
+
+        // Measure text and resize canvas
+        const metrics = ctx.measureText(text);
+        const width = Math.ceil(metrics.width) + 8;
+        const height = Math.ceil(parseInt(font, 10)) + 8;
+        textCanvas.width = width;
+        textCanvas.height = height;
+
+        // Redraw with correct size
+        ctx.font = font;
+        ctx.textAlign = align;
+        ctx.textBaseline = baseline;
+        ctx.fillStyle = color;
+        ctx.clearRect(0, 0, width, height);
+
+        // Calculate draw position based on alignment
+        let drawX = width / 2;
+        let drawY = height / 2;
+        if (align === "left") drawX = 0;
+        if (align === "right") drawX = width;
+        if (baseline === "top") drawY = 0;
+        if (baseline === "bottom") drawY = height;
+        ctx.fillText(text, drawX, drawY);
+
+        // 2. Upload as WebGL texture
+        const gl = this.gl;
+        const tex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textCanvas);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        // 3. Draw as a textured quad using the SpriteShader
+        this.spriteShader.Use(gl);
+        gl.uniform2f(this.spriteShader.texResolutionLoc, this.canvas.width, this.canvas.height);
+        gl.uniform2f(this.spriteShader.texTranslationLoc, x, y);
+        gl.uniform1f(this.spriteShader.texRotationLoc, 0);
+        gl.uniform2f(this.spriteShader.texSizeLoc, width, height);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.uniform1i(this.spriteShader.texSamplerLoc, 0);
+
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+        // Optionally: delete the texture to avoid memory leaks
+        gl.deleteTexture(tex);
+    }
+
+    DrawStrokeText(text, x, y, font, color=Color.Black(), align="center", baseline="alphabetic") {
+        // TODO
+    }
+
     DrawImage(img, x, y, scaleX, scaleY, rot=0) {
         const gl = this.gl;
-        gl.useProgram(this.textureProgram);
-
-        // Set up position buffer
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.texBuffer);
-        gl.enableVertexAttribArray(this.texPositionLoc);
-        gl.vertexAttribPointer(this.texPositionLoc, 2, gl.FLOAT, false, 0, 0);
-
-        // Set up texcoord buffer
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.texcoordBuffer);
-        gl.enableVertexAttribArray(this.texTexcoordLoc);
-        gl.vertexAttribPointer(this.texTexcoordLoc, 2, gl.FLOAT, false, 0, 0);
-
-        // Set uniforms
-        gl.uniform2f(this.texResolutionLoc, this.canvas.width, this.canvas.height);
-        gl.uniform2f(this.texTranslationLoc, x, y);
-        gl.uniform1f(this.texRotationLoc, rot || 0);
-        gl.uniform2f(this.texSizeLoc, scaleX * img.width, scaleY * img.height);
+        this.spriteShader.Use(gl);
+        
+        // Set uniforms using the spriteShader's locations
+        gl.uniform2f(this.spriteShader.texResolutionLoc, this.canvas.width, this.canvas.height);
+        gl.uniform2f(this.spriteShader.texTranslationLoc, x, y);
+        gl.uniform1f(this.spriteShader.texRotationLoc, rot || 0);
+        gl.uniform2f(this.spriteShader.texSizeLoc, scaleX * img.width, scaleY * img.height);
 
         // Bind texture
         const tex = this.GetTexture(img);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.uniform1i(this.texSamplerLoc, 0);
+        gl.uniform1i(this.spriteShader.texSamplerLoc, 0);
 
         // Draw
         gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -579,26 +498,183 @@ class WebGLRenderer extends Renderer {
 // #region WebGL shader objects
 class BasicRectShader {
     constructor(gl) {
-        this.program = CreateProgram(gl, vsSource, fsSource);
+        // Rectangle from (-0.5, -0.5) to (0.5, 0.5)
+        this.quadVerts = [
+            -0.5, -0.5,
+             0.5, -0.5,
+            -0.5,  0.5,
+            -0.5,  0.5,
+             0.5, -0.5,
+             0.5,  0.5,
+        ];
+
+        // Vertex shader (solid color)
+        this.vsQuadSource = `
+            attribute vec2 a_position;
+            uniform vec2 u_resolution;
+            uniform vec2 u_translation;
+            uniform float u_rotation;
+            uniform vec2 u_size;
+            void main() {
+                // Rotate
+                float cosR = cos(u_rotation);
+                float sinR = sin(u_rotation);
+                vec2 rotated = vec2(
+                    a_position.x * cosR - a_position.y * sinR,
+                    a_position.x * sinR + a_position.y * cosR
+                );
+                // Scale and translate to screen
+                vec2 pos = rotated * u_size + u_translation;
+                // Convert to clipspace
+                vec2 zeroToOne = pos / u_resolution;
+                vec2 zeroToTwo = zeroToOne * 2.0;
+                vec2 clipSpace = zeroToTwo - 1.0;
+                gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+            }
+        `;
+
+        // Fragment shader (solid color)
+        this.fsSolidColorSource = `
+            precision mediump float;
+            uniform vec4 u_color;
+            void main() {
+                gl_FragColor = u_color;
+            }
+        `;
+
+        // Compile shaders and link program
+        this.program = CreateProgram(gl, this.vsQuadSource, this.fsSolidColorSource);
+
+        // Look up locations
         this.positionLoc = gl.getAttribLocation(this.program, "a_position");
         this.resolutionLoc = gl.getUniformLocation(this.program, "u_resolution");
-        // ...other uniforms
+        this.translationLoc = gl.getUniformLocation(this.program, "u_translation");
+        this.rotationLoc = gl.getUniformLocation(this.program, "u_rotation");
+        this.sizeLoc = gl.getUniformLocation(this.program, "u_size");
+        this.colorLoc = gl.getUniformLocation(this.program, "u_color");
+
+        // Create a buffer for a unit rectangle centered at (0,0)
         this.buffer = gl.createBuffer();
-        // ...buffer setup
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+        
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.quadVerts), gl.STATIC_DRAW);
     }
-    use(gl) {
+
+    Use(gl) {
         gl.useProgram(this.program);
-        // ...set up attributes, uniforms, etc.
+        
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+        gl.enableVertexAttribArray(this.positionLoc);
+        gl.vertexAttribPointer(this.positionLoc, 2, gl.FLOAT, false, 0, 0);
     }
-    // ...draw methods if you want
+
+    UseForCustomBuffer(gl, buffer) {
+        gl.useProgram(this.program);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.enableVertexAttribArray(this.positionLoc);
+        gl.vertexAttribPointer(this.positionLoc, 2, gl.FLOAT, false, 0, 0);
+    }
 }
 
 class SpriteShader {
     constructor(gl) {
-        this.program = CreateProgram(gl, vsSource, fsSource);
-        // ...similar setup
+        // Rectangle from (-0.5, -0.5) to (0.5, 0.5)
+        this.quadVerts = [
+            -0.5, -0.5,
+             0.5, -0.5,
+            -0.5,  0.5,
+            -0.5,  0.5,
+             0.5, -0.5,
+             0.5,  0.5,
+        ];
+
+        // Texture coordinates
+        this.texcoords = [
+            0, 0,
+            1, 0,
+            0, 1,
+            0, 1,
+            1, 0,
+            1, 1,
+        ];
+
+        // Vertex shader for textured quad
+        this.vsTextureSource = `
+            attribute vec2 a_position;
+            attribute vec2 a_texcoord;
+            uniform vec2 u_resolution;
+            uniform vec2 u_translation;
+            uniform float u_rotation;
+            uniform vec2 u_size;
+            varying vec2 v_texcoord;
+            void main() {
+                // Rotate
+                float cosR = cos(u_rotation);
+                float sinR = sin(u_rotation);
+                vec2 rotated = vec2(
+                    a_position.x * cosR - a_position.y * sinR,
+                    a_position.x * sinR + a_position.y * cosR
+                );
+                // Scale and translate to screen
+                vec2 pos = rotated * u_size + u_translation;
+                // Convert to clipspace
+                vec2 zeroToOne = pos / u_resolution;
+                vec2 zeroToTwo = zeroToOne * 2.0;
+                vec2 clipSpace = zeroToTwo - 1.0;
+                gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+                v_texcoord = a_texcoord;
+            }
+        `;
+
+        // Fragment shader for textured quad
+        this.fsTextureSource = `
+            precision mediump float;
+            varying vec2 v_texcoord;
+            uniform sampler2D u_texture;
+            void main() {
+                vec4 c = texture2D(u_texture, v_texcoord);
+                gl_FragColor = c;
+                // If alpha is very low, force RGB to black
+                //if (c.a < 0.9) c.rgb = vec3(0.0);
+                //gl_FragColor = vec4(c.rgb * c.a, 1.0 - c.a);
+            }
+        `;
+
+        // Compile shaders and link program
+        this.program = CreateProgram(gl, this.vsTextureSource, this.fsTextureSource);
+        
+        this.texPositionLoc = gl.getAttribLocation(this.program, "a_position");
+        this.texTexcoordLoc = gl.getAttribLocation(this.program, "a_texcoord");
+        this.texResolutionLoc = gl.getUniformLocation(this.program, "u_resolution");
+        this.texTranslationLoc = gl.getUniformLocation(this.program, "u_translation");
+        this.texRotationLoc = gl.getUniformLocation(this.program, "u_rotation");
+        this.texSizeLoc = gl.getUniformLocation(this.program, "u_size");
+        this.texSamplerLoc = gl.getUniformLocation(this.program, "u_texture");
+
+        // Create a buffer for quad positions
+        this.texBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.texBuffer);
+        
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.quadVerts), gl.STATIC_DRAW);
+
+        // Texture coordinates buffer
+        this.texcoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.texcoordBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.texcoords), gl.STATIC_DRAW);
     }
-    use(gl) { /* ... */ }
+
+    Use(gl) {
+        gl.useProgram(this.program);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.texBuffer);
+        gl.enableVertexAttribArray(this.texPositionLoc);
+        gl.vertexAttribPointer(this.texPositionLoc, 2, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.texcoordBuffer);
+        gl.enableVertexAttribArray(this.texTexcoordLoc);
+        gl.vertexAttribPointer(this.texTexcoordLoc, 2, gl.FLOAT, false, 0, 0);
+    }
 }
 // #endregion
 

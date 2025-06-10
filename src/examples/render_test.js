@@ -75,5 +75,7 @@ class BasicGame extends Game {
 
         this.blueCircle.Draw(this.renderer);
         this.pinkCircle.Draw(this.renderer);
+
+        this.renderer.DrawFillText("Watson!!! O_O", this.screenHalfWidth, 20, "20px Comic Sans MS");
     }
 }
