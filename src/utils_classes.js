@@ -75,6 +75,13 @@ class Color {
         return new Color(1, 1, 0, 1);
     }
 
+    static black  = Color.Black();
+    static white  = Color.White();
+    static red    = Color.Red();
+    static green  = Color.Green();
+    static blue   = Color.Blue();
+    static yellow = Color.Yellow();
+
     static Copy(color) {
         return new Color(color.r, color.g, color.b, color.a);
     }
@@ -258,6 +265,7 @@ class SpriteSection extends Sprite {
 }
 
 class LinearGradient {
+    // TODO refactor this class to work with the new renderers
     constructor(x0, y0, x1, y1, colorStops) {
         this.gradient = ctx.createLinearGradient(x0, y0, x1, y1);
         colorStops.forEach(colorStop => {
@@ -271,6 +279,7 @@ class LinearGradient {
 }
 
 class RadialGradient {
+    // TODO refactor this class to work with the new renderers
     constructor(x0, y0, r0, x1, y1, r1, colorStops) {
         this.gradient = ctx.createRadialGradient(x0, y0, r0, x1, y1, r1);
         colorStops.forEach(colorStop => {
@@ -323,8 +332,8 @@ class TextLabel {
         this.stroke = stroke;
     }
 
-    Draw(ctx) {
-        DrawText(ctx, this.text, this.position.x, this.position.y, this.font, this.color, this.align, this.baseline, this.stroke);
+    Draw(renderer) {
+        renderer.DrawText(this.text, this.position.x, this.position.y, this.font, this.color, this.align, this.baseline, this.stroke);
     }
 }
 
@@ -339,16 +348,16 @@ class TextLabelFillAndStroke {
         this.baseline = baseline;
     }
 
-    Draw(ctx) {
-        DrawText(ctx, this.text, this.position.x, this.position.y, this.font, this.fillColor, this.align, this.baseline, false);
-        DrawText(ctx, this.text, this.position.x, this.position.y, this.font, this.strokeColor, this.align, this.baseline, true);
+    Draw(renderer) {
+        renderer.DrawFillText(this.text, this.position.x, this.position.y, this.font, this.fillColor, this.align, this.baseline);
+        renderer.DrawStrokeText(this.text, this.position.x, this.position.y, this.font, this.strokeColor, this.align, this.baseline);
     }
 }
 
 // #endregion
 
 // #region HelperCTXFunctions
-// TODO WIP moving these to the renderer
+// TODO delete these functions (already impelemnted on the renderer)
 
 function DrawRectangle(ctx, x, y, width, height, color, stroke=false, lineWidth=1) {
     // TODO moved to the renderer: delete it
@@ -374,6 +383,7 @@ function DrawStrokeRectangle(ctx, x, y, width, height, color, lineWidth=1) {
 }
 
 function DrawText(ctx, text, x, y, font, color="black", align="center", baseline="alphabetic", stroke=false) {
+    // TODO delete it, already done in the renderer
     if (stroke) {
         DrawStrokeText(ctx, text, x, y, font, color, align, baseline);
     }
@@ -383,6 +393,7 @@ function DrawText(ctx, text, x, y, font, color="black", align="center", baseline
 }
 
 function DrawFillText(ctx, text, x, y, font, color="black", align="center", baseline="alphabetic") {
+    // TODO delete it, already done in the renderer
     ctx.font = font;
     ctx.textAlign = align;
     ctx.textBaseline = baseline;
@@ -391,6 +402,7 @@ function DrawFillText(ctx, text, x, y, font, color="black", align="center", base
 }
 
 function DrawStrokeText(ctx, text, x, y, font, color="black", align="center", baseline="alphabetic") {
+    // TODO delete it, already done in the renderer
     ctx.font = font;
     ctx.textAlign = align;
     ctx.textBaseline = baseline;

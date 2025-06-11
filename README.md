@@ -26,8 +26,8 @@ Engine and examples presents on this project are active on github pages: https:/
   - game.js               # Core Game class
   - gameobjects.js        # GameObject, SpriteObject, AnimationObject, Camera, Pool, Background Layers
   - input.js              # Keyboard, mouse, and gamepad input
-  - ctx_utils.js          # Canvas drawing helpers
-  - utils.js              # Math, vector, and collision utilities
+  - utils_classes.js          # Canvas drawing helpers
+  - utils_math.js              # Math, vector, and collision utilities
   - audioplayer.js        # Audio system
   - htmlmenu.js           # HTML-based menu system
   - box2d_game.js         # Box2D game base class 
@@ -41,16 +41,16 @@ Engine and examples presents on this project are active on github pages: https:/
 ## Getting Started
 
 1. **Clone or Download** this repository.
-2. Create a new `index.html` for your game, and add all the `src` scripts you need to your `engine/` folder (main files: `main.js`, `game.js`, `gameobjects.js`, `input.js`, `ctx_utils.js`, `utils.js`, `audioplayer.js`, `htmlmenu.js`; and for Box2D physics objects: `box2d_game.js`, `box2d_gameobjects.js`, and `box2d_helper.js`):
+2. Create a new `index.html` for your game, and add all the `src` scripts you need to your `engine/` folder (main files: `main.js`, `game.js`, `gameobjects.js`, `input.js`, `utils_classes.js`, `utils_math.js`, `audioplayer.js`, `htmlmenu.js`; and for Box2D physics objects: `box2d_game.js`, `box2d_gameobjects.js`, and `box2d_helper.js`):
 ```html
 <head>
     <!-- ... -->
     <script src="engine/main.js"></script>
-    <script src="engine/utils.js"></script>
+    <script src="engine/utils_math.js"></script>
     <script src="engine/input.js"></script>
     <script src="engine/audioplayer.js"></script>
     <script src="engine/game.js"></script>
-    <script src="engine/ctx_utils.js"></script>
+    <script src="engine/utils_classes.js"></script>
     <script src="engine/gameobjects.js"></script>
     <script src="engine/lib/Box2D.js"></script>
     <!-- add these only if you want to use box2d physics -->

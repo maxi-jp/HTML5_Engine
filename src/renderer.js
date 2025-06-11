@@ -31,16 +31,17 @@ class Renderer {
     Clear() {}
 
     // Draw primitives
-    DrawLine(x1, y1, x2, y2, color=Color.Black(), lineWidth = 1) {}
-    DrawPolygon(points, strokeColor=Color.Black(), lineWidth=1, fill=false, fillColor=Color.Black()) {}
-    DrawRectangle(x, y, w, h, color, stroke=false, lineWidth=1, rot=0) {}
-    DrawStrokeRectangle(x, y, w, h, color, lineWidth, rot=0) {}
-    DrawFillRectangle(x, y, w, h, color, rot=0) {}
-    DrawCircle(x, y, radius, color, stroke=false, lineWidth=1) {}
-    DrawFillCircle(x, y, radius, color) {}
-    DrawStrokeCircle(x, y, radius, color, lineWidth=1) {}
-    DrawFillText(text, x, y, font, color=Color.Black(), align="center", baseline="alphabetic") {}
-    DrawStrokeText(text, x, y, font, color=Color.Black(), align="center", baseline="alphabetic") {}
+    DrawLine(x1, y1, x2, y2, color=Color.black, lineWidth = 1) {}
+    DrawPolygon(points, strokeColor=Color.black, lineWidth=1, fill=false, fillColor=Color.black) {}
+    DrawRectangle(x, y, w, h, color=Color.black, stroke=false, lineWidth=1, rot=0) {}
+    DrawStrokeRectangle(x, y, w, h, color=Color.black, lineWidth=1, rot=0) {}
+    DrawFillRectangle(x, y, w, h, color=Color.black, rot=0) {}
+    DrawCircle(x, y, radius, color=Color.black, stroke=false, lineWidth=1) {}
+    DrawFillCircle(x, y, radius, color=Color.black) {}
+    DrawStrokeCircle(x, y, radius, color=Color.black, lineWidth=1) {}
+    DrawText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic", stroke=false) {}
+    DrawFillText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic") {}
+    DrawStrokeText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic") {}
 
     // Draw sprites
     DrawImage(img, x, y, scaleX, scaleY, rot=0) {}
@@ -78,7 +79,7 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    DrawLine(x1, y1, x2, y2, color=Color.Black(), lineWidth = 1) {
+    DrawLine(x1, y1, x2, y2, color=Color.black, lineWidth = 1) {
         this.ctx.strokeStyle = color;
         this.ctx.lineWidth = lineWidth;
         this.ctx.beginPath();
@@ -87,7 +88,7 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.stroke();
     }
 
-    DrawPolygon(points, strokeColor=Color.Black(), lineWidth=1, fill=false, fillColor=Color.Black()) {
+    DrawPolygon(points, strokeColor=Color.black, lineWidth=1, fill=false, fillColor=Color.black) {
         this.ctx.strokeStyle = strokeColor;
         this.ctx.lineWidth = lineWidth;
         this.ctx.beginPath();
@@ -103,7 +104,7 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.stroke();
     }
 
-    DrawRectangle(x, y, w, h, color, stroke=false, lineWidth=1, rot=0) {
+    DrawRectangle(x, y, w, h, color=Color.black, stroke=false, lineWidth=1, rot=0) {
         if (stroke) {
             this.DrawStrokeRectangle(x, y, w, h, color, lineWidth, rot);
         }
@@ -112,7 +113,7 @@ class Canvas2DRenderer extends Renderer {
         }
     }
     
-    DrawStrokeRectangle(x, y, w, h, color, lineWidth, rot=0) {
+    DrawStrokeRectangle(x, y, w, h, color=Color.black, lineWidth=1, rot=0) {
         this.ctx.strokeStyle = color;
         this.ctx.lineWidth = lineWidth;
         if (rot !== 0) {
@@ -123,11 +124,11 @@ class Canvas2DRenderer extends Renderer {
             this.ctx.restore();
         }
         else {
-            this.ctx.strokeRect(x, y, width, height);
+            this.ctx.strokeRect(x, y, w, h);
         }
     }
 
-    DrawFillRectangle(x, y, w, h, color, rot=0) {
+    DrawFillRectangle(x, y, w, h, color=Color.black, rot=0) {
         this.ctx.fillStyle = color;
         if (rot !== 0) {
             this.ctx.save();
@@ -142,7 +143,7 @@ class Canvas2DRenderer extends Renderer {
     }
 
     
-    DrawCircle(x, y, radius, color, stroke=false, lineWidth=1) {
+    DrawCircle(x, y, radius, color=Color.black, stroke=false, lineWidth=1) {
         if (stroke) {
             this.DrawStrokeCircle(x, y, radius, color, lineWidth);
         }
@@ -151,7 +152,7 @@ class Canvas2DRenderer extends Renderer {
         }
     }
 
-    DrawFillCircle(x, y, radius, color) {
+    DrawFillCircle(x, y, radius, color=Color.black) {
         this.ctx.fillStyle = color;
         this.ctx.beginPath();
         this.ctx.arc(x, y, radius, 0, PI2, false);
@@ -159,7 +160,7 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.closePath();
     }
 
-    DrawStrokeCircle(x, y, radius, color, lineWidth=1) {
+    DrawStrokeCircle(x, y, radius, color=Color.black, lineWidth=1) {
         this.ctx.strokeStyle = color;
         this.ctx.lineWidth = lineWidth;
         this.ctx.beginPath();
@@ -168,7 +169,16 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.closePath();
     }
 
-    DrawFillText(text, x, y, font, color=Color.Black(), align="center", baseline="alphabetic") {
+    DrawText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic", stroke=false) {
+        if (stroke) {
+            this.DrawStrokeText(text, x, y, font, color, align, baseline);
+        }
+        else {
+            this.DrawFillText(text, x, y, font, color, align, baseline);
+        }
+    }
+
+    DrawFillText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic") {
         this.ctx.font = font;
         this.ctx.textAlign = align;
         this.ctx.textBaseline = baseline;
@@ -176,7 +186,7 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.fillText(text, x, y);
     }
 
-    DrawStrokeText(text, x, y, font, color=Color.Black(), align="center", baseline="alphabetic") {
+    DrawStrokeText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic") {
         this.ctx.font = font;
         this.ctx.textAlign = align;
         this.ctx.textBaseline = baseline;
@@ -228,7 +238,7 @@ class WebGLRenderer extends Renderer {
         this.gl = gl;
 
         // auxiliar structure for circle vertices
-        const numSegments = 32;
+        const numSegments = 64;
         this.circleVerts = [];
         for (let i = 0; i <= numSegments; i++) {
             this.circleVerts.push(0, 0);
@@ -265,7 +275,7 @@ class WebGLRenderer extends Renderer {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
     }
 
-    DrawLine(x1, y1, x2, y2, color=Color.Black(), lineWidth=1) {
+    DrawLine(x1, y1, x2, y2, color=Color.black, lineWidth=1) {
         const gl = this.gl;
 
         // buffer for the two points
@@ -302,7 +312,7 @@ class WebGLRenderer extends Renderer {
         gl.deleteBuffer(buffer);
     }
 
-    DrawPolygon(points, strokeColor=Color.Black(), lineWidth=1, fill=false, fillColor=Color.Black()) {
+    DrawPolygon(points, strokeColor=Color.black, lineWidth=1, fill=false, fillColor=Color.black) {
         for (let i = 0; i < points.length; i++) {
             const p1 = points[i];
             const p2 = points[(i + 1) % points.length];
@@ -367,7 +377,7 @@ class WebGLRenderer extends Renderer {
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
     
-    DrawCircle(x, y, radius, color, stroke=false, lineWidth=1) {
+    DrawCircle(x, y, radius, color=Color.black, stroke=false, lineWidth=1) {
         if (stroke) {
             this.DrawStrokeCircle(x, y, radius, color, lineWidth);
         } else {
@@ -375,7 +385,7 @@ class WebGLRenderer extends Renderer {
         }
     }
 
-    DrawFillCircle(x, y, radius, color) {
+    DrawFillCircle(x, y, radius, color=Color.black) {
         const gl = this.gl;
         
         const numSegments = this.circleVerts.length / 2;
@@ -410,7 +420,7 @@ class WebGLRenderer extends Renderer {
         this.circleVerts.shift(); // Remove the center point
     }
 
-    DrawStrokeCircle(x, y, radius, color, lineWidth=1) {
+    DrawStrokeCircle(x, y, radius, color=Color.black, lineWidth=1) {
         const gl = this.gl;
 
         const numSegments = this.circleVerts.length / 2;
@@ -440,7 +450,16 @@ class WebGLRenderer extends Renderer {
         gl.deleteBuffer(buffer);
     }
 
-    DrawFillText(text, x, y, font, color=Color.Black(), align="center", baseline="alphabetic") {
+    DrawText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic", stroke=false) {
+        if (stroke) {
+            this.DrawStrokeText(text, x, y, font, color, align, baseline);
+        }
+        else {
+            this.DrawFillText(text, x, y, font, color, align, baseline);
+        }
+    }
+
+    DrawFillText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic") {
         // TODO refactor this method
         // 1. Create an offscreen canvas
         const textCanvas = document.createElement('canvas');
@@ -452,7 +471,14 @@ class WebGLRenderer extends Renderer {
         // Measure text and resize canvas
         const metrics = ctx.measureText(text);
         const width = Math.ceil(metrics.width) + 8;
-        const height = Math.ceil(parseInt(font, 10)) + 8;
+
+        // Extract font size in px from the font string
+        let fontSize = 16; // fallback default
+        const match = font.match(/(\d+)px/);
+        if (match)
+            fontSize = parseInt(match[1], 10);
+        const height = Math.ceil(fontSize) + 8;
+
         textCanvas.width = width;
         textCanvas.height = height;
 
@@ -500,7 +526,7 @@ class WebGLRenderer extends Renderer {
         gl.deleteTexture(tex);
     }
 
-    DrawStrokeText(text, x, y, font, color=Color.Black(), align="center", baseline="alphabetic") {
+    DrawStrokeText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic") {
         // TODO
     }
 

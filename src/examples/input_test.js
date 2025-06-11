@@ -5,53 +5,41 @@ class InputAsset {
         this.width = width;
         this.height = height;
         this.key = key;
-        this.color = "white";
-        this.pressedColor = "lightgreen";
+        this.color = Color.white;
+        this.pressedColor = Color.FromHTMLColorName("lightgreen");
         this.keyDownCount = 0;
         this.keyUpCount = 0;
         this.pressed = false;
         this.value = value;
     }
 
-    DawAsRectangle(ctx) {
+    DawAsRectangle(renderer) {
         // rectangles fill
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+        renderer.DrawFillRectangle(this.position.x, this.position.y, this.width, this.height, this.color);
 
         // rectangles stroke line
-        ctx.strokeRect(this.position.x, this.position.y, this.width, this.height);
+        renderer.DrawStrokeRectangle(this.position.x, this.position.y, this.width, this.height);
 
         // rectangles text
-        ctx.fillStyle = "black";
-        ctx.font = "bold 32px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(this.key, this.position.x + this.width / 2, this.position.y + this.height - 12);
+        renderer.DrawFillText(this.key, this.position.x + this.width / 2, this.position.y + this.height - 12, "bold 32px Arial", Color.black, "center");
 
-        ctx.font = "normal 12px Arial";
-        ctx.textAlign = "left";
-        ctx.fillText("↓" + this.keyDownCount, this.position.x + 1, this.position.y + 12);
-        ctx.textAlign = "right";
-        ctx.fillText("↑" + this.keyUpCount, this.position.x + this.width - 2, this.position.y + 12);
+        
+        renderer.DrawFillText("↓" + this.keyDownCount, this.position.x + 1, this.position.y + 12, "normal 12px Arial", Color.black, "left");
+        renderer.DrawFillText("↑" + this.keyUpCount, this.position.x + this.width - 2, this.position.y + 12, "normal 12px Arial", Color.black, "right");
     }
 
-    DrawAsCircle(ctx) {
+    DrawAsCircle(renderer) {
         // circle fill
-        DrawFillCircle(ctx, this.position.x, this.position.y, this.width, this.color);
+        renderer.DrawFillCircle(this.position.x, this.position.y, this.width, this.color);
 
         // circle stroke
-        DrawStrokeCircle(ctx, this.position.x, this.position.y, this.width, "black", 1);
+        renderer.DrawStrokeCircle(this.position.x, this.position.y, this.width);
 
         // circles text
-        ctx.fillStyle = "black";
-        ctx.font = "bold 22px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(this.key, this.position.x, this.position.y + 13);
-
-        ctx.font = "normal 10px Arial";
-        ctx.textAlign = "left";
-        ctx.fillText("↓" + this.keyDownCount, this.position.x - 15, this.position.y - 6);
-        ctx.textAlign = "right";
-        ctx.fillText("↑" + this.keyUpCount, this.position.x + 14, this.position.y - 6);
+        renderer.DrawFillText(this.key, this.position.x, this.position.y + 13, "bold 22px Arial", Color.black, "center");
+        
+        renderer.DrawFillText("↓" + this.keyDownCount, this.position.x - 15, this.position.y - 6, "normal 10px Arial", Color.black, "left");
+        renderer.DrawFillText("↑" + this.keyUpCount, this.position.x + 14, this.position.y - 6, "normal 10px Arial", Color.black, "right");
     }
 
     UpdateAsKeyboard() {
@@ -60,7 +48,7 @@ class InputAsset {
         if (this.pressed)
             this.color = this.pressedColor;
         else
-            this.color = "white";
+            this.color = Color.white;
 
         // keydown event
         if (Input.IsKeyDown(this.id))
@@ -76,7 +64,7 @@ class InputAsset {
         if (this.pressed)
             this.color = this.pressedColor;
         else
-            this.color = "white";
+            this.color = Color.white;
 
         // keydown event
         if (Input.IsGamepadButtonDown(0, this.id))
@@ -88,8 +76,8 @@ class InputAsset {
 }
 
 class InputTest extends Game {
-    constructor() {
-        super();
+    constructor(renderer) {
+        super(renderer);
 
         this.keyRects = [
             new InputAsset(KEY_W, new Vector2( 80, 100), 50, 50, "W"),
@@ -127,7 +115,7 @@ class InputTest extends Game {
             new InputAsset("LT", new Vector2(260, 76), 40, 60, "LT"),
             new InputAsset("RT", new Vector2(590, 76), 40, 60, "RT")
         ];
-        this.gamepadTriggers[0].pressedColor = this.gamepadTriggers[1].pressedColor = "rgba(0, 255, 0, 0.5)";
+        this.gamepadTriggers[0].pressedColor = this.gamepadTriggers[1].pressedColor = new Color(0, 1, 0, 0.5);
 
         this.gamepadStickCircles = [
             new InputAsset("LS", new Vector2(370, 230), 40, 40, "LS", {x: 0, y: 0}),
@@ -171,58 +159,50 @@ class InputTest extends Game {
         });
     }
 
-    Draw(ctx) {
-        super.Draw(ctx);
+    Draw() {
+        super.Draw();
 
         // keyboard keys
-        DrawFillText(ctx, "Keyboard WASD events:", 18, 90, "normal 12px Arial", "black", "left");
+        this.renderer.DrawFillText("Keyboard WASD events:", 18, 90, "normal 12px Arial", Color.black, "left");
         this.keyRects.forEach(keyRect => {
-            keyRect.DawAsRectangle(ctx);
-        });
+            keyRect.DawAsRectangle(this.renderer);
+        }, this);
 
         // gamepad buttons
-        DrawFillText(ctx, "Gamepad0 events:", 240, 20, "normal 12px Arial", "black", "left");
+        this.renderer.DrawFillText("Gamepad0 events:", 240, 20, "normal 12px Arial", Color.black, "left");
         this.gamepadButtonCircles.forEach(buttonCircle => {
-            buttonCircle.DrawAsCircle(ctx)
-        });
+            buttonCircle.DrawAsCircle(this.renderer)
+        }, this);
         // gamepad stick
         this.gamepadStickCircles.forEach(stick => {
-            stick.DrawAsCircle(ctx);
+            stick.DrawAsCircle(this.renderer);
 
             // axis values
-            ctx.textAlign = "center";
-            ctx.fillText("x = " + stick.horizontalValue.toFixed(3), stick.position.x, stick.position.y + 22);
-            ctx.fillText("y = " + stick.verticalValue.toFixed(3), stick.position.x, stick.position.y + 30);
+            this.renderer.DrawFillText("x = " + stick.horizontalValue.toFixed(3), stick.position.x, stick.position.y + 22, "normal 12px Arial", Color.black, "center");
+            this.renderer.DrawFillText("y = " + stick.verticalValue.toFixed(3), stick.position.x, stick.position.y + 30, "normal 12px Arial", Color.black, "center");
 
             // red dot
-            DrawFillCircle(ctx, stick.position.x + (stick.value.x * 40), stick.position.y + (stick.value.y * 40), 3, "red");
-        })
+            this.renderer.DrawFillCircle(stick.position.x + (stick.value.x * 40), stick.position.y + (stick.value.y * 40), 3, Color.red);
+        }, this)
         // gamepad triggers
-        this.gamepadTriggers.forEach(trigger => {            
-            ctx.fillStyle = 'rgba(0, 0, 255, 1)';
-            ctx.fillRect(trigger.position.x, trigger.position.y, trigger.width, trigger.value * trigger.height);
+        this.gamepadTriggers.forEach(trigger => {     
+            this.renderer.DrawFillRectangle(trigger.position.x, trigger.position.y, trigger.width, trigger.value * trigger.height, Color.blue);
 
-            trigger.DawAsRectangle(ctx);
+            trigger.DawAsRectangle(this.renderer);
 
-            ctx.textAlign = "center";
-            ctx.fillText(trigger.value.toFixed(3), trigger.position.x + trigger.width / 2, trigger.position.y + trigger.height - 2);
-        });
+            this.renderer.DrawFillText(trigger.value.toFixed(3), trigger.position.x + trigger.width / 2, trigger.position.y + trigger.height - 2, "normal 12px Arial", Color.black, "center");
+        }, this);
 
         // mouse info (position and state)
-        ctx.beginPath();
-        ctx.arc(Input.mouse.x, Input.mouse.y, 10, 0, Math.PI * 2, false);
-        ctx.fillStyle = "white";
-        if (Input.IsMousePressed())
-            ctx.fillStyle = "red";
-        ctx.fill();
-        ctx.stroke();
+        if (Input.IsMousePressed()) {
+            renderer.DrawFillCircle(Input.mouse.x, Input.mouse.y, 10, Color.red);
+        }
+        else {
+            renderer.DrawFillCircle(Input.mouse.x, Input.mouse.y, 10, Color.white);
+        }
+        renderer.DrawStrokeCircle(Input.mouse.x, Input.mouse.y, 10, Color.black, 1);
 
-        ctx.fillStyle = "black";
-        ctx.fillText("↓" + this.mouseCounts.down, Input.mouse.x + 12, Input.mouse.y - 4);
-        ctx.fillText("↑" + this.mouseCounts.up, Input.mouse.x + 12, Input.mouse.y + 12);
+        this.renderer.DrawFillText("↓" + this.mouseCounts.down, Input.mouse.x + 12, Input.mouse.y - 4, "normal 12px Arial", Color.black, "center");
+        this.renderer.DrawFillText("↑" + this.mouseCounts.up, Input.mouse.x + 12, Input.mouse.y + 12, "normal 12px Arial", Color.black, "center");
     }
 }
-
-// initialize the game
-if (game === null)
-    game = new InputTest();

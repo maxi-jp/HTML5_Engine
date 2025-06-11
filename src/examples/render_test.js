@@ -28,6 +28,7 @@ class BasicGame extends Game {
         this.pinkCircle = null;
         this.snakeSprite = null;
         this.portalSprite = null;
+        this.textLabel = null;
 
         // auxiliar
         this.grey = new Color(0.5, 0.5, 0.5, 1);
@@ -41,7 +42,7 @@ class BasicGame extends Game {
         this.gameObjects.push(this.redRect);
 
         // a yellow 50x50px rectangle game object
-        this.yellowRect = new RectangleGO(new Vector2(this.screenHalfWidth, this.screenHalfHeight), 50, 50, Color.Yellow(), true, 4);
+        this.yellowRect = new RectangleGO(new Vector2(this.screenHalfWidth, this.screenHalfHeight), 50, 50, Color.yellow, true, 4);
         this.gameObjects.push(this.yellowRect);
 
         // SSAnimationObjectBasic
@@ -56,7 +57,7 @@ class BasicGame extends Game {
         this.blackRect = new Rectangle(new Vector2(0, this.screenHalfHeight), this.screenWidth, this.screenHalfHeight);
         
         // blue fill circle
-        this.blueCircle = new Circle(new Vector2(400, 100), 40, Color.Blue(), );
+        this.blueCircle = new Circle(new Vector2(400, 100), 40, Color.blue);
         // purple stroke circle
         this.pinkCircle = new Circle(new Vector2(400, 100), 40, new Color(1, 0, 1, 1), true, 4);
 
@@ -64,6 +65,9 @@ class BasicGame extends Game {
         this.snakeSprite = new Sprite(this.graphicAssets.snake.img, new Vector2(100, 100), 0, 1);
         // Portal sprite
         this.portalSprite = new Sprite(this.graphicAssets.portal.img, new Vector2(100, 300), 0, 1);
+
+        // a label text
+        this.textLabel = new TextLabel("a white text :)", new Vector2(this.screenHalfWidth, this.screenHeight - 10), "20px Comic Sans MS", Color.white, "center");
     }
 
     Update(deltaTime) {
@@ -100,5 +104,7 @@ class BasicGame extends Game {
         this.pinkCircle.Draw(this.renderer);
 
         this.renderer.DrawFillText("Watson!!! O_O", this.screenHalfWidth, 20, "20px Comic Sans MS");
+
+        this.textLabel.Draw(renderer);
     }
 }
