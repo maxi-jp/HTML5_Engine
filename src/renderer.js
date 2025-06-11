@@ -45,6 +45,8 @@ class Renderer {
     // Draw sprites
     DrawImage(img, x, y, scaleX, scaleY, rot=0) {}
     DrawImageBasic(img, x, y, w, h) {}
+    DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0) {}
+    DrawImageSectionBasic(img, x, y, sx, sy, sw, sh, scaleX, scaleY) {}
 }
 
 class Canvas2DRenderer extends Renderer {
@@ -198,12 +200,39 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.drawImage(img, x, y, w, h);
     }
 
+    DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0) {
+        this.ctx.save();
+
+        this.ctx.translate(x, y);
+        this.ctx.rotate(rot);
+        this.ctx.scale(scaleX, scaleY);
+        
+        if (debugMode) {
+            this.ctx.strokeStyle = "red";
+            this.ctx.strokeRect(-sw/2, -sh/2, sw, sh);
+        }
+
+        this.ctx.drawImage(img, sx, sy, sw, sh, -sw/2, -sh/2, sw, sh);
+
+        this.ctx.restore();
+    }
+
+    DrawImageSectionBasic(img, x, y, sx, sy, sw, sh, scaleX, scaleY) {
+        this.ctx.drawImage(img, sx, sy, sw, sh, x, y, sw * scaleX, sh * scaleY);
+    }
 }
 
 class WebGLRenderer extends Renderer {
     constructor(canvas, gl, config) {
         super(canvas, config);
         this.gl = gl;
+
+        // auxiliar structure for circle vertices
+        const numSegments = 32;
+        this.circleVerts = [];
+        for (let i = 0; i <= numSegments; i++) {
+            this.circleVerts.push(0, 0);
+        }
 
         // enable blending for pngs transparency
         this.gl.enable(this.gl.BLEND);
@@ -348,18 +377,20 @@ class WebGLRenderer extends Renderer {
 
     DrawFillCircle(x, y, radius, color) {
         const gl = this.gl;
-        const numSegments = 32;
-        const verts = [];
-        for (let i = 0; i <= numSegments; i++) {
-            const angle = (i / numSegments) * 2 * Math.PI;
-            verts.push(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius);
+        
+        const numSegments = this.circleVerts.length / 2;
+        for (let i = 0; i < this.circleVerts.length; i += 2) {
+            const angle = (i / numSegments) * PI2;
+            this.circleVerts[i] = x + Math.cos(angle) * radius;
+            this.circleVerts[i + 1] = y + Math.sin(angle) * radius;
         }
-        // Center point
-        verts.unshift(x, y);
+
+        // insert center point into the circle vertices
+        this.circleVerts.unshift(x, y);
 
         const buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STREAM_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.circleVerts), gl.STREAM_DRAW);
 
         // Use the shader with this custom buffer
         this.basicRectShader.UseForCustomBuffer(gl, buffer);
@@ -371,23 +402,27 @@ class WebGLRenderer extends Renderer {
         gl.uniform2f(this.basicRectShader.sizeLoc, 1, 1);
         gl.uniform4fv(this.basicRectShader.colorLoc, color.rgba);
 
-        gl.drawArrays(gl.TRIANGLE_FAN, 0, verts.length / 2);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, numSegments);
 
         gl.deleteBuffer(buffer);
+
+        this.circleVerts.shift();
+        this.circleVerts.shift(); // Remove the center point
     }
 
     DrawStrokeCircle(x, y, radius, color, lineWidth=1) {
         const gl = this.gl;
-        const numSegments = 32;
-        const verts = [];
-        for (let i = 0; i <= numSegments; i++) {
-            const angle = (i / numSegments) * 2 * Math.PI;
-            verts.push(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius);
+
+        const numSegments = this.circleVerts.length / 2;
+        for (let i = 0; i < this.circleVerts.length; i += 2) {
+            const angle = (i / numSegments) * PI2;
+            this.circleVerts[i] = x + Math.cos(angle) * radius;
+            this.circleVerts[i + 1] = y + Math.sin(angle) * radius;
         }
 
         const buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STREAM_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.circleVerts), gl.STREAM_DRAW);
 
         // Use the shader with this custom buffer
         this.basicRectShader.UseForCustomBuffer(gl, buffer);
@@ -400,7 +435,7 @@ class WebGLRenderer extends Renderer {
         gl.uniform4fv(this.basicRectShader.colorLoc, color.rgba);
 
         gl.lineWidth(lineWidth); // May be ignored on most platforms
-        gl.drawArrays(gl.LINE_STRIP, 0, verts.length / 2);
+        gl.drawArrays(gl.LINE_STRIP, 0, numSegments);
 
         gl.deleteBuffer(buffer);
     }
@@ -492,7 +527,57 @@ class WebGLRenderer extends Renderer {
     DrawImageBasic(img, x, y, w, h) {
         this.DrawImage(img, x, y, w / img.width, h / img.height);
     }
-    
+
+    DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0) {
+        const gl = this.gl;
+        const shader = this.spriteShader;
+
+        // Calculate normalized texture coordinates for the section
+        const texLeft   = sx / img.width;
+        const texTop    = sy / img.height;
+        const texRight  = (sx + sw) / img.width;
+        const texBottom = (sy + sh) / img.height;
+
+        // Build texcoord buffer for the section (two triangles)
+        const texcoords = new Float32Array([
+            texLeft,  texTop,
+            texRight, texTop,
+            texLeft,  texBottom,
+            texLeft,  texBottom,
+            texRight, texTop,
+            texRight, texBottom,
+        ]);
+
+        // Use the shader and set up position buffer
+        shader.Use(gl);
+
+        // Override the texcoord buffer for this draw
+        gl.bindBuffer(gl.ARRAY_BUFFER, shader.texcoordBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, texcoords, gl.DYNAMIC_DRAW);
+
+        // Set uniforms
+        gl.uniform2f(shader.texResolutionLoc, this.canvas.width, this.canvas.height);
+        gl.uniform2f(shader.texTranslationLoc, x, y);
+        gl.uniform1f(shader.texRotationLoc, rot || 0);
+        gl.uniform2f(shader.texSizeLoc, sw * scaleX, sh * scaleY);
+
+        // Bind texture
+        const tex = this.GetTexture(img);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.uniform1i(shader.texSamplerLoc, 0);
+
+        // Draw
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+        // Restore the default texcoords for future draws
+        gl.bindBuffer(gl.ARRAY_BUFFER, shader.texcoordBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(shader.texcoords), gl.STATIC_DRAW);
+    }
+
+    DrawImageSectionBasic(img, x, y, sx, sy, sw, sh, scaleX, scaleY) {
+        this.DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, 0);
+    }   
 }
 
 // #region WebGL shader objects

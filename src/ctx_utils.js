@@ -231,26 +231,13 @@ class Sprite {
     DrawBasic(renderer) {
         renderer.DrawImageBasic(this.img, this.position.x, this.position.y, this.img.width * this.scale.x, this.img.height * this.scale.y);
     }
-
-    DrawSection(ctx, sx, sy, sw, sh) {
-        ctx.save();
-
-        ctx.translate(this.position.x, this.position.y);
-        ctx.rotate(this.rotation);
-        ctx.scale(this._computedScale.x, this._computedScale.y);
-        
-        if (debugMode) {
-            ctx.strokeStyle = "red";
-            ctx.strokeRect(-sw/2, -sh/2, sw, sh);
-        }
-
-        ctx.drawImage(this.img, sx, sy, sw, sh, -sw/2, -sh/2, sw, sh);
-
-        ctx.restore();
+    
+    DrawSection(renderer, sx, sy, sw, sh) {
+        renderer.DrawImageSection(this.img, this.position.x, this.position.y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y, this.rotation);
     }
 
-    DrawSectionBasic(ctx, sx, sy, sw, sh) {
-        ctx.drawImage(this.img, sx, sy, sw, sh, this.position.x, this.position.y, sw * this.scale.x, sh * this.scale.y);
+    DrawSectionBasic(sx, sy, sw, sh) {
+        renderer.DrawImageSectionBasic(this.img, this.position.x, this.position.y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y);
     }
 }
 
@@ -261,12 +248,12 @@ class SpriteSection extends Sprite {
         this.rect = rect;
     }
 
-    Draw(ctx) {
-        this.DrawSection(ctx, this.rect.x, this.rect.y, this.rect.w, this.rect.h);
+    Draw(renderer) {
+        this.DrawSection(renderer, this.rect.x, this.rect.y, this.rect.w, this.rect.h);
     }
 
-    DrawBasic(ctx) {
-        this.DrawSectionBasic(ctx, this.rect.x, this.rect.y, this.rect.w, this.rect.h);
+    DrawBasic(renderer) {
+        this.DrawSectionBasic(renderer, this.rect.x, this.rect.y, this.rect.w, this.rect.h);
     }
 }
 

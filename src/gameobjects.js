@@ -147,7 +147,7 @@ class SSAnimationObjectBasic extends SpriteObject {
         this.actualFrame = 0;
         this.actualFrameCountTime = 0;
 
-        this.spritePosition = new Vector2(0, 0);
+        this.spritePosition = new Vector2(0, 0); // only used if debugMode
     }
     
     Start() {}
@@ -167,12 +167,12 @@ class SSAnimationObjectBasic extends SpriteObject {
         );
     }
 
-    Draw(ctx) {
-        this.sprite.DrawSection(ctx, this.actualFrame * this.frameWidth, this.actualAnimation * this.frameHeight, this.frameWidth, this.frameHeight, 0, 0, this.frameWidth, this.frameHeight);
+    Draw(renderer) {
+        this.sprite.DrawSection(renderer, this.actualFrame * this.frameWidth, this.actualAnimation * this.frameHeight, this.frameWidth, this.frameHeight, 0, 0, this.frameWidth, this.frameHeight);
         
         if (debugMode) {
-            ctx.strokeStyle = "red";
-            ctx.strokeRect(this.spritePosition.x, this.spritePosition.y, this.frameWidth * this.scale.x, this.frameHeight * this.scale.y);
+            renderer.ctx.strokeStyle = "red";
+            renderer.ctx.strokeRect(this.spritePosition.x, this.spritePosition.y, this.frameWidth * this.scale.x, this.frameHeight * this.scale.y);
         }
     }
 

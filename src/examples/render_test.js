@@ -9,12 +9,18 @@ class BasicGame extends Game {
             portal: {
                 path: "src/examples/common_assets/portal2.png",
                 img: null
-            }
+            },
+            floppy: {
+                path: "./src/examples/floppyderp/assets/player_sprites.png",
+                img: null
+            },
         };
 
         // game objects
         this.redRect = null;
         this.yellowRect = null;
+        this.animationObjectBasic1 = null;
+        this.animationObjectBasic2 = null;
 
         // other objects
         this.blackRect = null;
@@ -37,6 +43,14 @@ class BasicGame extends Game {
         // a yellow 50x50px rectangle game object
         this.yellowRect = new RectangleGO(new Vector2(this.screenHalfWidth, this.screenHalfHeight), 50, 50, Color.Yellow(), true, 4);
         this.gameObjects.push(this.yellowRect);
+
+        // SSAnimationObjectBasic
+        this.animationObjectBasic1 = new SSAnimationObjectBasic(new Vector2(460, this.screenHalfHeight), 0, 1, this.graphicAssets.floppy.img, 24, 24, [10, 10], 1 / 12);
+        this.gameObjects.push(this.animationObjectBasic1);
+
+        this.animationObjectBasic2 = new SSAnimationObjectBasic(new Vector2(560, this.screenHalfHeight), 0, 2, this.graphicAssets.floppy.img, 24, 24, [10, 10], 1 / 8);
+        this.gameObjects.push(this.animationObjectBasic2);
+        this.animationObjectBasic2.PlayAnimationLoop(1);
 
         // big black background rectangle
         this.blackRect = new Rectangle(new Vector2(0, this.screenHalfHeight), this.screenWidth, this.screenHalfHeight);
@@ -61,6 +75,15 @@ class BasicGame extends Game {
         this.portalSprite.rotation += 0.33 * deltaTime;
 
         this.pinkCircle.radius = (Math.sin(totalTime) + 1) * this.blueCircle.radius * 0.5;
+
+        // update the scale of the animationObjectBasic1
+        const newScale = (Math.sin(totalTime) + 1) * 2;
+        this.animationObjectBasic1.scale = newScale;
+
+        // update the position and rotation of the animationObjectBasic2
+        const newPosY = Math.sin(totalTime) * 20;
+        this.animationObjectBasic2.position.Set(this.animationObjectBasic2.x, this.screenHalfHeight + newPosY);
+        this.animationObjectBasic2.rotation += 0.2 * deltaTime;
     }
 
     Draw() {
