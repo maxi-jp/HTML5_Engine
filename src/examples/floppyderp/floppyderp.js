@@ -11,10 +11,10 @@ var FloppyDerpMenuState = {
 }
 
 class FloppyDerp extends Game {
-    constructor() {
-        super();
+    constructor(renderer) {
+        super(renderer);
 
-        this.showDebug = true;
+        this.showDebug = false;
         this.graphicAssets = {
             player: {
                 path: "./src/examples/floppyderp/assets/player_sprites.png",
@@ -87,9 +87,9 @@ class FloppyDerp extends Game {
 
         // background colors
         this.bgColors = [
-            new Color(128, 0, 255),
-            new Color(0, 255, 255),
-            new Color(255, 196, 0)
+            new Color(0.5, 0, 1),
+            new Color(0, 1, 1),
+            new Color(1, 0.77, 0)
         ]
         this.bgColorMixed = Color.Black();
         this.bgColorVar = 0.0; // color mix in the current step
@@ -285,38 +285,39 @@ class FloppyDerp extends Game {
         }
     }
 
-    Draw(ctx) {
+    Draw() {
+        const ctx = this.renderer.ctx;
         // background
-        DrawFillRectangle(ctx, 0, 0, canvas.width, canvas.height, "black");
-        this.DrawBg(ctx);
+        this.renderer.DrawFillRectangle(0, 0, canvas.width, canvas.height, Color.black);
+        this.DrawBg();
         
         switch(this.gameState) {
             case 0: // menú
-                this.DrawMenu(ctx);
+                this.DrawMenu();
                 break;
             
             case 1: // juego
                 // tubes
                 for (let i = 0; i < this.tubes.length; i++)
-                    this.tubes[i].Draw(ctx);
+                    this.tubes[i].Draw(renderer);
 
-                this.player.Draw(ctx);
+                this.player.Draw(renderer);
                 
                 // score
-                this.scoreLabel.Draw(ctx);
+                this.scoreLabel.Draw(renderer);
                 
                 break;
             
             case 2: // menú GameOver
-                this.gameoverSprite.Draw(ctx);
+                this.gameoverSprite.Draw(renderer);
                 
                 if (this.newRecord) {
-                    this.newRecordLabel.Draw(ctx);
+                    this.newRecordLabel.Draw(renderer);
                 }
                 break;
         }
             
-        this.soundMuteSprite.DrawSection(ctx, this.audioActive ? 0 : 32, 0, 32, 32);
+        this.soundMuteSprite.DrawSection(this.renderer, this.audioActive ? 0 : 32, 0, 32, 32);
         
         if (this.showDebug) {
             // draw gameplay variables
@@ -339,19 +340,23 @@ class FloppyDerp extends Game {
         }
     }
 
-    DrawBg(ctx) {
+    DrawBg() {
         // compute the actual background color
         const actualColor = this.bgColors[this.bgColorStep];
         const nextColor = this.bgColors[(this.bgColorStep + 1) % this.bgColors.length];
         
         this.bgColorMixed = Color.Lerp(actualColor, nextColor, this.bgColorVar);
 
-        var lGrad = ctx.createLinearGradient(320, 0, 320, this.screenWidth);
-        lGrad.addColorStop(0.0, '#040311');
-        lGrad.addColorStop(0.05, "black");
-        lGrad.addColorStop(1.0, this.bgColorMixed);
-        ctx.fillStyle = lGrad;
-        ctx.fillRect(0, 0, this.screenWidth, this.screenHeight);
+        // var lGrad = this.renderer.ctx.createLinearGradient(320, 0, 320, this.screenWidth);
+        var lGrad = new LinearGradient(renderer, 320, 0, 320, this.screenWidth, [
+            [ 0.0, Color.FromHex('#040311') ],
+            [ 0.05, Color.Black() ],
+            [ 1.0, this.bgColorMixed ]
+        ])
+        // lGrad.addColorStop(0.0, '#040311');
+        // lGrad.addColorStop(0.05, "black");
+        // lGrad.addColorStop(1.0, this.bgColorMixed);
+        this.renderer.DrawGradientRectangle(0, 0, this.screenWidth, this.screenHeight, lGrad);
     }
 
     UpdateMenu(deltaTime) {
@@ -372,20 +377,20 @@ class FloppyDerp extends Game {
         }
     }
 
-    DrawMenu(ctx) {
+    DrawMenu() {
         if (this.menuState == 0) {
             // title sprite
-            this.titleSprite.Draw(ctx);
+            this.titleSprite.Draw(this.renderer);
         }
         else if (this.menuState == 1) {
             // title and credits sprites
-            this.titleSprite.Draw(ctx);
-            this.creditsSprite.Draw(ctx);
+            this.titleSprite.Draw(this.renderer);
+            this.creditsSprite.Draw(this.renderer);
         }
         else if (this.menuState == 2) {  
             // title and credits sprites                  
-            this.titleSprite.Draw(ctx);
-            this.creditsSprite.Draw(ctx);
+            this.titleSprite.Draw(this.renderer);
+            this.creditsSprite.Draw(this.renderer);
         }
     }
     
@@ -485,8 +490,8 @@ class FloppyDerpPlayer extends SSAnimationObjectBasic {
         }
     }
 
-    Draw(ctx) {
-        super.Draw(ctx);
+    Draw(renderer) {
+        super.Draw(renderer);
     }
     
     Reset() {
@@ -528,18 +533,14 @@ class FloppyDerpTube extends GameObject {
         this.img3 = tubeImg3;
     }
 
-    Draw(ctx) {
-        ctx.drawImage(this.img1, this.position.x, this.t1Y);
-        ctx.drawImage(this.img3, this.position.x, this.t1Y + 32, 32, 300);
-        ctx.drawImage(this.img2, this.position.x, this.t2Y);
-        ctx.drawImage(this.img3, this.position.x, this.t2Y, 32, -300);
+    Draw(renderer) {
+        renderer.DrawImageBasic(this.img1, this.position.x, this.t1Y);
+        renderer.DrawImageBasic(this.img3, this.position.x, this.t1Y + 32, 32, 300);
+        renderer.DrawImageBasic(this.img2, this.position.x, this.t2Y);
+        renderer.DrawImageBasic(this.img3, this.position.x, this.t2Y, 32, -300);
     }
 
     Update(deltaTime) {
         this.position.x -= game.scrollVelocity * deltaTime;
     }
 }
-
-// initialize the game
-if (game === null)
-    game = new FloppyDerp();

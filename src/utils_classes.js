@@ -139,10 +139,10 @@ class Color {
         const stepMin1 = 1 - step;
 
         return new Color(
-            Math.round((stepMin1 * from.r) + (step * to.r)),
-            Math.round((stepMin1 * from.g) + (step * to.g)),
-            Math.round((stepMin1 * from.b) + (step * to.b)),
-            Math.round((stepMin1 * from.a) + (step * to.a))
+            (stepMin1 * from.r) + (step * to.r),
+            (stepMin1 * from.g) + (step * to.g),
+            (stepMin1 * from.b) + (step * to.b),
+            (stepMin1 * from.a) + (step * to.a)
         );
     }
 
@@ -265,16 +265,28 @@ class SpriteSection extends Sprite {
 }
 
 class LinearGradient {
-    // TODO refactor this class to work with the new renderers
-    constructor(x0, y0, x1, y1, colorStops) {
-        this.gradient = ctx.createLinearGradient(x0, y0, x1, y1);
-        colorStops.forEach(colorStop => {
-            this.addColorStop(colorStop[0], colorStop[1]);
-        });
+    constructor(renderer, x0, y0, x1, y1, colorStops=[]) {
+        this.x0 = x0;
+        this.y0 = y0;
+        this.x1 = x1;
+        this.y1 = y1;
+        this.colorStops = [];
+
+        colorStops.forEach(cs => this.addColorStop(cs[0], cs[1]));
+
+        if (renderer.ctx) {
+            this.gradient = ctx.createLinearGradient(x0, y0, x1, y1);
+            colorStops.forEach(cs => {
+                this.gradient.addColorStop(cs[0], cs[1]);
+            });
+        }
+        else if (renderer instanceof WebGLRenderer) {
+            this.webglTexture = GradientRectShader.CreateGradientTexture(renderer.gl, this.colorStops);
+        }
     }
 
     addColorStop(offset, color) {
-        this.gradient.addColorStop(offset, color);
+        this.colorStops.push({ offset, color: color });
     }
 }
 

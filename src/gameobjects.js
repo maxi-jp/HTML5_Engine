@@ -126,12 +126,12 @@ class SpriteObject extends GameObject {
     Start() {}
     Update(deltaTime) {}
 
-    Draw(ctx) {
-        this.sprite.Draw(ctx);
+    Draw(renderer) {
+        this.sprite.Draw(renderer);
     }
 
-    DrawSection(ctx, sx, sy, sw, sh) {
-        this.sprite.DrawSection(ctx, sx, sy, sw, sh);
+    DrawSection(renderer, sx, sy, sw, sh) {
+        this.sprite.DrawSection(renderer, sx, sy, sw, sh);
     }
 }
 
