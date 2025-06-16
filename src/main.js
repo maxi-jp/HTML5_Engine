@@ -27,14 +27,16 @@ function LoadImages(assets, onloaded) {
     
     let imagesToLoad = 0;
     
-    const onload = () => --imagesToLoad === 0 && onloaded();
+    // const onload = () => --imagesToLoad === 0 && onloaded();
 	
-	// const onload = function() {
-    //     --imagesToLoad;
-    //     if (imagesToLoad === 0) {
-    //         onloaded();
-    //     }
-    // }
+    const onload = function(img) {
+        img.halfWidth = img.width / 2;
+        img.halfHeight = img.height / 2;
+        --imagesToLoad;
+        if (imagesToLoad === 0) {
+            onloaded();
+        }
+    }
 
     // iterate through the object of assets and load every image
     for (let asset in assets) {
@@ -44,7 +46,7 @@ function LoadImages(assets, onloaded) {
             // create the new image and set its path and onload event
             const img = assets[asset].img = new Image;
             img.src = assets[asset].path;
-            img.onload = onload;
+            img.onload = () => onload(img);
         }
     }
 }

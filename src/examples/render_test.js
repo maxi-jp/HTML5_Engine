@@ -36,9 +36,9 @@ class BasicGame extends Game {
     
     Start() {
         super.Start();
-        
+
         // a red 100x100px rectangle game object
-        this.redRect = new RectangleGO(new Vector2(this.screenHalfWidth, this.screenHalfHeight));
+        this.redRect = new RectangleGO(new Vector2(this.screenHalfWidth, this.screenHalfHeight), 120, 80);
         this.gameObjects.push(this.redRect);
 
         // a yellow 50x50px rectangle game object
@@ -73,7 +73,8 @@ class BasicGame extends Game {
     Update(deltaTime) {
         super.Update(deltaTime);
 
-        this.redRect.rotation += 1 * deltaTime;
+        // this.redRect.rotation += 1 * deltaTime;
+        this.redRect.rotation = Input.mouse.x * 0.01;
         this.yellowRect.rotation -= 1.5 * deltaTime;
 
         this.portalSprite.rotation += 0.33 * deltaTime;

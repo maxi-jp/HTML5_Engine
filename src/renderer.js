@@ -545,6 +545,9 @@ class WebGLRenderer extends Renderer {
         const gl = this.gl;
         this.spriteShader.Use(gl);
         
+        // Set viewport and clear if needed
+        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        
         // Set uniforms using the spriteShader's locations
         gl.uniform2f(this.spriteShader.texResolutionLoc, this.canvas.width, this.canvas.height);
         gl.uniform2f(this.spriteShader.texTranslationLoc, x, y);
@@ -562,7 +565,7 @@ class WebGLRenderer extends Renderer {
     }
 
     DrawImageBasic(img, x, y, w=img.width, h=img.height) {
-        this.DrawImage(img, x, y, w / img.width, h / img.height);
+        this.DrawImage(img, x + w / 2, y + h / 2, w / img.width, h / img.height);
     }
 
     DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0) {
@@ -658,15 +661,15 @@ class BasicRectShader {
             uniform float u_rotation;
             uniform vec2 u_size;
             void main() {
-                // Rotate
+                // Scale - Rotate
                 float cosR = cos(u_rotation);
                 float sinR = sin(u_rotation);
+                vec2 scaled = a_position * u_size;
                 vec2 rotated = vec2(
-                    a_position.x * cosR - a_position.y * sinR,
-                    a_position.x * sinR + a_position.y * cosR
+                    scaled.x * cosR - scaled.y * sinR,
+                    scaled.x * sinR + scaled.y * cosR
                 );
-                // Scale and translate to screen
-                vec2 pos = rotated * u_size + u_translation;
+                vec2 pos = rotated + u_translation;
                 // Convert to clipspace
                 vec2 zeroToOne = pos / u_resolution;
                 vec2 zeroToTwo = zeroToOne * 2.0;
@@ -751,15 +754,15 @@ class SpriteShader {
             uniform vec2 u_size;
             varying vec2 v_texcoord;
             void main() {
-                // Rotate
+                // Scale first, then rotate
                 float cosR = cos(u_rotation);
                 float sinR = sin(u_rotation);
+                vec2 scaled = a_position * u_size;
                 vec2 rotated = vec2(
-                    a_position.x * cosR - a_position.y * sinR,
-                    a_position.x * sinR + a_position.y * cosR
+                    scaled.x * cosR - scaled.y * sinR,
+                    scaled.x * sinR + scaled.y * cosR
                 );
-                // Scale and translate to screen
-                vec2 pos = rotated * u_size + u_translation;
+                vec2 pos = rotated + u_translation;
                 // Convert to clipspace
                 vec2 zeroToOne = pos / u_resolution;
                 vec2 zeroToTwo = zeroToOne * 2.0;
@@ -840,15 +843,15 @@ class GradientRectShader {
             uniform vec2 u_size;
             varying vec2 v_localPos;
             void main() {
-                // Rotate
+                // Scale first, then rotate
                 float cosR = cos(u_rotation);
                 float sinR = sin(u_rotation);
+                vec2 scaled = a_position * u_size;
                 vec2 rotated = vec2(
-                    a_position.x * cosR - a_position.y * sinR,
-                    a_position.x * sinR + a_position.y * cosR
+                    scaled.x * cosR - scaled.y * sinR,
+                    scaled.x * sinR + scaled.y * cosR
                 );
-                // Scale and translate to screen
-                vec2 pos = rotated * u_size + u_translation;
+                vec2 pos = rotated + u_translation;
                 // Convert to clipspace
                 vec2 zeroToOne = pos / u_resolution;
                 vec2 zeroToTwo = zeroToOne * 2.0;

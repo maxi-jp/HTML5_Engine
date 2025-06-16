@@ -168,8 +168,8 @@ class Sprite {
 
     constructor(img, position, rotation, scale) {
         this.img = img;
-        this.img.halfWidth = img.width / 2;
-        this.img.halfHeight = img.height / 2;
+        // this.img.halfWidth = img.width / 2;
+        // this.img.halfHeight = img.height / 2;
         this.position = position;
         this.rotation = rotation;
         this.scale = scale;
