@@ -16,6 +16,8 @@ class BasicGame extends Game {
             },
         };
 
+        this.config.imageSmoothingEnabled = false;
+
         // game objects
         this.redRect = null;
         this.yellowRect = null;

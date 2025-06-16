@@ -1,17 +1,10 @@
 class Renderer {
     _width = 640;
     _height = 480;
+    _imageSmoothingEnabled = true;
 
-    constructor(canvas, config) {
+    constructor(canvas) {
         this.canvas = canvas;
-        this.config = {
-            imageSmoothingEnabled: true,
-        };
-        // config example:
-        // {
-        //     imageSmoothingEnabled: true, // enable/disable image smoothing on the canvas context
-        // }
-        Object.assign(this.config, config);
     }
 
     get width() {
@@ -20,12 +13,18 @@ class Renderer {
     get height() {
         return this._height;
     }
+    get imageSmoothingEnabled() {
+        return this._imageSmoothingEnabled;
+    }
 
     set width(value) {
         this.canvas.width = value;
     }
     set height(value) {
         this.canvas.height = value;
+    }
+    set imageSmoothingEnabled(value) {
+        this._imageSmoothingEnabled = value;
     }
 
     Clear() {}
@@ -59,25 +58,20 @@ class Canvas2DRenderer extends Renderer {
     constructor(canvas, config) {
         super(canvas, config);
         this.ctx = canvas.getContext("2d");
-
-        if (this.config.imageSmoothingEnabled !== undefined) {
-            this.ctx.imageSmoothingEnabled = this.config.imageSmoothingEnabled;
-        }
     }
 
     set width(value) {
         this.canvas.width = value;
-
-        if (this.config.imageSmoothingEnabled !== undefined) {
-            this.ctx.imageSmoothingEnabled = this.config.imageSmoothingEnabled;
-        }
+        this.ctx.imageSmoothingEnabled = this._imageSmoothingEnabled;
     }
     set height(value) {
         this.canvas.height = value;
-        
-        if (this.config.imageSmoothingEnabled !== undefined) {
-            this.ctx.imageSmoothingEnabled = this.config.imageSmoothingEnabled;
-        }
+        this.ctx.imageSmoothingEnabled = this._imageSmoothingEnabled;
+    }
+
+    set imageSmoothingEnabled(value) {
+        this._imageSmoothingEnabled = value;
+        this.ctx.imageSmoothingEnabled = this._imageSmoothingEnabled;
     }
 
     Clear() {
@@ -263,18 +257,30 @@ class WebGLRenderer extends Renderer {
         this.gradientRectShader = new GradientRectShader(this.gl);
     }
 
+    set width(value) {
+        this.canvas.width = value;
+        this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+    }
+    set height(value) {
+        this.canvas.height = value;
+        this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+    }
+
     GetTexture(img) {
         // helper function to create and cache textures from images
         if (!img._webglTexture) {
             const gl = this.gl;
             const tex = gl.createTexture();
+
             gl.bindTexture(gl.TEXTURE_2D, tex);
             gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true); // bowsers may use premultiplied alpha when uploading pngs
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, this._imageSmoothingEnabled ? gl.LINEAR : gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, this._imageSmoothingEnabled ? gl.LINEAR : gl.NEAREST);
+
             img._webglTexture = tex;
         }
 
@@ -284,6 +290,8 @@ class WebGLRenderer extends Renderer {
     Clear() {
         this.gl.clearColor(0, 0, 0, 0); // TODO delete this after testing different pngs
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+        
+        this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     }
 
     DrawLine(x1, y1, x2, y2, color=Color.black, lineWidth=1) {
@@ -300,9 +308,6 @@ class WebGLRenderer extends Renderer {
         gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STREAM_DRAW);
         
         this.basicRectShader.UseForCustomBuffer(gl, buffer);
-
-        // Set viewport and clear if needed
-        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
 
         // Set uniforms (no rotation/scale, just pass through)
         gl.uniform2f(this.basicRectShader.resolutionLoc, this.canvas.width, this.canvas.height);
@@ -371,9 +376,6 @@ class WebGLRenderer extends Renderer {
         }
 
         this.basicRectShader.Use(this.gl);
-        
-        // Set viewport and clear if needed
-        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
 
         // Set uniforms
         gl.uniform2f(this.basicRectShader.resolutionLoc, this.canvas.width, this.canvas.height);
@@ -545,9 +547,6 @@ class WebGLRenderer extends Renderer {
         const gl = this.gl;
         this.spriteShader.Use(gl);
         
-        // Set viewport and clear if needed
-        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-        
         // Set uniforms using the spriteShader's locations
         gl.uniform2f(this.spriteShader.texResolutionLoc, this.canvas.width, this.canvas.height);
         gl.uniform2f(this.spriteShader.texTranslationLoc, x, y);
@@ -627,7 +626,6 @@ class WebGLRenderer extends Renderer {
         // Center the rectangle at (x + w/2, y + h/2)
         shader.Use(gl);
 
-        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         gl.uniform2f(shader.resolutionLoc, this.canvas.width, this.canvas.height);
         gl.uniform2f(shader.translationLoc, x + w/2, y + h/2);
         gl.uniform1f(shader.rotationLoc, 0);

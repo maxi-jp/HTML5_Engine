@@ -77,6 +77,8 @@ class Game {
     Start() {
         this.renderer.width = this._screenWidth;
         this.renderer.height = this._screenHeight;
+        if (typeof(this.config.imageSmoothingEnabled) !== 'undefined')
+            this.renderer.imageSmoothingEnabled = this.config.imageSmoothingEnabled;
         
         this.gameObjects = [];
     }
