@@ -216,6 +216,7 @@ function SetupStatsHTMLElements() {
     document.body.appendChild(container);
 
     // Save references
+    this.statsElements.parent = container;
     this.statsElements.fps = fpsElem;
     this.statsElements.fpsdt = fpsDTElem;
     this.statsElements.dt = dtElem;

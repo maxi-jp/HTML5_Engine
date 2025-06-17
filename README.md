@@ -22,12 +22,13 @@ Engine and examples presents on this project are active on github pages: https:/
 
 ## Directory Structure
 - src/
+  - renderer.js           # Graphic renderers (support for 2d context and WebGL)
   - main.js               # Entry point and main loop
   - game.js               # Core Game class
   - gameobjects.js        # GameObject, SpriteObject, AnimationObject, Camera, Pool, Background Layers
   - input.js              # Keyboard, mouse, and gamepad input
-  - utils_classes.js          # Canvas drawing helpers
-  - utils_math.js              # Math, vector, and collision utilities
+  - utils_classes.js      # Canvas drawing helpers
+  - utils_math.js         # Math, vector, and collision utilities
   - audioplayer.js        # Audio system
   - htmlmenu.js           # HTML-based menu system
   - box2d_game.js         # Box2D game base class 
@@ -45,6 +46,7 @@ Engine and examples presents on this project are active on github pages: https:/
 ```html
 <head>
     <!-- ... -->
+    <script src="engine/renderer.js"></script>
     <script src="engine/main.js"></script>
     <script src="engine/utils_math.js"></script>
     <script src="engine/input.js"></script>
@@ -62,11 +64,11 @@ Engine and examples presents on this project are active on github pages: https:/
     <script src="src/my-game.js"></script>
 </head>
 ```
-3. Create a new script with a new class that inherits from **Game**, add it to the `index.html`, and initialize the game:
+3. Create a new script with a new class that inherits from **Game**, add it to the `index.html`, and initialize the game (the constructor must receive the renderer object and should pass it to its parent):
 ```javascript
 class MyGame extends Game {
-    constructor() {
-        super();
+    constructor(renderer) {
+        super(renderer);
         // Declare game objects
     }
 
@@ -82,17 +84,18 @@ class MyGame extends Game {
         super.Update(deltaTime);  // Update the game objects of this.gameObjects array
     }
 
-    Draw(ctx) {
+    Draw() {
         // Draw a black rectangle that fills the canvas
-        DrawFillRectangle(ctx, 0, 0, this.screenWidth, this.screenHeight, "black");
+        this.renderer.DrawFillRectangle(0, 0, this.screenWidth, this.screenHeight, Color.black);
 
-        super.Draw(ctx); // Draw the game objects of this.gameObjects array
+        super.Draw(); // Draw the game objects of this.gameObjects array
     }
 }
 
-// Initialize the game
-if (game === null)
-    game = new MyGame();
+// call Init (global function defined in the main.js script) with the class of your game as parameter once the document has been loaded 
+window.onload = () => {
+    Init(MyGame);
+}
 ```
 
 4. Create GameObjects by inheriting from the classes in `gameobjects.js`, add them to the `this.gameObjects` array of your game, and run! (See the examples in `src/examples/`.)

@@ -396,11 +396,42 @@ class WebGLRenderer extends Renderer {
     }
 
     DrawPolygon(points, strokeColor=Color.black, lineWidth=1, fill=false, fillColor=Color.black) {
-        for (let i = 0; i < points.length; i++) {
-            const p1 = points[i];
-            const p2 = points[(i + 1) % points.length];
-            this.DrawLine(p1[0], p1[1], p2[0], p2[1], strokeColor, lineWidth);
+        // for (let i = 0; i < points.length; i++) {
+        //     const p1 = points[i];
+        //     const p2 = points[(i + 1) % points.length];
+        //     this.DrawLine(p1.x, p1.y, p2.x, p2.y, strokeColor, lineWidth);
+        // }
+
+        const gl = this.gl;
+
+        // Convert points to a flat Float32Array
+        const vertices = new Float32Array(points.flatMap(p => [p.x, p.y]));
+
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STREAM_DRAW);
+
+        this.basicRectShader.UseForCustomBuffer(gl, buffer);
+
+        gl.uniform2f(this.basicRectShader.resolutionLoc, this.canvas.width, this.canvas.height);
+        gl.uniform2f(this.basicRectShader.translationLoc, 0, 0);
+        gl.uniform1f(this.basicRectShader.rotationLoc, 0);
+        gl.uniform2f(this.basicRectShader.sizeLoc, 1, 1);
+
+        // Fill polygon if requested
+        if (fill && points.length >= 3) {
+            gl.uniform4fv(this.basicRectShader.colorLoc, fillColor.rgba);
+            gl.drawArrays(gl.TRIANGLE_FAN, 0, points.length);
         }
+
+        // Draw stroke
+        if (points.length >= 2) {
+            gl.uniform4fv(this.basicRectShader.colorLoc, strokeColor.rgba);
+            gl.lineWidth(lineWidth);
+            gl.drawArrays(gl.LINE_LOOP, 0, points.length);
+        }
+
+        gl.deleteBuffer(buffer);
     }
 
     DrawRectangle(x, y, w, h, color, stroke=false, lineWidth=1, rot=0) {

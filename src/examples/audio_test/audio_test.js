@@ -1,6 +1,6 @@
 class AudioTest extends Game {
-    constructor() {
-        super();
+    constructor(renderer) {
+        super(renderer);
 
         this.config = {
             audioAnalyzer: true,
@@ -54,7 +54,7 @@ class AudioTest extends Game {
         // setup the bars for the audio spectrum
         this.audioBarsRectangles = [];
         for (let i = 0; i < numberOfBars; i++) {
-            const rect = new Rectangle(new Vector2(i * this.spectrumBarWidth, 0), this.spectrumBarWidth, this.screenHeight, 'red');
+            const rect = new Rectangle(new Vector2(i * this.spectrumBarWidth, 0), this.spectrumBarWidth, this.screenHeight, Color.Black());
             this.audioBarsRectangles.push(rect);
         }
     }
@@ -128,66 +128,66 @@ class AudioTest extends Game {
 
         // update the bars for the audio spectrum
         const frequencyData = audioPlayer.GetFrequencyData();
-
+        
         for (let i = 0; i < frequencyData.length; i++) {
-            this.audioBarsRectangles[i].height = frequencyData[i] * this.spectrumBarHeightMultiplier;
-            this.audioBarsRectangles[i].position.x = i * this.spectrumBarWidth;
-            this.audioBarsRectangles[i].position.y = this.screenHeight - this.audioBarsRectangles[i].height;
-            this.audioBarsRectangles[i].color = `rgb(${255 * this.audioBarsRectangles[i].height / this.screenHeight}, 50, 150)`;
+            const rect = this.audioBarsRectangles[i];
+            
+            rect.height = frequencyData[i] * this.spectrumBarHeightMultiplier;
+            rect.position.x = i * this.spectrumBarWidth;
+            rect.position.y = this.screenHeight - rect.height;
+
+            rect.color.r = rect.height / this.screenHeight;
+            rect.color.g = 0.196;
+            rect.color.b = 0.588
         }
     }
 
-    Draw(ctx) {
-        super.Draw(ctx);
+    Draw() {
+        super.Draw();
 
         // Draw the bar graph for the audio spectrum
-        this.audioBarsRectangles.forEach(rect => rect.Draw(ctx));
+        this.audioBarsRectangles.forEach(rect => rect.Draw(renderer));
 
         // lines pointing at the center of the screen
-        DrawSegment(ctx, this.screenHalfWidth, 0, this.screenHalfWidth, this.screenHeight, "grey");
-        DrawSegment(ctx, 0, this.screenHalfHeight, this.screenWidth, this.screenHalfHeight, "grey");
+        this.renderer.DrawLine(this.screenHalfWidth, 0, this.screenHalfWidth, this.screenHeight, Color.lightgrey);
+        this.renderer.DrawLine(0, this.screenHalfHeight, this.screenWidth, this.screenHalfHeight, Color.lightgrey);
 
         if (audioPlayer.IsPlaying(this.currentAudio)) {
             // Draw a triangle facing right when playing
-            DrawPolygon(ctx, [
+            this.renderer.DrawPolygon([
                 {x: Input.mouse.x - 10, y: Input.mouse.y - 10}, // Top vertex
                 {x: Input.mouse.x - 10, y: Input.mouse.y + 10}, // Bottom vertex
                 {x: Input.mouse.x + 10, y: Input.mouse.y}       // Right vertex
-            ], "black", 1, true, "green");
+            ], Color.black, 1, true, Color.green);
         }
         else if (!audioPlayer.IsPlaying(this.currentAudio) && this.audioAssets[this.currentAudio]?.audio.currentTime > 0) {
             // Draw two vertical lines if paused
-            DrawFillRectangle(ctx, Input.mouse.x - 8, Input.mouse.y - 10, 4, 20, "orange");
-            DrawFillRectangle(ctx, Input.mouse.x + 4, Input.mouse.y - 10, 4, 20, "orange");
+            this.renderer.DrawFillRectangle(Input.mouse.x - 8, Input.mouse.y - 10, 4, 20, Color.orange);
+            this.renderer.DrawFillRectangle(Input.mouse.x + 4, Input.mouse.y - 10, 4, 20, Color.orange);
         }
         else {
             // Draw a square when stopped
-            DrawFillRectangle(ctx, Input.mouse.x - 10, Input.mouse.y - 10, 20, 20, "red");
+            this.renderer.DrawFillRectangle(Input.mouse.x - 10, Input.mouse.y - 10, 20, 20, Color.red);
         }
         
-        //DrawCircle(ctx, Input.mouse.x, Input.mouse.y, 12, "red");
+        //this.renderer.DrawCircle(Input.mouse.x, Input.mouse.y, 12, Color.red);
         // mouse coordinates
-        DrawSegment(ctx, Input.mouse.x, 0, Input.mouse.x, this.screenHeight, "#BBBBBB");
-        DrawSegment(ctx, 0, Input.mouse.y, this.screenWidth, Input.mouse.y, "#BBBBBB");
+        this.renderer.DrawLine(Input.mouse.x, 0, Input.mouse.x, this.screenHeight, Color.grey);
+        this.renderer.DrawLine(0, Input.mouse.y, this.screenWidth, Input.mouse.y, Color.grey);
 
         // Display instructions
-        this.titleLabel.Draw(ctx);
-        this.select1Label.Draw(ctx);
-        this.select2Label.Draw(ctx);
-        this.select3Label.Draw(ctx);
-        this.playPauseStopLabel.Draw(ctx);
-        this.mousePositionLabel.Draw(ctx);
-        this.adjustPitchLabel.Draw(ctx);
+        this.titleLabel.Draw(this.renderer);
+        this.select1Label.Draw(this.renderer);
+        this.select2Label.Draw(this.renderer);
+        this.select3Label.Draw(this.renderer);
+        this.playPauseStopLabel.Draw(this.renderer);
+        this.mousePositionLabel.Draw(this.renderer);
+        this.adjustPitchLabel.Draw(this.renderer);
 
         // Display current audio properties
-        this.audioSelectedLabel.Draw(ctx);
-        this.panLabel.Draw(ctx);
-        this.volumeLabel.Draw(ctx);
-        this.pitchLabel.Draw(ctx);
+        this.audioSelectedLabel.Draw(this.renderer);
+        this.panLabel.Draw(this.renderer);
+        this.volumeLabel.Draw(this.renderer);
+        this.pitchLabel.Draw(this.renderer);
     }
-}
-
-// Initialize the game
-if (game === null) {
-    game = new AudioTest();
 }

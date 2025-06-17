@@ -94,6 +94,9 @@ class Color {
     static yellow = Color.Yellow();
     static orange = Color.Orange();
     static pink   = Color.Pink();
+    static grey   = new Color(0.5, 0.5, 0.5, 1);
+    static darkGrey  = new Color(0.663, 0.663, 0.663, 1);
+    static lightGrey = new Color(0.827, 0.827, 0.827, 1);
 
     static Copy(color) {
         return new Color(color.r, color.g, color.b, color.a);
