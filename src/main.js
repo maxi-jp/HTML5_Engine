@@ -1,6 +1,5 @@
 
 var canvas = /** @type {HTMLCanvasElement} */(null);
-var ctx = /** @type {CanvasRenderingContext2D} */(null);
 var requestAnimationFrameID = -1;
 
 var renderer = null
@@ -61,10 +60,11 @@ function Init(GameClass) {
             gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
         }
         renderer = gl ? new WebGLRenderer(canvas, gl) : new Canvas2DRenderer(canvas);
+        if (gl)
+            SetupStatsHTMLElements();
     }
     else {
         renderer = new Canvas2DRenderer(canvas);
-        ctx = renderer.ctx; // TODO remove this and fix the bugs
     }
 
     // input setup
@@ -133,7 +133,7 @@ function Loop() {
     Update(deltaTime);
     
     // Draw the game ------
-    Draw(ctx);
+    Draw();
 
     // reset input data ---
     Input.PostUpdate();
@@ -144,7 +144,7 @@ function Update(deltaTime) {
     game.Update(deltaTime);
 }
 
-function Draw(/** @type {CanvasRenderingContext2D} */ctx) {
+function Draw() {
     renderer.Clear();
 
     // draw the game
@@ -152,24 +152,73 @@ function Draw(/** @type {CanvasRenderingContext2D} */ctx) {
 
     // draw stats
     if (drawStats)
-        DrawStats(ctx);
+        DrawStats();
 }
 
-function DrawStats(ctx) {
-    if (!ctx)
-        return; // TODO remove this
-    
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.fillRect(2, 2, 132, 54);
+function DrawStats() {
+    if (renderer instanceof WebGLRenderer) {
+        this.statsElements.fps.innerText = `FPS: ${fps.toFixed(1)}`;
+        this.statsElements.fpsdt.innerText = `FPS (dt): ${(1 / globalDT).toFixed(2)}`;
+        this.statsElements.dt.innerText = `Delta: ${(globalDT * 1000).toFixed(2)} ms`;
+    }
+    else {
+        const ctx = renderer.ctx;
 
-    ctx.fillStyle = "white";
-    ctx.textAlign = "start";
-    ctx.textBaseline = "bottom"
-    ctx.font = "12px Comic Sans MS regular";
+        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+        ctx.fillRect(2, 2, 132, 54);
 
-    ctx.fillText("FPS: " + fps, 6, 16);
-    ctx.fillText("FPS (dt): " + (1 / globalDT).toFixed(2), 6, 34);
-    ctx.fillText("deltaTime (ms): " + (globalDT * 1000).toFixed(2), 6, 52);
+        ctx.fillStyle = "white";
+        ctx.textAlign = "start";
+        ctx.textBaseline = "bottom"
+        ctx.font = "12px Comic Sans MS regular";
+
+        ctx.fillText("FPS: " + fps, 6, 16);
+        ctx.fillText("FPS (dt): " + (1 / globalDT).toFixed(2), 6, 34);
+        ctx.fillText("deltaTime (ms): " + (globalDT * 1000).toFixed(2), 6, 52);
+    }
+}
+
+function SetupStatsHTMLElements() {
+    if (this.statsElements)
+        return;
+
+    this.statsElements = {};
+
+    // Container
+    const container = document.createElement('div');
+    container.id = 'engine-stats-container';
+    container.style.position = 'absolute';
+    container.style.top = '8px';
+    container.style.left = '8px';
+    container.style.background = 'rgba(0,0,0,0.6)';
+    container.style.color = '#fff';
+    container.style.font = '12px monospace';
+    container.style.padding = '4px 8px';
+    container.style.borderRadius = '4px';
+    container.style.textAlign = 'left';
+    container.style.zIndex = 1000;
+
+    // FPS
+    const fpsElem = document.createElement('div');
+    fpsElem.id = 'engine-stats-fps';
+    container.appendChild(fpsElem);
+
+    // FPS (dt)
+    const fpsDTElem = document.createElement('div');
+    fpsDTElem.id = 'engine-stats-fpsdt';
+    container.appendChild(fpsDTElem);
+
+    // DeltaTime
+    const dtElem = document.createElement('div');
+    dtElem.id = 'engine-stats-dt';
+    container.appendChild(dtElem);
+
+    document.body.appendChild(container);
+
+    // Save references
+    this.statsElements.fps = fpsElem;
+    this.statsElements.fpsdt = fpsDTElem;
+    this.statsElements.dt = dtElem;
 }
 
 function ResumeAudioContext() {

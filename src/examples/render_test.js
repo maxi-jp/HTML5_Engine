@@ -69,7 +69,7 @@ class BasicGame extends Game {
         this.portalSprite = new Sprite(this.graphicAssets.portal.img, new Vector2(100, 300), 0, 1);
 
         // a label text
-        this.textLabel = new TextLabel("a white text :)", new Vector2(this.screenHalfWidth, this.screenHeight - 10), "20px Comic Sans MS", Color.white, "center");
+        this.textLabel = new TextLabel("a white text :)", new Vector2(this.screenHalfWidth, this.screenHeight - 10), "40px Comic Sans MS", Color.white, "center", "bottom", true, 0.5);
     }
 
     Update(deltaTime) {
@@ -107,6 +107,12 @@ class BasicGame extends Game {
         this.pinkCircle.Draw(this.renderer);
 
         this.renderer.DrawFillText("Watson!!! O_O", this.screenHalfWidth, 20, "20px Comic Sans MS");
+        this.renderer.DrawFillText("Top-left corner", 0, 0, "16px Comic Sans MS", Color.green, "left", "top");
+        this.renderer.DrawFillText("Top-right corner", this.screenWidth, 0, "16px Comic Sans MS", Color.pink, "right", "top");
+        this.renderer.DrawFillText("Middle-left", 0, this.screenHalfHeight, "16px Comic Sans MS", Color.orange, "left", "middle");
+        this.renderer.DrawFillText("Middle-right", this.screenWidth, this.screenHalfHeight, "16px Comic Sans MS", Color.orange, "right", "middle");
+        this.renderer.DrawFillText("Bottom-left corner", 0, this.screenHeight, "16px Comic Sans MS", Color.lime, "left", "bottom");
+        this.renderer.DrawFillText("Bottom-right corner", this.screenWidth, this.screenHeight, "16px Comic Sans MS", Color.aqua, "right", "bottom");
 
         this.textLabel.Draw(renderer);
     }

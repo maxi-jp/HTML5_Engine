@@ -66,21 +66,34 @@ class Color {
         return new Color(1, 0, 0, 1);
     }
     static Green() {
-        return new Color(0, 1, 0, 1);
+        return new Color(0, 0.5, 0, 1);
     }
     static Blue() {
         return new Color(0, 0, 1, 1);
     }
+    static Aqua() {
+        return new Color(0, 1, 1, 1);
+    }
     static Yellow() {
         return new Color(1, 1, 0, 1);
+    }
+    static Orange() {
+        return new Color(1, 0.647, 0, 1);
+    }
+    static Pink() {
+        return new Color(1, 0, 1, 1);
     }
 
     static black  = Color.Black();
     static white  = Color.White();
     static red    = Color.Red();
     static green  = Color.Green();
+    static lime   = new Color(0, 1, 0, 1);
     static blue   = Color.Blue();
+    static aqua   = Color.Aqua();
     static yellow = Color.Yellow();
+    static orange = Color.Orange();
+    static pink   = Color.Pink();
 
     static Copy(color) {
         return new Color(color.r, color.g, color.b, color.a);
@@ -334,7 +347,7 @@ class Circle {
 }
 
 class TextLabel {
-    constructor(text, position, font, color="black", align="center", baseline="bottom", stroke=false) {
+    constructor(text, position, font, color="black", align="center", baseline="bottom", stroke=false, lineWidth=1) {
         this.text = text;
         this.position = position;
         this.font = font;
@@ -342,10 +355,11 @@ class TextLabel {
         this.align = align;
         this.baseline = baseline;
         this.stroke = stroke;
+        this.lineWidth = lineWidth;
     }
 
     Draw(renderer) {
-        renderer.DrawText(this.text, this.position.x, this.position.y, this.font, this.color, this.align, this.baseline, this.stroke);
+        renderer.DrawText(this.text, this.position.x, this.position.y, this.font, this.color, this.align, this.baseline, this.stroke, this.lineWidth);
     }
 }
 

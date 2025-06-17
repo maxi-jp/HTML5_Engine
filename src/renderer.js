@@ -40,7 +40,7 @@ class Renderer {
     DrawStrokeCircle(x, y, radius, color=Color.black, lineWidth=1) {}
 
     // Draw text
-    DrawText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic", stroke=false) {}
+    DrawText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic", stroke=false, lineWidth=1) {}
     DrawFillText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic") {}
     DrawStrokeText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic") {}
 
@@ -168,9 +168,9 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.closePath();
     }
 
-    DrawText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic", stroke=false) {
+    DrawText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic", stroke=false, lineWidth=1) {
         if (stroke) {
-            this.DrawStrokeText(text, x, y, font, color, align, baseline);
+            this.DrawStrokeText(text, x, y, font, color, align, baseline, lineWidth);
         }
         else {
             this.DrawFillText(text, x, y, font, color, align, baseline);
@@ -185,11 +185,12 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.fillText(text, x, y);
     }
 
-    DrawStrokeText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic") {
+    DrawStrokeText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic", lineWidth=1) {
         this.ctx.font = font;
         this.ctx.textAlign = align;
         this.ctx.textBaseline = baseline;
         this.ctx.strokeStyle = color;
+        this.ctx.lineWidth = lineWidth;
         this.ctx.strokeText(text, x, y);
     }
 
@@ -248,6 +249,11 @@ class WebGLRenderer extends Renderer {
             this.circleVerts.push(0, 0);
         }
 
+        // axuliar canvas for rendering text
+        this.textCanvas = document.createElement('canvas');
+        this.textCanvasCtx = this.textCanvas.getContext('2d');
+        this.textTexture = this.gl.createTexture();
+
         // enable blending for pngs transparency
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
@@ -285,6 +291,67 @@ class WebGLRenderer extends Renderer {
         }
 
         return img._webglTexture;
+    }
+
+    PrepareText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic", stroke=false, lineWidth=1) {
+        const ctx = this.textCanvasCtx;
+        const textCanvas = this.textCanvas;
+
+        ctx.font = font;
+        ctx.textAlign = align;
+        ctx.textBaseline = baseline;
+
+        // Measure text and resize canvas
+        const metrics = ctx.measureText(text);
+        const width = Math.ceil(metrics.width) + 8;
+
+        // Extract font size in px from the font string
+        let fontSize = 16; // fallback default
+        const match = font.match(/(\d+)px/);
+        if (match)
+            fontSize = parseInt(match[1], 10);
+        const height = Math.ceil(fontSize) + 8;
+
+        textCanvas.width = width;
+        textCanvas.height = height;
+
+        // Redraw with correct size
+        ctx.font = font;
+        ctx.textAlign = align;
+        ctx.textBaseline = baseline;
+        ctx.clearRect(0, 0, width, height);
+
+        // Calculate draw position based on alignment
+        let drawX = width / 2;
+        let drawY = height / 2;
+        let tx = x, ty = y;
+        if (align === "left") {
+            tx += drawX;
+            drawX = 0;
+        }
+        if (align === "right") {
+            tx -= drawX;
+            drawX = width;
+        }
+        if (baseline === "top") {
+            ty += drawY;
+            drawY = 0;
+        }
+        if (baseline === "bottom") {
+            ty -= drawY;
+            drawY = height;
+        }
+
+        if (stroke) {
+            ctx.strokeStyle = color;
+            ctx.strokeText(text, drawX, drawY);
+        }
+        else {
+            ctx.fillStyle = color;
+            ctx.fillText(text, drawX, drawY);
+        }
+
+        return { width, height, x: tx, y: ty };
     }
 
     Clear() {
@@ -463,84 +530,42 @@ class WebGLRenderer extends Renderer {
         gl.deleteBuffer(buffer);
     }
 
-    DrawText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic", stroke=false) {
-        if (stroke) {
-            this.DrawStrokeText(text, x, y, font, color, align, baseline);
-        }
-        else {
-            this.DrawFillText(text, x, y, font, color, align, baseline);
-        }
-    }
+    DrawText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic", stroke=false, lineWidth=1) {
+        // TODO rethink this method
+        // Prepare the text in the auxiliar Canvas
+        const { width, height, x: tx, y: ty } = this.PrepareText(text, x, y, font, color, align, baseline, stroke, lineWidth);
 
-    DrawFillText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic") {
-        // TODO refactor this method
-        // 1. Create an offscreen canvas
-        const textCanvas = document.createElement('canvas');
-        const ctx = textCanvas.getContext('2d');
-        ctx.font = font;
-        ctx.textAlign = align;
-        ctx.textBaseline = baseline;
-
-        // Measure text and resize canvas
-        const metrics = ctx.measureText(text);
-        const width = Math.ceil(metrics.width) + 8;
-
-        // Extract font size in px from the font string
-        let fontSize = 16; // fallback default
-        const match = font.match(/(\d+)px/);
-        if (match)
-            fontSize = parseInt(match[1], 10);
-        const height = Math.ceil(fontSize) + 8;
-
-        textCanvas.width = width;
-        textCanvas.height = height;
-
-        // Redraw with correct size
-        ctx.font = font;
-        ctx.textAlign = align;
-        ctx.textBaseline = baseline;
-        ctx.fillStyle = color;
-        ctx.clearRect(0, 0, width, height);
-
-        // Calculate draw position based on alignment
-        let drawX = width / 2;
-        let drawY = height / 2;
-        if (align === "left") drawX = 0;
-        if (align === "right") drawX = width;
-        if (baseline === "top") drawY = 0;
-        if (baseline === "bottom") drawY = height;
-        ctx.fillText(text, drawX, drawY);
-
-        // 2. Upload as WebGL texture
+        // Upload as WebGL texture
         const gl = this.gl;
-        const tex = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, tex);
+        
+        gl.bindTexture(gl.TEXTURE_2D, this.textTexture);
         gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textCanvas);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.textCanvas);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
-        // 3. Draw as a textured quad using the SpriteShader
+        // Draw as a textured quad using the SpriteShader
         this.spriteShader.Use(gl);
         gl.uniform2f(this.spriteShader.texResolutionLoc, this.canvas.width, this.canvas.height);
-        gl.uniform2f(this.spriteShader.texTranslationLoc, x, y);
+        gl.uniform2f(this.spriteShader.texTranslationLoc, tx, ty);
         gl.uniform1f(this.spriteShader.texRotationLoc, 0);
         gl.uniform2f(this.spriteShader.texSizeLoc, width, height);
 
         gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.bindTexture(gl.TEXTURE_2D, this.textTexture);
         gl.uniform1i(this.spriteShader.texSamplerLoc, 0);
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-        // Optionally: delete the texture to avoid memory leaks
-        gl.deleteTexture(tex);
     }
 
-    DrawStrokeText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic") {
-        // TODO
+    DrawFillText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic") {
+        this.DrawText(text, x, y, font, color, align, baseline, false);
+    }
+
+    DrawStrokeText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic", lineWidth=1) {
+        this.DrawText(text, x, y, font, color, align, baseline, true, lineWidth);
     }
 
     DrawImage(img, x, y, scaleX, scaleY, rot=0) {
