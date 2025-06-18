@@ -56,6 +56,10 @@ class Color {
         this.string = this.toString();
     }
 
+    static Random() {
+        return new Color(Math.random(), Math.random(), Math.random(), 1);
+    }
+
     static Black() {
         return new Color(0, 0, 0, 1);
     }
