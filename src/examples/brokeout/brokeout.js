@@ -1,6 +1,6 @@
 class BrokeOut extends Game {
-    constructor() {
-        super();
+    constructor(renderer) {
+        super(renderer);
 
         this.playerScore = 0;
         this.playerScoreLabel = null;
@@ -18,7 +18,7 @@ class BrokeOut extends Game {
         this.screenHeight = 480;
 
         this.playerScore = 0;
-        this.playerScoreLabel = new TextLabelFillAndStroke(this.playerScore, new Vector2(this.screenWidth / 2, 50), "40px Comic Sans MS", "white", "black", "center", "bottom");
+        this.playerScoreLabel = new TextLabelFillAndStroke(this.playerScore, new Vector2(this.screenWidth / 2, 50), "40px Comic Sans MS", Color.white, Color.black, "center", "bottom");
 
         // initialize the ball
         this.ball = new Ball(new Vector2(this.screenHalfWidth, this.screenHalfHeight), 400, new Vector2(RandomBetweenFloat(-0.5, 0.5), 1));
@@ -42,7 +42,7 @@ class BrokeOut extends Game {
                     new Vector2(i * brickWidth, j * brickHeight),
                     brickWidth,
                     brickHeight,
-                    GetRandomColor(),
+                    Color.Random(),
                     1
                 );
                 this.bricks.push(newBrick);
@@ -72,17 +72,17 @@ class BrokeOut extends Game {
         }
     }
 
-    Draw(ctx) {
+    Draw() {
         // black background
-        DrawFillRectangle(ctx, 0, 0, this.screenWidth, this.screenHeight, "black")
+        this.renderer.DrawFillRectangle(0, 0, this.screenWidth, this.screenHeight, Color.black)
 
         // draw the game objects
-        super.Draw(ctx);
+        super.Draw();
 
         // draw the bricks
-        this.bricks.forEach(brick => brick.Draw(ctx));
+        this.bricks.forEach(brick => brick.Draw(this.renderer));
 
-        this.playerScoreLabel.Draw(ctx);
+        this.playerScoreLabel.Draw(this.renderer);
     }
 
 }
@@ -103,7 +103,7 @@ class Ball extends GameObject {
     }
 
     Start() {
-        this.circle = new Circle(this.position, this.radius, "white", false);
+        this.circle = new Circle(this.position, this.radius, Color.white, false);
         this.displacementVector.Set(0, 0);
     }
 
@@ -166,8 +166,8 @@ class Ball extends GameObject {
         this.position.y += this.displacementVector.y;
     }
 
-    Draw(ctx) {
-        this.circle.Draw(ctx);
+    Draw(renderer) {
+        this.circle.Draw(renderer);
     }
 
     CheckPlayerPaddleCollision(paddle) {
@@ -259,7 +259,7 @@ class Paddle extends GameObject {
 
         this.initialPosition = Vector2.Copy(position);
 
-        this.rectangle = new Rectangle(this.position, width, height, "red");
+        this.rectangle = new Rectangle(this.position, width, height, Color.red);
 
         this.speed = speed;
         this.movement = 0;
@@ -289,8 +289,8 @@ class Paddle extends GameObject {
             this.position.x = game.screenWidth - this.rectangle.width;
     }
 
-    Draw(ctx) {
-        this.rectangle.Draw(ctx);
+    Draw(renderer) {
+        this.rectangle.Draw(renderer);
     }
 }
 
@@ -308,8 +308,8 @@ class Brick extends GameObject {
 
     Update(deltaTime) {}
 
-    Draw(ctx) {
-        this.rectangle.Draw(ctx);
+    Draw(renderer) {
+        this.rectangle.Draw(renderer);
     }
 
     Hit(hitPower = 1) {
@@ -317,7 +317,3 @@ class Brick extends GameObject {
         return this.strengh <= 0;
     }
 }
-
-// initialize the game
-if (game === null)
-    game = new BrokeOut();
