@@ -295,7 +295,7 @@ class LinearGradient {
         colorStops.forEach(cs => this.addColorStop(cs[0], cs[1]));
 
         if (renderer.ctx) {
-            this.gradient = ctx.createLinearGradient(x0, y0, x1, y1);
+            this.gradient = renderer.ctx.createLinearGradient(x0, y0, x1, y1);
             colorStops.forEach(cs => {
                 this.gradient.addColorStop(cs[0], cs[1]);
             });

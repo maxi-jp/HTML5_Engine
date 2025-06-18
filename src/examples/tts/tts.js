@@ -1,6 +1,6 @@
 class TTS extends Game {
-    constructor() {
-        super();
+    constructor(renderer) {
+        super(renderer);
         this.graphicAssets = {
             ships: {
                 path: "src/examples/tts/assets/simpleSpace_sheet.png",
@@ -20,7 +20,7 @@ class TTS extends Game {
         this.enemies = [];
         this.camera = null;
 
-        this.sceneLimits = new Rectangle(Vector2.Zero(), 800, 640, "white", true);
+        this.sceneLimits = new Rectangle(Vector2.Zero(), 800, 640, Color.white, true);
 
         this.timeToSpawnEnemy = 1;
         this.timeToSpawnEnemyAux = 0;
@@ -41,7 +41,7 @@ class TTS extends Game {
         super.Start();
 
         // configure background gradient
-        this.bgGrad = new LinearGradient(0, 0, 0, canvas.height, [
+        this.bgGrad = new LinearGradient(this.renderer, 0, 0, 0, canvas.height, [
             [0, "#191200"],
             [0.1, "#000000"],
             [0.35, "#07073e"],
@@ -119,38 +119,37 @@ class TTS extends Game {
         }
     }
 
-    Draw(ctx) {
+    Draw() {
         // background
-        ctx.fillStyle = this.bgGrad.gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        this.renderer.DrawGradientRectangle(0, 0, canvas.width, canvas.height, this.bgGrad);
 
-        this.camera.PreDraw(ctx);
+        // this.camera.PreDraw(ctx);
 
         // background grid
         // horizontal lines
         const verticalStep = 50;
         const horizontalLines = this.sceneLimits.height / verticalStep;
         for (let i = 0; i < horizontalLines; i++) {
-            DrawSegment(ctx, this.sceneLimits.position.x, this.sceneLimits.position.y + verticalStep * i, this.sceneLimits.position.x + this.sceneLimits.width, this.sceneLimits.position.y + verticalStep * i, "grey", 1);
+            this.renderer.DrawLine(this.sceneLimits.position.x, this.sceneLimits.position.y + verticalStep * i, this.sceneLimits.position.x + this.sceneLimits.width, this.sceneLimits.position.y + verticalStep * i, "grey", 1);
         }
         // vertical lines
         const horizontalStep = 50;
         const verticalLines = this.sceneLimits.width / horizontalStep;
         for (let i = 0; i < verticalLines; i++) {
-            DrawSegment(ctx, this.sceneLimits.position.x + horizontalStep * i, this.sceneLimits.position.y, this.sceneLimits.position.x + horizontalStep * i, this.sceneLimits.position.y + this.sceneLimits.height, "grey", 1);
+            this.renderer.DrawLine(this.sceneLimits.position.x + horizontalStep * i, this.sceneLimits.position.y, this.sceneLimits.position.x + horizontalStep * i, this.sceneLimits.position.y + this.sceneLimits.height, "grey", 1);
         }
 
-        this.sceneLimits.Draw(ctx);
+        this.sceneLimits.Draw(renderer);
 
-        // draw the game objects
-        super.Draw(ctx);
+        // // draw the game objects
+        super.Draw();
 
-        this.camera.PostDraw(ctx);
+        // this.camera.PostDraw(ctx);
 
-        // draw the mouse position
-        this.mouseCircle.Draw(ctx);
+        // // draw the mouse position
+        // this.mouseCircle.Draw(ctx);
 
-        this.playerScoreLabel.Draw(ctx);
+        // this.playerScoreLabel.Draw(ctx);
     }
 
     AddEnemy(enemy) {
@@ -190,7 +189,3 @@ class TTS extends Game {
         this.AddEnemy(enemy);
     }
 }
-
-// initialize the game
-if (game === null)
-    game = new TTS();

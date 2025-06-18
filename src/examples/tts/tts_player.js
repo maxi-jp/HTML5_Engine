@@ -130,10 +130,10 @@ class PlayerShip extends SpriteObject {
             this.position.y = this.sceneLimits.position.y + this.sceneLimits.height - this.boundingRadious;
     }
 
-    Draw(ctx) {
-        super.DrawSection(ctx, 52, 244, 48, 48);
+    Draw(renderer) {
+        super.DrawSection(renderer, 52, 244, 48, 48);
 
         // draw the bullets
-        this.bulletPool.Draw(ctx);
+        this.bulletPool.Draw(renderer);
     }
 }

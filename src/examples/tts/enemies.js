@@ -25,10 +25,10 @@ class Enemy extends SpriteObject {
         this.position.y += Math.sin(this.rotation - PIH) * this.speed * deltaTime;
     }
 
-    Draw(ctx) {
-        super.DrawSection(ctx, 149, 182, 31, 46);
+    Draw(renderer) {
+        super.DrawSection(renderer, 149, 182, 31, 46);
 
-        DrawFillCircle(ctx, this.position.x, this.position.y, this.boundingRadious, "rgba(255, 0, 0, 0.25)");
+        renderer.DrawFillCircle(this.position.x, this.position.y, this.boundingRadious, new Color(1, 0, 0, 0.25)); // TODO remove Color instantiating
     }
 
     Damage(damage) {
@@ -120,12 +120,14 @@ class EnemyKamikaze extends Enemy {
         }
     }
 
-    Draw(ctx) {
+    Draw(renderer) {
+        const ctx = renderer.ctx;
+
         ctx.globalAlpha = this.thrustFireSprite.alpha;
         this.thrustFireSprite.DrawSection(ctx, 180, 182, 32, 76);
 
         ctx.globalAlpha = 1;
-        super.Draw(ctx);
+        super.Draw(renderer);
     }
 }
 

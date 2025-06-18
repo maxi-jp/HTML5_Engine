@@ -20,7 +20,9 @@ class Bullet {
         this.position.y += Math.sin(this.rotation) * this.speed * deltaTime;
     }
 
-    Draw(ctx) {
+    Draw(renderer) {
+        const ctx = renderer.ctx;
+
         ctx.save();
 
         ctx.translate(this.position.x, this.position.y);
