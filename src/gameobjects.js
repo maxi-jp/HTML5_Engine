@@ -64,10 +64,10 @@ class RectangleGO extends GameObject {
 }
 
 class SpriteObject extends GameObject {
-    constructor(position, rotation, scale, img) {
+    constructor(position, rotation, scale, img, alpha=1.0) {
         super(position);
         
-        this.sprite = new Sprite(img, this._position, this._rotation, this._scale);
+        this.sprite = new Sprite(img, this._position, this._rotation, this._scale, alpha);
         this._rotation = rotation;
         this.scale = scale;
 
@@ -249,6 +249,7 @@ class Camera {
 
     constructor(position) {
         this._position = Vector2.Copy(position);
+        this.lastState = { x: 0, y: 0, r: 0, s: 1 };
     }
 
     get position() {
@@ -284,14 +285,19 @@ class Camera {
     }
 
     Start() {}
-    Update(deltaTime) {}
-
-    PreDraw(ctx) {
-        ctx.save();
+    Update(deltaTime) {
+        // this.lastState.x = this.position.x;
+        // this.lastState.y = this.position.y;
+        // this.lastState.r = this.rotation;
+        // this.lastState.s = this.scale;
     }
 
-    PostDraw(ctx) {
-        ctx.restore();
+    PreDraw(renderer) {
+        renderer.ApplyCameraTransform(this);
+    }
+
+    PostDraw(renderer) {
+        renderer.RestoreCameraTransform();
     }
 }
 
@@ -315,11 +321,6 @@ class FollowCameraBasic extends Camera {
             this.target.position.x - (canvas.width  / 2) + this.offset.x,
             this.target.position.y - (canvas.height / 2) + this.offset.y
         );
-    }
-
-    PreDraw(ctx) {
-        super.PreDraw(ctx);
-        ctx.translate(-this.position.x, -this.position.y);
     }
 }
 
@@ -382,11 +383,6 @@ class FollowCamera extends Camera {
         this.position.y += ((this.targetPosition.y - this.position.y) * smoothStep) + this.shakingValue.y;
     }
 
-    PreDraw(ctx) {
-        super.PreDraw(ctx);
-        ctx.translate(-this.position.x, -this.position.y);
-    }
-
     Shake(time, speed, size) {
         this.shakingTime = time;
         this.shakingSpeed = speed;
@@ -396,6 +392,8 @@ class FollowCamera extends Camera {
 }
 
 class Pool {
+    static semiTransparentRed = new Color(1, 0, 0, 0.5);
+
     constructor(owner, maxSize, objectConstructor, constructorParams=[]) {
         this.owner = owner;
         this.maxSize = maxSize;
@@ -422,21 +420,21 @@ class Pool {
         });
     }
 
-    Draw(ctx) {
+    Draw(renderer) {
         this.objects.forEach(object => {
             if (object.active)
-                object.Draw(ctx);
+                object.Draw(renderer);
         });
 
         if (this.drawDebug) {
             // draw the state of the object pool
-            ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
-            ctx.strokeStyle = "white";
+            renderer.ctx.fillStyle = Pool.semiTransparentRed;
+            renderer.ctx.strokeStyle = Color.white;
             for (let i = 0; i < this.objects.length; i++) {
                 if (this.objects[i].active) {
-                    ctx.fillRect(10 + 20 * i, 10, 20, 20);
+                    renderer.ctx.fillRect(10 + 20 * i, 10, 20, 20);
                 }
-                ctx.strokeRect(10 + 20 * i, 10, 20, 20);
+                renderer.ctx.strokeRect(10 + 20 * i, 10, 20, 20);
             }
         }
     }

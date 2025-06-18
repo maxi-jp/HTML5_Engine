@@ -1,13 +1,7 @@
-class Bullet {
-    // TODO transform this class to inherit SpriteObject
+class Bullet extends RectangleGO {
     constructor() {
-        this.position = {
-            x: 0,
-            y: 0
-        }
-        this.rotation = 0;
-
-        this.width = 8;
+        super(Vector2.Zero(), 8, 2, Color.yellow);
+        
         this.speed = 700;
         this.damage = 1;
         this.owner = null;
@@ -18,19 +12,5 @@ class Bullet {
     Update(deltaTime) {
         this.position.x += Math.cos(this.rotation) * this.speed * deltaTime;
         this.position.y += Math.sin(this.rotation) * this.speed * deltaTime;
-    }
-
-    Draw(renderer) {
-        const ctx = renderer.ctx;
-
-        ctx.save();
-
-        ctx.translate(this.position.x, this.position.y);
-        ctx.rotate(this.rotation);
-
-        ctx.fillStyle = "yellow";
-        ctx.fillRect(-this.width, -1, this.width, 2);
-
-        ctx.restore();
     }
 }

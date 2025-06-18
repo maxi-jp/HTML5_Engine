@@ -45,13 +45,17 @@ class Renderer {
     DrawStrokeText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic") {}
 
     // Draw sprites
-    DrawImage(img, x, y, scaleX, scaleY, rot=0) {}
-    DrawImageBasic(img, x, y, w=img.width, h=img.height) {}
-    DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0) {}
-    DrawImageSectionBasic(img, x, y, sx, sy, sw, sh, scaleX, scaleY) {}
+    DrawImage(img, x, y, scaleX, scaleY, rot=0, alpha=1.0) {}
+    DrawImageBasic(img, x, y, w=img.width, h=img.height, alpha=1.0) {}
+    DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0, alpha=1.0) {}
+    DrawImageSectionBasic(img, x, y, sx, sy, sw, sh, scaleX, scaleY, alpha=1.0) {}
 
     // other Draw methods
     DrawGradientRectangle(x, y, w, h, gradient) { }
+
+    // Camera transform methods
+    ApplyCameraTransform(camera) {}
+    RestoreCameraTransform() {}
 }
 
 class Canvas2DRenderer extends Renderer {
@@ -194,7 +198,8 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.strokeText(text, x, y);
     }
 
-    DrawImage(img, x, y, scaleX, scaleY, rot=0) {
+    DrawImage(img, x, y, scaleX, scaleY, rot=0, alpha=1.0) {
+        this.ctx.globalAlpha = alpha;
         this.ctx.save();
 
         this.ctx.translate(x, y);
@@ -204,15 +209,18 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.drawImage(img, -img.halfWidth, -img.halfHeight);
 
         this.ctx.restore();
+        this.ctx.globalAlpha = 1.0;
     }
 
-    DrawImageBasic(img, x, y, w=img.width, h=img.height) {
+    DrawImageBasic(img, x, y, w=img.width, h=img.height, alpha=1.0) {
+        this.ctx.globalAlpha = alpha;
         this.ctx.drawImage(img, x, y, w, h);
+        this.ctx.globalAlpha = 1.0;
     }
 
-    DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0) {
+    DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0, alpha=1.0) {
         this.ctx.save();
-
+        
         this.ctx.translate(x, y);
         this.ctx.rotate(rot);
         this.ctx.scale(scaleX, scaleY);
@@ -222,18 +230,34 @@ class Canvas2DRenderer extends Renderer {
             this.ctx.strokeRect(-sw/2, -sh/2, sw, sh);
         }
 
+        this.ctx.globalAlpha = alpha;
+
         this.ctx.drawImage(img, sx, sy, sw, sh, -sw/2, -sh/2, sw, sh);
 
+        this.ctx.globalAlpha = 1.0;
+        
         this.ctx.restore();
     }
 
-    DrawImageSectionBasic(img, x, y, sx, sy, sw, sh, scaleX, scaleY) {
+    DrawImageSectionBasic(img, x, y, sx, sy, sw, sh, scaleX, scaleY, alpha=1.0) {
+        this.ctx.globalAlpha = alpha;
         this.ctx.drawImage(img, sx, sy, sw, sh, x, y, sw * scaleX, sh * scaleY);
+        this.ctx.globalAlpha = 1.0;
     }
 
     DrawGradientRectangle(x, y, w, h, gradient) {
         this.ctx.fillStyle = gradient.gradient;
         this.ctx.fillRect(x, y, w, h);
+    }
+
+    ApplyCameraTransform(camera) {
+        this.ctx.save();
+        this.ctx.translate(-camera.x, -camera.y);
+        // TODO: handle rotation and scale
+    }
+
+    RestoreCameraTransform() {
+        this.ctx.restore();
     }
 }
 
@@ -241,6 +265,12 @@ class WebGLRenderer extends Renderer {
     constructor(canvas, gl, config) {
         super(canvas, config);
         this.gl = gl;
+
+        this.viewMatrix = new Float32Array([
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1  // -camera.x, -camera.y, 1
+        ]);
 
         // auxiliar structure for circle vertices
         const numSegments = 64;
@@ -258,6 +288,7 @@ class WebGLRenderer extends Renderer {
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         
+        // shaders
         this.basicRectShader = new BasicRectShader(this.gl);
         this.spriteShader = new SpriteShader(this.gl);
         this.gradientRectShader = new GradientRectShader(this.gl);
@@ -599,7 +630,7 @@ class WebGLRenderer extends Renderer {
         this.DrawText(text, x, y, font, color, align, baseline, true, lineWidth);
     }
 
-    DrawImage(img, x, y, scaleX, scaleY, rot=0) {
+    DrawImage(img, x, y, scaleX, scaleY, rot=0, alpha=1.0) {
         const gl = this.gl;
         this.spriteShader.Use(gl);
         
@@ -608,6 +639,7 @@ class WebGLRenderer extends Renderer {
         gl.uniform2f(this.spriteShader.texTranslationLoc, x, y);
         gl.uniform1f(this.spriteShader.texRotationLoc, rot || 0);
         gl.uniform2f(this.spriteShader.texSizeLoc, scaleX * img.width, scaleY * img.height);
+        gl.uniform1f(this.spriteShader.texAlphaLoc, alpha);
 
         // Bind texture
         const tex = this.GetTexture(img);
@@ -619,11 +651,11 @@ class WebGLRenderer extends Renderer {
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
 
-    DrawImageBasic(img, x, y, w=img.width, h=img.height) {
-        this.DrawImage(img, x + w / 2, y + h / 2, w / img.width, h / img.height);
+    DrawImageBasic(img, x, y, w=img.width, h=img.height, alpha=1.0) {
+        this.DrawImage(img, x + w / 2, y + h / 2, w / img.width, h / img.height, alpha);
     }
 
-    DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0) {
+    DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0, alpha=1.0) {
         const gl = this.gl;
         const shader = this.spriteShader;
 
@@ -655,6 +687,7 @@ class WebGLRenderer extends Renderer {
         gl.uniform2f(shader.texTranslationLoc, x, y);
         gl.uniform1f(shader.texRotationLoc, rot || 0);
         gl.uniform2f(shader.texSizeLoc, sw * scaleX, sh * scaleY);
+        gl.uniform1f(shader.texAlphaLoc, alpha);
 
         // Bind texture
         const tex = this.GetTexture(img);
@@ -670,8 +703,8 @@ class WebGLRenderer extends Renderer {
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(shader.texcoords), gl.STATIC_DRAW);
     }
 
-    DrawImageSectionBasic(img, x, y, sx, sy, sw, sh, scaleX, scaleY) {
-        this.DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, 0);
+    DrawImageSectionBasic(img, x, y, sx, sy, sw, sh, scaleX, scaleY, alpha=1.0) {
+        this.DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, 0, alpha);
     }
     
     DrawGradientRectangle(x, y, w, h, gradient) {
@@ -691,6 +724,38 @@ class WebGLRenderer extends Renderer {
         gl.bindTexture(gl.TEXTURE_2D, gradient.webglTexture);
         gl.uniform1i(shader.gradientLoc, 0);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+
+    ApplyCameraTransform(camera) {
+        if (-camera.x !== this.viewMatrix[6] || -camera.y !== this.viewMatrix[7]) {
+            this.viewMatrix[6] = -camera.x;
+            this.viewMatrix[7] = -camera.y;
+            // TODO apply rotation and scale
+
+            this.gl.useProgram(this.basicRectShader.program);
+            this.gl.uniformMatrix3fv(this.basicRectShader.viewMatrixLoc, false, this.viewMatrix);
+
+            this.gl.useProgram(this.spriteShader.program);
+            this.gl.uniformMatrix3fv(this.spriteShader.viewMatrixLoc, false, this.viewMatrix);
+
+            this.gl.useProgram(this.gradientRectShader.program);
+            this.gl.uniformMatrix3fv(this.gradientRectShader.viewMatrixLoc, false, this.viewMatrix);
+        }
+    }
+
+    RestoreCameraTransform() {
+        if (this.viewMatrix[6] !== 0 || this.viewMatrix[7] !== 0) {
+            this.viewMatrix[6] = this.viewMatrix[7] = 0;
+
+            this.gl.useProgram(this.basicRectShader.program);
+            this.gl.uniformMatrix3fv(this.basicRectShader.viewMatrixLoc, false, this.viewMatrix);
+
+            this.gl.useProgram(this.spriteShader.program);
+            this.gl.uniformMatrix3fv(this.spriteShader.viewMatrixLoc, false, this.viewMatrix);
+
+            this.gl.useProgram(this.gradientRectShader.program);
+            this.gl.uniformMatrix3fv(this.gradientRectShader.viewMatrixLoc, false, this.viewMatrix);
+        }
     }
 }
 
@@ -714,6 +779,7 @@ class BasicRectShader {
             uniform vec2 u_translation;
             uniform float u_rotation;
             uniform vec2 u_size;
+            uniform mat3 u_viewMatrix;
             void main() {
                 // Scale - Rotate
                 float cosR = cos(u_rotation);
@@ -724,8 +790,10 @@ class BasicRectShader {
                     scaled.x * sinR + scaled.y * cosR
                 );
                 vec2 pos = rotated + u_translation;
+                vec3 localPos = vec3(pos, 1.0);
+                vec3 worldPos = u_viewMatrix * localPos;
                 // Convert to clipspace
-                vec2 zeroToOne = pos / u_resolution;
+                vec2 zeroToOne = worldPos.xy / u_resolution;
                 vec2 zeroToTwo = zeroToOne * 2.0;
                 vec2 clipSpace = zeroToTwo - 1.0;
                 gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
@@ -749,6 +817,7 @@ class BasicRectShader {
         this.resolutionLoc = gl.getUniformLocation(this.program, "u_resolution");
         this.translationLoc = gl.getUniformLocation(this.program, "u_translation");
         this.rotationLoc = gl.getUniformLocation(this.program, "u_rotation");
+        this.viewMatrixLoc = gl.getUniformLocation(this.program, "u_viewMatrix");
         this.sizeLoc = gl.getUniformLocation(this.program, "u_size");
         this.colorLoc = gl.getUniformLocation(this.program, "u_color");
 
@@ -757,6 +826,14 @@ class BasicRectShader {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.quadVerts), gl.STATIC_DRAW);
+
+        // Set temporal viewMatrix
+        gl.useProgram(this.program);
+        gl.uniformMatrix3fv(this.viewMatrixLoc, false, new Float32Array([
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1
+        ]));
     }
 
     Use(gl) {
@@ -806,6 +883,7 @@ class SpriteShader {
             uniform vec2 u_translation;
             uniform float u_rotation;
             uniform vec2 u_size;
+            uniform mat3 u_viewMatrix;
             varying vec2 v_texcoord;
             void main() {
                 // Scale first, then rotate
@@ -817,8 +895,10 @@ class SpriteShader {
                     scaled.x * sinR + scaled.y * cosR
                 );
                 vec2 pos = rotated + u_translation;
+                vec3 localPos = vec3(pos, 1.0);
+                vec3 worldPos = u_viewMatrix * localPos;
                 // Convert to clipspace
-                vec2 zeroToOne = pos / u_resolution;
+                vec2 zeroToOne = worldPos.xy / u_resolution;
                 vec2 zeroToTwo = zeroToOne * 2.0;
                 vec2 clipSpace = zeroToTwo - 1.0;
                 gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
@@ -831,9 +911,10 @@ class SpriteShader {
             precision mediump float;
             varying vec2 v_texcoord;
             uniform sampler2D u_texture;
+            uniform float u_alpha;
             void main() {
-                vec4 c = texture2D(u_texture, v_texcoord);
-                gl_FragColor = c;
+                vec4 texColor = texture2D(u_texture, v_texcoord);
+                gl_FragColor = vec4(texColor.rgb, texColor.a * u_alpha);
                 // If alpha is very low, force RGB to black
                 //if (c.a < 0.9) c.rgb = vec3(0.0);
                 //gl_FragColor = vec4(c.rgb * c.a, 1.0 - c.a);
@@ -848,8 +929,10 @@ class SpriteShader {
         this.texResolutionLoc = gl.getUniformLocation(this.program, "u_resolution");
         this.texTranslationLoc = gl.getUniformLocation(this.program, "u_translation");
         this.texRotationLoc = gl.getUniformLocation(this.program, "u_rotation");
+        this.viewMatrixLoc = gl.getUniformLocation(this.program, "u_viewMatrix");
         this.texSizeLoc = gl.getUniformLocation(this.program, "u_size");
         this.texSamplerLoc = gl.getUniformLocation(this.program, "u_texture");
+        this.texAlphaLoc = gl.getUniformLocation(this.program, "u_alpha");
 
         // Create a buffer for quad positions
         this.texBuffer = gl.createBuffer();
@@ -861,6 +944,14 @@ class SpriteShader {
         this.texcoordBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.texcoordBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.texcoords), gl.STATIC_DRAW);
+
+        // Set temporal viewMatrix
+        gl.useProgram(this.program);
+        gl.uniformMatrix3fv(this.viewMatrixLoc, false, new Float32Array([
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1
+        ]));
     }
 
     Use(gl) {
@@ -895,6 +986,7 @@ class GradientRectShader {
             uniform vec2 u_translation;
             uniform float u_rotation;
             uniform vec2 u_size;
+            uniform mat3 u_viewMatrix;
             varying vec2 v_localPos;
             void main() {
                 // Scale first, then rotate
@@ -906,8 +998,10 @@ class GradientRectShader {
                     scaled.x * sinR + scaled.y * cosR
                 );
                 vec2 pos = rotated + u_translation;
+                vec3 localPos = vec3(pos, 1.0);
+                vec3 worldPos = u_viewMatrix * localPos;
                 // Convert to clipspace
-                vec2 zeroToOne = pos / u_resolution;
+                vec2 zeroToOne = worldPos.xy / u_resolution;
                 vec2 zeroToTwo = zeroToOne * 2.0;
                 vec2 clipSpace = zeroToTwo - 1.0;
                 gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
@@ -935,6 +1029,7 @@ class GradientRectShader {
         this.resolutionLoc = gl.getUniformLocation(this.program, "u_resolution");
         this.translationLoc = gl.getUniformLocation(this.program, "u_translation");
         this.rotationLoc = gl.getUniformLocation(this.program, "u_rotation");
+        this.viewMatrixLoc = gl.getUniformLocation(this.program, "u_viewMatrix");
         this.sizeLoc = gl.getUniformLocation(this.program, "u_size");
         this.colorALoc = gl.getUniformLocation(this.program, "u_colorA");
         this.colorBLoc = gl.getUniformLocation(this.program, "u_colorB");
@@ -943,6 +1038,14 @@ class GradientRectShader {
         this.buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.quadVerts), gl.STATIC_DRAW);
+
+        // Set temporal viewMatrix
+        gl.useProgram(this.program);
+        gl.uniformMatrix3fv(this.viewMatrixLoc, false, new Float32Array([
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1
+        ]));
     }
 
     // create or update a 1D gradient texture from color stops

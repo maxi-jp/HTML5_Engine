@@ -186,13 +186,14 @@ class Sprite {
     _flipY = false;
     _computedScale = new Vector2(1, 1);
 
-    constructor(img, position, rotation, scale) {
+    constructor(img, position, rotation, scale, alpha=1.0) {
         this.img = img;
         // this.img.halfWidth = img.width / 2;
         // this.img.halfHeight = img.height / 2;
         this.position = position;
         this.rotation = rotation;
         this.scale = scale;
+        this.alpha = alpha;
         
         this._computedScale = new Vector2(this._scale.x, this._scale.y);
         this._computedScale.x *= this._flipX ? -1 : 1;
@@ -252,19 +253,19 @@ class Sprite {
     }
 
     Draw(renderer) {
-        renderer.DrawImage(this.img, this.position.x, this.position.y, this._computedScale.x, this._computedScale.y, this.rotation);
+        renderer.DrawImage(this.img, this.position.x, this.position.y, this._computedScale.x, this._computedScale.y, this.rotation, this.alpha);
     }
 
     DrawBasic(renderer) {
-        renderer.DrawImageBasic(this.img, this.position.x, this.position.y, this.img.width * this.scale.x, this.img.height * this.scale.y);
+        renderer.DrawImageBasic(this.img, this.position.x, this.position.y, this.img.width * this.scale.x, this.img.height * this.scale.y, this.alpha);
     }
     
     DrawSection(renderer, sx, sy, sw, sh) {
-        renderer.DrawImageSection(this.img, this.position.x, this.position.y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y, this.rotation);
+        renderer.DrawImageSection(this.img, this.position.x, this.position.y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y, this.rotation, this.alpha);
     }
 
     DrawSectionBasic(sx, sy, sw, sh) {
-        renderer.DrawImageSectionBasic(this.img, this.position.x, this.position.y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y);
+        renderer.DrawImageSectionBasic(this.img, this.position.x, this.position.y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y, this.alpha);
     }
 }
 

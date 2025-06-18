@@ -1,4 +1,6 @@
 class Enemy extends SpriteObject {
+    static colliderColor = new Color(1, 0, 0, 0.25);
+
     constructor(initialPosition, img, player, sceneLimits) {
         super(initialPosition, 0, 1, img);
 
@@ -28,7 +30,7 @@ class Enemy extends SpriteObject {
     Draw(renderer) {
         super.DrawSection(renderer, 149, 182, 31, 46);
 
-        renderer.DrawFillCircle(this.position.x, this.position.y, this.boundingRadious, new Color(1, 0, 0, 0.25)); // TODO remove Color instantiating
+        renderer.DrawFillCircle(this.position.x, this.position.y, this.boundingRadious, Enemy.colliderColor);
     }
 
     Damage(damage) {
@@ -121,12 +123,8 @@ class EnemyKamikaze extends Enemy {
     }
 
     Draw(renderer) {
-        const ctx = renderer.ctx;
-
-        ctx.globalAlpha = this.thrustFireSprite.alpha;
-        this.thrustFireSprite.DrawSection(ctx, 180, 182, 32, 76);
-
-        ctx.globalAlpha = 1;
+        this.thrustFireSprite.DrawSection(renderer, 180, 182, 32, 76);
+        
         super.Draw(renderer);
     }
 }
@@ -168,13 +166,13 @@ class EnemyAsteroid extends Enemy {
         }
     }
 
-    Draw(ctx) {
+    Draw(renderer) {
         if (this.small)
-            super.DrawSection(ctx, 144, 476, 32, 32);
+            super.DrawSection(renderer, 144, 476, 32, 32);
         else
-            super.DrawSection(ctx, 144, 428, 48, 48);
+            super.DrawSection(renderer, 144, 428, 48, 48);
 
-        DrawFillCircle(ctx, this.position.x, this.position.y, this.boundingRadious, "rgba(255, 0, 0, 0.25)");
+        renderer.DrawFillCircle(this.position.x, this.position.y, this.boundingRadious, Enemy.colliderColor);
     }
 
     Damage(damage) {

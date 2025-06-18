@@ -49,7 +49,7 @@ class TTS extends Game {
             [1, "#274f98"]
         ]);
 
-        this.mouseCircle = new Circle(new Vector2(0, 0), 5, 'red', 1);
+        this.mouseCircle = new Circle(new Vector2(0, 0), 5, Color.red, 1);
 
         this.player = new PlayerShip(new Vector2(canvas.width / 2, canvas.height / 2), 0, 1, this.graphicAssets.ships.img, this.sceneLimits);
         this.gameObjects.push(this.player);
@@ -123,33 +123,33 @@ class TTS extends Game {
         // background
         this.renderer.DrawGradientRectangle(0, 0, canvas.width, canvas.height, this.bgGrad);
 
-        // this.camera.PreDraw(ctx);
+        this.camera.PreDraw(this.renderer);
 
         // background grid
         // horizontal lines
         const verticalStep = 50;
         const horizontalLines = this.sceneLimits.height / verticalStep;
         for (let i = 0; i < horizontalLines; i++) {
-            this.renderer.DrawLine(this.sceneLimits.position.x, this.sceneLimits.position.y + verticalStep * i, this.sceneLimits.position.x + this.sceneLimits.width, this.sceneLimits.position.y + verticalStep * i, "grey", 1);
+            this.renderer.DrawLine(this.sceneLimits.position.x, this.sceneLimits.position.y + verticalStep * i, this.sceneLimits.position.x + this.sceneLimits.width, this.sceneLimits.position.y + verticalStep * i, Color.grey, 1);
         }
         // vertical lines
         const horizontalStep = 50;
         const verticalLines = this.sceneLimits.width / horizontalStep;
         for (let i = 0; i < verticalLines; i++) {
-            this.renderer.DrawLine(this.sceneLimits.position.x + horizontalStep * i, this.sceneLimits.position.y, this.sceneLimits.position.x + horizontalStep * i, this.sceneLimits.position.y + this.sceneLimits.height, "grey", 1);
+            this.renderer.DrawLine(this.sceneLimits.position.x + horizontalStep * i, this.sceneLimits.position.y, this.sceneLimits.position.x + horizontalStep * i, this.sceneLimits.position.y + this.sceneLimits.height, Color.grey, 1);
         }
 
         this.sceneLimits.Draw(renderer);
 
-        // // draw the game objects
+        // draw the game objects
         super.Draw();
 
-        // this.camera.PostDraw(ctx);
+        this.camera.PostDraw(this.renderer);
 
-        // // draw the mouse position
-        // this.mouseCircle.Draw(ctx);
+        // draw the mouse position
+        this.mouseCircle.Draw(renderer);
 
-        // this.playerScoreLabel.Draw(ctx);
+        this.playerScoreLabel.Draw(renderer);
     }
 
     AddEnemy(enemy) {
