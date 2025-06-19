@@ -272,12 +272,20 @@ class WebGLRenderer extends Renderer {
             0, 0, 1  // -camera.x, -camera.y, 1
         ]);
 
+        // auxiliar line vertices
+        this.lineVertices = new Float32Array([ 0.0, 0.0, 0.0, 0.0 ]);
+
+        // auxiliar rectangle vertices
+        this.auxRectVertices = [
+            { x: -1, y: -1},
+            { x:  1, y: -1},
+            { x:  1, y:  1},
+            { x: -1, y:  1}
+        ]
+
         // auxiliar structure for circle vertices
-        const numSegments = 64;
-        this.circleVerts = [];
-        for (let i = 0; i <= numSegments; i++) {
-            this.circleVerts.push(0, 0);
-        }
+        this.circleNumSegments = 64;
+        this.circleVerts = new Float32Array(this.circleNumSegments * 2);
 
         // axuliar canvas for rendering text
         this.textCanvas = document.createElement('canvas');
@@ -396,14 +404,14 @@ class WebGLRenderer extends Renderer {
         const gl = this.gl;
 
         // buffer for the two points
-        const vertices = new Float32Array([
-            x1, y1,
-            x2, y2
-        ]);
+        this.lineVertices[0] = x1;
+        this.lineVertices[1] = y1;
+        this.lineVertices[2] = x2;
+        this.lineVertices[3] = y2;
 
         const buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STREAM_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.lineVertices, gl.STREAM_DRAW);
         
         this.basicRectShader.UseForCustomBuffer(gl, buffer);
 
@@ -481,19 +489,19 @@ class WebGLRenderer extends Renderer {
 
         // Rectangle corners centered at (x, y)
         const hw = w / 2, hh = h / 2;
-        const corners = [
-            [-hw, -hh],
-            [ hw, -hh],
-            [ hw,  hh],
-            [-hw,  hh]
-        ];
         // Apply rotation and translation
         const cosR = Math.cos(rot), sinR = Math.sin(rot);
-        const points = corners.map(([cx, cy]) => [
-            x + cx * cosR - cy * sinR,
-            y + cx * sinR + cy * cosR
-        ]);
-        this.DrawPolygon(points, color, lineWidth);
+        // update vertices array
+        this.auxRectVertices[0].x = x - hw * cosR + hh * sinR;
+        this.auxRectVertices[0].y = y - hw * sinR - hh * cosR;
+        this.auxRectVertices[1].x = x + hw * cosR + hh * sinR;
+        this.auxRectVertices[1].y = y + hw * sinR - hh * cosR;
+        this.auxRectVertices[2].x = x + hw * cosR - hh * sinR;
+        this.auxRectVertices[2].y = y + hw * sinR + hh * cosR;
+        this.auxRectVertices[3].x = x - hw * cosR - hh * sinR;
+        this.auxRectVertices[3].y = y - hw * sinR + hh * cosR;
+        
+        this.DrawPolygon(this.auxRectVertices, color, lineWidth);
     }
 
     DrawFillRectangle(x, y, w, h, color, rot=0) {
@@ -530,19 +538,18 @@ class WebGLRenderer extends Renderer {
     DrawFillCircle(x, y, radius, color=Color.black) {
         const gl = this.gl;
         
-        const numSegments = this.circleVerts.length / 2;
         for (let i = 0; i < this.circleVerts.length; i += 2) {
-            const angle = (i / numSegments) * PI2;
+            const angle = (i / this.circleNumSegments) * PI2;
             this.circleVerts[i] = x + Math.cos(angle) * radius;
             this.circleVerts[i + 1] = y + Math.sin(angle) * radius;
         }
 
         // insert center point into the circle vertices
-        this.circleVerts.unshift(x, y);
+        // this.circleVerts.unshift(x, y);
 
         const buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.circleVerts), gl.STREAM_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.circleVerts, gl.STREAM_DRAW);
 
         // Use the shader with this custom buffer
         this.basicRectShader.UseForCustomBuffer(gl, buffer);
@@ -554,27 +561,26 @@ class WebGLRenderer extends Renderer {
         gl.uniform2f(this.basicRectShader.sizeLoc, 1, 1);
         gl.uniform4fv(this.basicRectShader.colorLoc, color.rgba);
 
-        gl.drawArrays(gl.TRIANGLE_FAN, 0, numSegments);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, this.circleNumSegments);
 
         gl.deleteBuffer(buffer);
 
-        this.circleVerts.shift();
-        this.circleVerts.shift(); // Remove the center point
+        // this.circleVerts.shift();
+        // this.circleVerts.shift(); // Remove the center point
     }
 
     DrawStrokeCircle(x, y, radius, color=Color.black, lineWidth=1) {
         const gl = this.gl;
-
-        const numSegments = this.circleVerts.length / 2;
+        
         for (let i = 0; i < this.circleVerts.length; i += 2) {
-            const angle = (i / numSegments) * PI2;
+            const angle = (i / this.circleNumSegments) * PI2;
             this.circleVerts[i] = x + Math.cos(angle) * radius;
             this.circleVerts[i + 1] = y + Math.sin(angle) * radius;
         }
 
         const buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.circleVerts), gl.STREAM_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.circleVerts, gl.STREAM_DRAW);
 
         // Use the shader with this custom buffer
         this.basicRectShader.UseForCustomBuffer(gl, buffer);
@@ -587,7 +593,7 @@ class WebGLRenderer extends Renderer {
         gl.uniform4fv(this.basicRectShader.colorLoc, color.rgba);
 
         gl.lineWidth(lineWidth); // May be ignored on most platforms
-        gl.drawArrays(gl.LINE_STRIP, 0, numSegments);
+        gl.drawArrays(gl.LINE_STRIP, 0, this.circleNumSegments);
 
         gl.deleteBuffer(buffer);
     }
@@ -652,7 +658,7 @@ class WebGLRenderer extends Renderer {
     }
 
     DrawImageBasic(img, x, y, w=img.width, h=img.height, alpha=1.0) {
-        this.DrawImage(img, x + w / 2, y + h / 2, w / img.width, h / img.height, alpha);
+        this.DrawImage(img, x + w / 2, y + h / 2, w / img.width, h / img.height, 0, alpha);
     }
 
     DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0, alpha=1.0) {

@@ -73,7 +73,6 @@ class EnemyKamikaze extends Enemy {
         this.thrustFireSprite.alpha = (Math.cos(totalTime * 20) + 1) / 2;
         this.thrustFireSprite.alpha += (Math.cos(totalTime * 54.67) + 1) / 2;
 
-
         switch(this.state) {
             case KamikazeState.looking:
                 // look for the player

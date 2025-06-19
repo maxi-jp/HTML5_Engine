@@ -20,7 +20,7 @@ class TTS extends Game {
         this.enemies = [];
         this.camera = null;
 
-        this.sceneLimits = new Rectangle(Vector2.Zero(), 800, 640, Color.white, true);
+        this.sceneLimits = new Rectangle(Vector2.Zero(), 800, 640, Color.white, true, 2);
 
         this.timeToSpawnEnemy = 1;
         this.timeToSpawnEnemyAux = 0;
@@ -182,7 +182,7 @@ class TTS extends Game {
             enemy = new EnemyAsteroid(spawnPoint, this.graphicAssets.ships.img, this.player, this.sceneLimits);
         }
 
-        this.timeToSpawnEnemy *= 0.95;
+        this.timeToSpawnEnemy *= 0.97;
         if (this.timeToSpawnEnemy < 0.15)
             this.timeToSpawnEnemy = 0.15
 

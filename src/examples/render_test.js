@@ -28,6 +28,7 @@ class BasicGame extends Game {
         this.blackRect = null;
         this.blueCircle = null;
         this.pinkCircle = null;
+        this.greenCircle = null;
         this.snakeSprite = null;
         this.portalSprite = null;
         this.textLabel = null;
@@ -62,6 +63,8 @@ class BasicGame extends Game {
         this.blueCircle = new Circle(new Vector2(400, 100), 40, Color.blue);
         // purple stroke circle
         this.pinkCircle = new Circle(new Vector2(400, 100), 40, new Color(1, 0, 1, 1), true, 4);
+        // semitransparent green fill circle
+        this.greenCircle = new Circle(new Vector2(200, 400), 20, new Color(0, 1, 0, 0.25)); 
 
         // Snake sprite
         this.snakeSprite = new Sprite(this.graphicAssets.snake.img, new Vector2(100, 100), 0, 1);
@@ -105,6 +108,7 @@ class BasicGame extends Game {
 
         this.blueCircle.Draw(this.renderer);
         this.pinkCircle.Draw(this.renderer);
+        this.greenCircle.Draw(this.renderer);
 
         this.renderer.DrawFillText("Watson!!! O_O", this.screenHalfWidth, 20, "20px Comic Sans MS");
         this.renderer.DrawFillText("Top-left corner", 0, 0, "16px Comic Sans MS", Color.green, "left", "top");
