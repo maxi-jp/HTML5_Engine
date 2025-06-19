@@ -287,13 +287,15 @@ class SpriteSection extends Sprite {
 
 class LinearGradient {
     constructor(renderer, x0, y0, x1, y1, colorStops=[]) {
+        this.renderer = renderer;
         this.x0 = x0;
         this.y0 = y0;
         this.x1 = x1;
         this.y1 = y1;
         this.colorStops = [];
+        this.webglTexture = null;
 
-        colorStops.forEach(cs => this.addColorStop(cs[0], cs[1]));
+        colorStops.forEach(cs => this.AddColorStop(cs[0], cs[1]));
 
         if (renderer.ctx) {
             this.gradient = renderer.ctx.createLinearGradient(x0, y0, x1, y1);
@@ -306,8 +308,24 @@ class LinearGradient {
         }
     }
 
-    addColorStop(offset, color) {
+    AddColorStop(offset, color) {
         this.colorStops.push({ offset, color: color });
+    }
+
+    SetColorStop(offsetId, color) {
+        this.colorStops[offsetId].color = color;
+        if (this.renderer.ctx) {
+            this.gradient = renderer.ctx.createLinearGradient(this.x0, this.y0, this.x1, this.y1);
+            this.colorStops.forEach(cs => {
+                this.gradient.addColorStop(cs.offset, cs.color);
+            });
+        }
+        else {
+            if (this.webglTexture)
+                GradientRectShader.CleanGradientTexture(this.renderer.gl, this.webglTexture);
+
+            this.webglTexture = GradientRectShader.CreateGradientTexture(this.renderer.gl, this.colorStops);
+        }
     }
 }
 

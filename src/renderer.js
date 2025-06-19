@@ -714,14 +714,15 @@ class WebGLRenderer extends Renderer {
     }
     
     DrawGradientRectangle(x, y, w, h, gradient) {
+        // TODO this would be far more optimal if instead of using a texture, it'll use vertex color
         // Only supports two color stops: top and bottom
         const gl = this.gl;
         const shader = this.gradientRectShader;
 
-        // Center the rectangle at (x + w/2, y + h/2)
         shader.Use(gl);
-
+        
         gl.uniform2f(shader.resolutionLoc, this.canvas.width, this.canvas.height);
+        // Center the rectangle at (x + w/2, y + h/2)
         gl.uniform2f(shader.translationLoc, x + w/2, y + h/2);
         gl.uniform1f(shader.rotationLoc, 0);
         gl.uniform2f(shader.sizeLoc, w, h);
@@ -1076,6 +1077,10 @@ class GradientRectShader {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
         return tex;
+    }
+
+    static CleanGradientTexture(gl, text) {
+        gl.deleteTexture(text);
     }
 
     Use(gl) {

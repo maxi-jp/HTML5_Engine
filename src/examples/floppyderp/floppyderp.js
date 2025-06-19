@@ -68,7 +68,7 @@ class FloppyDerp extends Game {
         this.maxScore = 0;
         this.newRecord = false; // flag that indicates the record was reached the last game
 
-        this.gravityValue = 9.8;   // gravity strengh
+        this.gravityValue = 800;    // gravity strengh
         this.gravityAc = 1.8;       // aceleration for the gravity
         this.scrollVelocity = 250.0;  // horizontal scroll speed
         this.initialPlayerPosition = Vector2.Zero(); // Initial player position
@@ -95,6 +95,7 @@ class FloppyDerp extends Game {
         this.bgColorVar = 0.0; // color mix in the current step
         this.bgColorStep = 0; // mix step, 0: 1-2, 1: 2-3, 2: 3-0
         this.bgColorVarVelocity = 1; // color variation speed
+        this.bgGradient = null; // background LinearGradient object
 
         this.gameState = FloppyDerpGameState.menu;
         this.menuState = FloppyDerpMenuState.init;
@@ -130,6 +131,11 @@ class FloppyDerp extends Game {
         this.nextTubeSpawn = 0.0;
         this.bgColorVar = 0.0;
         this.bgColorStep = 0;
+        this.bgGradient = new LinearGradient(this.renderer, 320, 0, 320, this.screenWidth, [
+            [ 0.0, Color.FromHex('#040311') ],
+            [ 0.05, Color.Black() ],
+            [ 1.0, this.bgColorMixed ]
+        ]);
 
         this.tubes = [];
         
@@ -347,16 +353,8 @@ class FloppyDerp extends Game {
         
         this.bgColorMixed = Color.Lerp(actualColor, nextColor, this.bgColorVar);
 
-        // var lGrad = this.renderer.ctx.createLinearGradient(320, 0, 320, this.screenWidth);
-        var lGrad = new LinearGradient(renderer, 320, 0, 320, this.screenWidth, [
-            [ 0.0, Color.FromHex('#040311') ],
-            [ 0.05, Color.Black() ],
-            [ 1.0, this.bgColorMixed ]
-        ])
-        // lGrad.addColorStop(0.0, '#040311');
-        // lGrad.addColorStop(0.05, "black");
-        // lGrad.addColorStop(1.0, this.bgColorMixed);
-        this.renderer.DrawGradientRectangle(0, 0, this.screenWidth, this.screenHeight, lGrad);
+        this.bgGradient.SetColorStop(2, this.bgColorMixed);
+        this.renderer.DrawGradientRectangle(0, 0, this.screenWidth, this.screenHeight, this.bgGradient);
     }
 
     UpdateMenu(deltaTime) {
@@ -429,7 +427,7 @@ class FloppyDerpPlayer extends SSAnimationObjectBasic {
 
         this.initialPosition = Vector2.Copy(position);
 
-        this.jumpVelocityPower = 10.0;
+        this.jumpVelocityPower = 700.0;
         this.jumpVelocity = 10.0;
         this.jumpPunch = 2.5 * game.gravityValue * game.gravityAc; // jump force
         this.colliderW = 16;
@@ -456,7 +454,7 @@ class FloppyDerpPlayer extends SSAnimationObjectBasic {
         switch (this.state) {
             case 0: // falling
                 this.fallVelocity += game.gravityValue * game.gravityAc * deltaTime;
-                this.position.y += this.fallVelocity;
+                this.position.y += this.fallVelocity * deltaTime;;
             
                 if (this.position.y >= game.screenHeight)
                     this.Reset();
@@ -465,13 +463,13 @@ class FloppyDerpPlayer extends SSAnimationObjectBasic {
             
             case 1: // jumping
                 this.jumpVelocity -= this.jumpPunch * deltaTime;
-                this.position.y -= this.jumpVelocity;
+                this.position.y -= this.jumpVelocity * deltaTime;;
                 
                 if (this.position.y <= 0)
                     this.Reset();
                     
                 if (this.jumpVelocity <= 0.0) {
-                    this.jumpVelocity = 10.0;
+                    this.jumpVelocity = this.jumpVelocityPower;
                     this.fallVelocity = 0.0;
 
                     this.state = 0; // falling
@@ -481,7 +479,7 @@ class FloppyDerpPlayer extends SSAnimationObjectBasic {
                 
             case 2: // dying
                 this.fallVelocity += game.gravityValue * game.gravityAc * deltaTime * 0.25;
-                this.position.y += this.fallVelocity;
+                this.position.y += this.fallVelocity * deltaTime;
             
                 if (this.position.y >= game.screenHeight)
                     game.GameOver();
@@ -496,7 +494,7 @@ class FloppyDerpPlayer extends SSAnimationObjectBasic {
     
     Reset() {
         this.position.Set(this.initialPosition.x, this.initialPosition.y);
-        this.fallVelocity = 0.0;
+        this.fallVelocity = 0.0; // reset fall velocity
         this.jumpVelocity = this.jumpVelocityPower;
         this.state = 0;
 
