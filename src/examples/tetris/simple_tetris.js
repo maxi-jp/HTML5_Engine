@@ -1,6 +1,6 @@
 class SimpleTetris extends Game {
-    constructor() {
-        super();
+    constructor(renderer) {
+        super(renderer);
 
         this.grid = null;
         this.gridSize = { rows: 20, cols: 10 };
@@ -10,13 +10,13 @@ class SimpleTetris extends Game {
         this.initialPiecePosition = { x: 3, y: 0 };
         
         this.pieces = [
-            { type: 'I', color: 'red', shape: [[1, 1, 1, 1]] },
-            { type: 'J', color: 'blue', shape: [[1, 0, 0], [1, 1, 1]] },
-            { type: 'L', color: 'green', shape: [[0, 0, 1], [1, 1, 1]] },
-            { type: 'O', color: 'yellow', shape: [[1, 1], [1, 1]] },
-            { type: 'S', color: 'purple', shape: [[0, 1, 1], [1, 1, 0]] },
-            { type: 'T', color: 'orange', shape: [[0, 1, 0], [1, 1, 1]] },
-            { type: 'Z', color: 'cyan', shape: [[1, 1, 0], [0, 1, 1]] }
+            { type: 'I', color: Color.red,    shape: [[1, 1, 1, 1]] },
+            { type: 'J', color: Color.blue,   shape: [[1, 0, 0], [1, 1, 1]] },
+            { type: 'L', color: Color.green,  shape: [[0, 0, 1], [1, 1, 1]] },
+            { type: 'O', color: Color.yellow, shape: [[1, 1], [1, 1]] },
+            { type: 'S', color: Color.purple, shape: [[0, 1, 1], [1, 1, 0]] },
+            { type: 'T', color: Color.orange, shape: [[0, 1, 0], [1, 1, 1]] },
+            { type: 'Z', color: Color.cyan,   shape: [[1, 1, 0], [0, 1, 1]] }
         ];
         
         this.currentPiece = null;
@@ -55,8 +55,8 @@ class SimpleTetris extends Game {
         this.totalLinesCleared = 0;
         this.score = 0;
 
-        this.scoreLabel = new TextLabel("Score: 0", new Vector2(20, 420), "20px Comic Sans MS", "black", "left", "middle", false);
-        this.keysLabel = new TextLabel("Keys: A (left) | D (right) | Space (rotate) | W (instant fall)", new Vector2(20, 460), "16px Comic Sans MS", "grey", "left", "middle", false);
+        this.scoreLabel = new TextLabel("Score: 0", new Vector2(20, 420), "20px Comic Sans MS", Color.black, "left", "middle", false);
+        this.keysLabel = new TextLabel("Keys: A (left) | D (right) | Space (rotate) | W (instant fall)", new Vector2(20, 460), "16px Comic Sans MS", Color.grey, "left", "middle", false);
 
         // center the grid in the canvas
         this.gridPosition.x = Math.floor((canvas.width - this.gridSize.cols * this.squareSize) / 2);
@@ -73,33 +73,33 @@ class SimpleTetris extends Game {
         }
     }
 
-    Draw(ctx) {
-        super.Draw(ctx);
+    Draw() {
+        super.Draw();
 
         // Draw the grid
         // Fallen pieces of the grid
         for (let y = 0; y < this.grid.length; y++) {
             for (let x = 0; x < this.grid[y].length; x++) {
                 if (this.grid[y][x] !== 0) {
-                    DrawFillRectangle(ctx, this.gridPosition.x + x * this.squareSize, this.gridPosition.y + y * this.squareSize, this.squareSize, this.squareSize, 'gray');
-                    DrawStrokeRectangle(ctx, this.gridPosition.x + x * this.squareSize, this.gridPosition.y + y * this.squareSize, this.squareSize, this.squareSize, 'black', 1);
+                    this.renderer.DrawFillRectangle(this.gridPosition.x + x * this.squareSize, this.gridPosition.y + y * this.squareSize, this.squareSize, this.squareSize, Color.grey);
+                    this.renderer.DrawStrokeRectangle(this.gridPosition.x + x * this.squareSize, this.gridPosition.y + y * this.squareSize, this.squareSize, this.squareSize, Color.black, 1);
                 }
             }
         }
 
         // Draw the current piece
-        this.DrawPiece(ctx, this.currentPiece, this.gridPosition.x + this.currentPiece.position.x * this.squareSize, this.gridPosition.y + this.currentPiece.position.y * this.squareSize);
+        this.DrawPiece(renderer, this.currentPiece, this.gridPosition.x + this.currentPiece.position.x * this.squareSize, this.gridPosition.y + this.currentPiece.position.y * this.squareSize);
         
         // Border of the grid
-        DrawStrokeRectangle(ctx, this.gridPosition.x, this.gridPosition.y, this.gridSize.cols * this.squareSize, this.gridSize.rows * this.squareSize, 'black', 2);
+        this.renderer.DrawStrokeRectangle(this.gridPosition.x, this.gridPosition.y, this.gridSize.cols * this.squareSize, this.gridSize.rows * this.squareSize, Color.black, 2);
         
         // Draw the next piece
-        DrawStrokeRectangle(ctx, this.gridPosition.x + this.gridSize.cols * this.squareSize + 20, this.gridPosition.y, 6 * this.squareSize, 4 * this.squareSize, 'black', 2);
-        this.DrawPiece(ctx, this.nextPiece, this.gridPosition.x + (this.gridSize.cols + 1) * this.squareSize + 20, this.gridPosition.y + 20);
+        this.renderer.DrawStrokeRectangle(this.gridPosition.x + this.gridSize.cols * this.squareSize + 20, this.gridPosition.y, 6 * this.squareSize, 4 * this.squareSize, Color.black, 2);
+        this.DrawPiece(renderer, this.nextPiece, this.gridPosition.x + (this.gridSize.cols + 1) * this.squareSize + 20, this.gridPosition.y + 20);
         
         // UI
-        this.keysLabel.Draw(ctx);
-        this.scoreLabel.Draw(ctx);
+        this.keysLabel.Draw(renderer);
+        this.scoreLabel.Draw(renderer);
     }
     
     InitializeGrid(rows, cols) {
@@ -273,9 +273,9 @@ class SimpleTetris extends Game {
         this.scoreLabel.text = `Score: ${this.score}`;
     }
 
-    DrawPiece(ctx, piece, x, y) {
+    DrawPiece(renderer, piece, x, y) {
         // Debug bounding box
-        DrawStrokeRectangle(ctx, x, y, this.squareSize * 4, this.squareSize * 4, 'grey', 1);
+        renderer.DrawStrokeRectangle(x, y, this.squareSize * 4, this.squareSize * 4, Color.grey, 1);
 
         for (let j = 0; j < piece.shape.length; j++) {
             for (let i = 0; i < piece.shape[j].length; i++) {
@@ -283,8 +283,8 @@ class SimpleTetris extends Game {
                     const coordX = x + i * this.squareSize;
                     const coordY = y + j * this.squareSize;
 
-                    DrawFillRectangle(ctx, coordX, coordY, this.squareSize, this.squareSize, piece.color);
-                    DrawStrokeRectangle(ctx, coordX, coordY, this.squareSize, this.squareSize, 'black', 1);
+                    renderer.DrawFillRectangle(coordX, coordY, this.squareSize, this.squareSize, piece.color);
+                    renderer.DrawStrokeRectangle(coordX, coordY, this.squareSize, this.squareSize, Color.black, 1);
                 }
             }
         }
@@ -313,7 +313,3 @@ class SimpleTetris extends Game {
         this.currentDropTime = 0;
     }
 }
-
-// initialize the game
-if (game === null)
-    game = new SimpleTetris();

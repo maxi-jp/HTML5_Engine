@@ -290,7 +290,7 @@ class WebGLRenderer extends Renderer {
         // axuliar canvas for rendering text
         this.textCanvas = document.createElement('canvas');
         this.textCanvasCtx = this.textCanvas.getContext('2d');
-        this.textTexture = this.gl.createTexture();
+        this.InitTextTexture();
 
         // enable blending for pngs transparency
         this.gl.enable(this.gl.BLEND);
@@ -330,6 +330,34 @@ class WebGLRenderer extends Renderer {
         }
 
         return img._webglTexture;
+    }
+
+    InitTextTexture() {
+        const gl = this.gl;
+
+        this.textTexture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, this.textTexture);
+
+        // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+        //  // Upload a 1x1 transparent pixel to make the texture data-complete.
+        // const level = 0;
+        // const internalFormat = gl.RGBA;
+        // const width = 1;
+        // const height = 1;
+        // const border = 0;
+        // const srcFormat = gl.RGBA;
+        // const srcType = gl.UNSIGNED_BYTE;
+        // const pixel = new Uint8Array([0, 0, 0, 0]); // Transparent black
+        // gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+        //               width, height, border, srcFormat, srcType,
+        //               pixel);
+
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        gl.bindTexture(gl.TEXTURE_2D, null); // Unbind after setting params
     }
 
     PrepareText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic", stroke=false, lineWidth=1) {
@@ -603,24 +631,22 @@ class WebGLRenderer extends Renderer {
         // Prepare the text in the auxiliar Canvas
         const { width, height, x: tx, y: ty } = this.PrepareText(text, x, y, font, color, align, baseline, stroke, lineWidth);
 
-        // Upload as WebGL texture
         const gl = this.gl;
         
+        // Upload as WebGL texture
         gl.bindTexture(gl.TEXTURE_2D, this.textTexture);
-        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.textCanvas);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
         // Draw as a textured quad using the SpriteShader
         this.spriteShader.Use(gl);
+        
         gl.uniform2f(this.spriteShader.texResolutionLoc, this.canvas.width, this.canvas.height);
         gl.uniform2f(this.spriteShader.texTranslationLoc, tx, ty);
         gl.uniform1f(this.spriteShader.texRotationLoc, 0);
         gl.uniform2f(this.spriteShader.texSizeLoc, width, height);
-
+        gl.uniform1f(this.spriteShader.texAlphaLoc, 1.0);
+        
+        // Bind texture
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.textTexture);
         gl.uniform1i(this.spriteShader.texSamplerLoc, 0);

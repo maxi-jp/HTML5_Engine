@@ -7,6 +7,7 @@
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="stylesheet" href="css/style.css">
+    <script src="src/renderer.js"></script>
     <script src="src/main.js"></script>
     <script src="src/utils_math.js"></script>
     <script src="src/input.js"></script>
@@ -18,5 +19,11 @@
 </head>
 <body>
     <canvas id="myCanvas" width="640" height="480"></canvas>
+
+    <script>
+        window.onload = () => {
+            Init(Tetris);
+        }
+    </script>
 </body>
 </html>

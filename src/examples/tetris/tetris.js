@@ -6,8 +6,8 @@ const TetrisGameState = {
 };
 
 class Tetris extends Game {
-    constructor() {
-        super();
+    constructor(renderer) {
+        super(renderer);
 
         this.currentState = TetrisGameState.Playing;
 
@@ -103,13 +103,13 @@ class Tetris extends Game {
         };
 
         this.pieces = [
-            { type: 'I', color: 'red', shape: this.rotationStates['I'][0] },
-            { type: 'J', color: 'blue', shape: this.rotationStates['J'][0] },
-            { type: 'L', color: 'green', shape: this.rotationStates['L'][0] },
-            { type: 'O', color: 'yellow', shape: this.rotationStates['O'][0] },
-            { type: 'S', color: 'purple', shape: this.rotationStates['S'][0] },
-            { type: 'T', color: 'orange', shape: this.rotationStates['T'][0] },
-            { type: 'Z', color: 'cyan', shape: this.rotationStates['Z'][0] }
+            { type: 'I', color: Color.red,    shape: this.rotationStates['I'][0] },
+            { type: 'J', color: Color.blue,   shape: this.rotationStates['J'][0] },
+            { type: 'L', color: Color.green,  shape: this.rotationStates['L'][0] },
+            { type: 'O', color: Color.yellow, shape: this.rotationStates['O'][0] },
+            { type: 'S', color: Color.purple, shape: this.rotationStates['S'][0] },
+            { type: 'T', color: Color.orange, shape: this.rotationStates['T'][0] },
+            { type: 'Z', color: Color.cyan,   shape: this.rotationStates['Z'][0] }
         ];
         
         this.currentPiece = null;
@@ -174,10 +174,10 @@ class Tetris extends Game {
         this.totalLinesCleared = 0;
         this.score = 0;
 
-        this.scoreLabel = new TextLabel("Score: 0", new Vector2(20, 420), "20px Comic Sans MS", "black", "left", "middle", false);
-        this.keysLabel = new TextLabel("Keys: A (left) | D (right) | Space (rotate) | W (instant fall) | Q (save piece)", new Vector2(20, 460), "16px Comic Sans MS", "grey", "left", "middle", false);
-        this.gameOverLavel = new TextLabel("Game Over", new Vector2(canvas.width / 2, canvas.height / 2), "40px Comic Sans MS", "black", "center", "middle", false);
-        this.pauseLavel = new TextLabel("PAUSE", new Vector2(canvas.width / 2, canvas.height / 2), "40px Comic Sans MS", "black", "center", "middle", false);
+        this.scoreLabel = new TextLabel("Score: 0", new Vector2(20, 420), "20px Comic Sans MS", Color.black, "left", "middle", false);
+        this.keysLabel = new TextLabel("Keys: A (left) | D (right) | Space (rotate) | W (instant fall) | Q (save piece)", new Vector2(20, 460), "16px Comic Sans MS", Color.grey, "left", "middle", false);
+        this.gameOverLavel = new TextLabel("Game Over", new Vector2(canvas.width / 2, canvas.height / 2), "40px Comic Sans MS", Color.black, "center", "middle", false);
+        this.pauseLavel = new TextLabel("PAUSE", new Vector2(canvas.width / 2, canvas.height / 2), "40px Comic Sans MS", Color.black, "center", "middle", false);
 
         // center the grid in the canvas
         this.gridPosition.x = Math.floor((canvas.width - this.gridSize.cols * this.squareSize) / 2);
@@ -215,50 +215,50 @@ class Tetris extends Game {
         }
     }
 
-    Draw(ctx) {
-        super.Draw(ctx);
+    Draw() {
+        super.Draw();
 
         // Draw the grid
         // Fallen pieces of the grid
         for (let y = 0; y < this.grid.length; y++) {
             for (let x = 0; x < this.grid[y].length; x++) {
                 if (this.grid[y][x] !== 0) {
-                    DrawFillRectangle(ctx, this.gridPosition.x + x * this.squareSize, this.gridPosition.y + y * this.squareSize, this.squareSize, this.squareSize, 'gray');
-                    DrawStrokeRectangle(ctx, this.gridPosition.x + x * this.squareSize, this.gridPosition.y + y * this.squareSize, this.squareSize, this.squareSize, 'black', 1);
+                    this.renderer.DrawFillRectangle(this.gridPosition.x + x * this.squareSize, this.gridPosition.y + y * this.squareSize, this.squareSize, this.squareSize, Color.grey);
+                    this.renderer.DrawStrokeRectangle(this.gridPosition.x + x * this.squareSize, this.gridPosition.y + y * this.squareSize, this.squareSize, this.squareSize, Color.black, 1);
                 }
             }
         }
 
         // Draw the ghost piece
-        this.DrawPiece(ctx, this.ghostPiece, this.gridPosition.x + this.ghostPiece.position.x * this.squareSize, this.gridPosition.y + this.ghostPiece.position.y * this.squareSize);
+        this.DrawPiece(renderer, this.ghostPiece, this.gridPosition.x + this.ghostPiece.position.x * this.squareSize, this.gridPosition.y + this.ghostPiece.position.y * this.squareSize);
 
         // Draw the current piece
-        this.DrawPiece(ctx, this.currentPiece, this.gridPosition.x + this.currentPiece.position.x * this.squareSize, this.gridPosition.y + this.currentPiece.position.y * this.squareSize);
+        this.DrawPiece(renderer, this.currentPiece, this.gridPosition.x + this.currentPiece.position.x * this.squareSize, this.gridPosition.y + this.currentPiece.position.y * this.squareSize);
         
         // Border of the grid
-        DrawStrokeRectangle(ctx, this.gridPosition.x, this.gridPosition.y, this.gridSize.cols * this.squareSize, this.gridSize.rows * this.squareSize, 'black', 2);
+        this.renderer.DrawStrokeRectangle(this.gridPosition.x, this.gridPosition.y, this.gridSize.cols * this.squareSize, this.gridSize.rows * this.squareSize, Color.black, 2);
         
         // Draw the next pieces
-        DrawStrokeRectangle(ctx, this.gridPosition.x + this.gridSize.cols * this.squareSize + 20, this.gridPosition.y, 6 * this.squareSize, 4 * this.squareSize, 'black', 2);
+        this.renderer.DrawStrokeRectangle(this.gridPosition.x + this.gridSize.cols * this.squareSize + 20, this.gridPosition.y, 6 * this.squareSize, 4 * this.squareSize, Color.black, 2);
         for (let i = 0; i < this.nextPieces.length; i++) {
-            this.DrawPiece(ctx, this.nextPieces[i], this.gridPosition.x + (this.gridSize.cols + 1) * this.squareSize + 20, this.gridPosition.y + 20 + (i * 4 * this.squareSize));
+            this.DrawPiece(renderer, this.nextPieces[i], this.gridPosition.x + (this.gridSize.cols + 1) * this.squareSize + 20, this.gridPosition.y + 20 + (i * 4 * this.squareSize));
         }
 
         // Draw the saved piece
-        DrawStrokeRectangle(ctx, this.gridPosition.x - 6 * this.squareSize - 20, this.gridPosition.y, 6 * this.squareSize, 4 * this.squareSize, 'black', 2);
+        this.renderer.DrawStrokeRectangle( this.gridPosition.x - 6 * this.squareSize - 20, this.gridPosition.y, 6 * this.squareSize, 4 * this.squareSize, Color.black, 2);
         if (this.savedPiece !== null) {
-            this.DrawPiece(ctx, this.savedPiece, this.gridPosition.x - 6 * this.squareSize - 20, this.gridPosition.y + 20);
+            this.DrawPiece(renderer, this.savedPiece, this.gridPosition.x - 6 * this.squareSize - 20, this.gridPosition.y + 20);
         }
         
         // UI
-        this.keysLabel.Draw(ctx);
-        this.scoreLabel.Draw(ctx);
+        this.keysLabel.Draw(renderer);
+        this.scoreLabel.Draw(renderer);
 
         if (this.currentState === TetrisGameState.GameOver) {
-            this.gameOverLavel.Draw(ctx);
+            this.gameOverLavel.Draw(renderer);
         }
         else if (this.currentState == TetrisGameState.Pause) {
-            this.pauseLavel.Draw(ctx);
+            this.pauseLavel.Draw(renderer);
         }
     }
     
@@ -488,9 +488,9 @@ class Tetris extends Game {
         this.scoreLabel.text = `Score: ${this.score}`;
     }
 
-    DrawPiece(ctx, piece, x, y) {
+    DrawPiece(renderer, piece, x, y) {
         // Debug bounding box
-        DrawStrokeRectangle(ctx, x, y, this.squareSize * 4, this.squareSize * 4, 'grey', 1);
+        renderer.DrawStrokeRectangle(x, y, this.squareSize * 4, this.squareSize * 4, Color.grey, 1);
 
         for (let j = 0; j < piece.shape.length; j++) {
             for (let i = 0; i < piece.shape[j].length; i++) {
@@ -498,8 +498,8 @@ class Tetris extends Game {
                     const coordX = x + i * this.squareSize;
                     const coordY = y + j * this.squareSize;
 
-                    DrawFillRectangle(ctx, coordX, coordY, this.squareSize, this.squareSize, piece.color.string);
-                    DrawStrokeRectangle(ctx, coordX, coordY, this.squareSize, this.squareSize, 'black', 1);
+                    renderer.DrawFillRectangle(coordX, coordY, this.squareSize, this.squareSize, piece.color);
+                    renderer.DrawStrokeRectangle(coordX, coordY, this.squareSize, this.squareSize, Color.black, 1);
                 }
             }
         }
@@ -541,11 +541,7 @@ class Tetris extends Game {
 
     UpdateGhostPieceAfterChange() {
         this.ghostPiece.type = this.currentPiece.type;
-        this.ghostPiece.color = Color.Copy(this.currentPiece.color).Desaturate(0.33);
+        this.ghostPiece.color = Color.Copy(this.currentPiece.color).Desaturate(0.05);
         this.ghostPiece.color.a = 0.5;
     }
 }
-
-// initialize the game
-if (game === null)
-    game = new Tetris();

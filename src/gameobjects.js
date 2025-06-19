@@ -49,7 +49,7 @@ class GameObject {
 }
 
 class RectangleGO extends GameObject {
-    constructor(position, width=100, height=100, color=Color.Red(), stroke=false, lineWidth=1) {
+    constructor(position, width=100, height=100, color=Color.red, stroke=false, lineWidth=1) {
         super(position);
         this.rectangle = new Rectangle(this._position, width, height, color, stroke, lineWidth);
     }
@@ -60,6 +60,21 @@ class RectangleGO extends GameObject {
 
     Draw(renderer) {
         renderer.DrawRectangle(this.position.x, this.position.y, this.rectangle.width, this.rectangle.height, this.rectangle.color, this.rectangle.stroke, this.rectangle.lineWidth, this.rotation);
+    }
+}
+
+class CircleGO extends GameObject {
+    constructor(position, radius=100, color=Color.red, stroke=false, lineWidth=1) {
+        super(position);
+        this.circle = new Circle(this._position, radius, color, stroke=false, lineWidth=1)
+    }
+
+    Start() { }
+
+    Update(deltaTime) { }
+
+    Draw(renderer) {
+        renderer.DrawCircle(this.position.x, this.position.y, this.circle.radius, this.circle.color, this.circle.stroke, this.circle.lineWidth);
     }
 }
 

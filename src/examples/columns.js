@@ -1,12 +1,20 @@
 class ColumnsGame extends Game {
-    constructor() {
-        super();
+    constructor(renderer) {
+        super(renderer);
+
+        this.graphicAssets = {
+            snake: {
+                path: "src/examples/common_assets/snake.png",
+                img: null
+            }
+        };
+        
         this.gridCols = 6;
         this.gridRows = 13;
         this.cellSize = 32;
         this.gridOffset = { x: 120, y: 32 };
 
-        this.colors = ["red", "blue", "yellow", "green", "purple", "cyan"];
+        this.colors = [Color.red, Color.blue, Color.yellow, Color.green, Color.purple, Color.cyan];
         this.grid = [];
         this.falling = null; // {blocks: [{x,y,color}], pos: {x,y}, state: "falling"/"landed"}
         this.fallTimer = 0;
@@ -29,7 +37,7 @@ class ColumnsGame extends Game {
         this.fallTimer = 0;
         this.gameOver = false;
         this.score = 0;
-        this.scoreLabel = new TextLabel("Score: 0", new Vector2(20, 20), "20px Comic Sans MS", "black", "left", "middle", false);
+        this.scoreLabel = new TextLabel("Score: 0", new Vector2(20, 20), "20px Comic Sans MS", Color.black, "left", "middle", false);
         this.SpawnColumn();
     }
 
@@ -175,29 +183,27 @@ class ColumnsGame extends Game {
         }
     }
 
-    Draw(ctx) {
-        super.Draw(ctx);
+    Draw() {
+        super.Draw();
         // Draw background
-        DrawFillRectangle(ctx, this.gridOffset.x, this.gridOffset.y, this.gridCols * this.cellSize, this.gridRows * this.cellSize, "#222");
+        this.renderer.DrawFillRectangle(this.gridOffset.x, this.gridOffset.y, this.gridCols * this.cellSize, this.gridRows * this.cellSize, Color.lightGrey);
 
         // Draw grid
         for (let y = 0; y < this.gridRows; y++) {
             for (let x = 0; x < this.gridCols; x++) {
                 if (this.grid[y][x]) {
-                    DrawFillRectangle(
-                        ctx,
+                    this.renderer.DrawFillRectangle(
                         this.gridOffset.x + x * this.cellSize + 2,
                         this.gridOffset.y + y * this.cellSize + 2,
                         this.cellSize - 4, this.cellSize - 4,
                         this.grid[y][x]
                     );
                 }
-                DrawStrokeRectangle(
-                    ctx,
+                this.renderer.DrawStrokeRectangle(
                     this.gridOffset.x + x * this.cellSize,
                     this.gridOffset.y + y * this.cellSize,
                     this.cellSize, this.cellSize,
-                    "#444"
+                    Color.grey
                 );
             }
         }
@@ -208,8 +214,7 @@ class ColumnsGame extends Game {
                 let bx = this.falling.pos.x;
                 let by = this.falling.pos.y - i;
                 if (by >= 0 && by < this.gridRows) {
-                    DrawFillRectangle(
-                        ctx,
+                    this.renderer.DrawFillRectangle(
                         this.gridOffset.x + bx * this.cellSize + 2,
                         this.gridOffset.y + by * this.cellSize + 2,
                         this.cellSize - 4, this.cellSize - 4,
@@ -220,13 +225,9 @@ class ColumnsGame extends Game {
         }
 
         // Draw border
-        DrawStrokeRectangle(ctx, this.gridOffset.x, this.gridOffset.y, this.gridCols * this.cellSize, this.gridRows * this.cellSize, "white", 2);
+        this.renderer.DrawStrokeRectangle(this.gridOffset.x, this.gridOffset.y, this.gridCols * this.cellSize, this.gridRows * this.cellSize, Color.white, 2);
 
         // Draw score
-        this.scoreLabel.Draw(ctx);
+        this.scoreLabel.Draw(renderer);
     }
 }
-
-// Initialize the game
-if (game === null)
-    game = new ColumnsGame();

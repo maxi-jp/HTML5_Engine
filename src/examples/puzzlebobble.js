@@ -1,12 +1,13 @@
 class PuzzleBobbleGame extends Game {
-    constructor() {
-        super();
+    constructor(renderer) {
+        super(renderer);
         this.gridCols = 8;
         this.gridRows = 12;
         this.cellSize = 32;
         this.gridOffset = { x: 30, y: 40 };
 
-        this.colors = ["red", "blue", "yellow", "green", "purple", "cyan"];
+        this.colors = [Color.red, Color.blue, Color.yellow, Color.green, Color.purple, Color.cyan];
+        this.semiTransparentBlack = new Color(0, 0, 0, 0.3);
         this.grid = [];
         this.bubbles = [];
         this.shooter = { x: 4, y: this.gridRows, angle: -Math.PI/2 };
@@ -121,14 +122,14 @@ class PuzzleBobbleGame extends Game {
         }
     }
 
-    Draw(ctx) {
-        super.Draw(ctx);
+    Draw() {
+        super.Draw();
+
         // Draw grid
         for (let y = 0; y < this.gridRows; y++) {
             for (let x = 0; x < this.gridCols; x++) {
                 if (this.grid[y][x]) {
-                    DrawFillCircle(
-                        ctx,
+                    this.renderer.DrawFillCircle(
                         this.gridOffset.x + x * this.cellSize + this.cellSize/2,
                         this.gridOffset.y + y * this.cellSize + this.cellSize/2,
                         this.cellSize/2 - 2,
@@ -143,8 +144,8 @@ class PuzzleBobbleGame extends Game {
         let sy = this.gridRows * this.cellSize + this.gridOffset.y;
         let aimX = sx + Math.cos(this.shooter.angle) * 60;
         let aimY = sy + Math.sin(this.shooter.angle) * 60;
-        DrawSegment(ctx, sx, sy, aimX, aimY, "black", 3);
-        DrawFillCircle(ctx, sx, sy, this.cellSize/2 - 2, this.nextColor);
+        this.renderer.DrawLine(sx, sy, aimX, aimY, Color.black, 3);
+        this.renderer.DrawFillCircle(sx, sy, this.cellSize/2 - 2, this.nextColor);
 
         // Draw trajectory preview
         if (!this.shooting) {
@@ -182,30 +183,38 @@ class PuzzleBobbleGame extends Game {
             }
 
             // Draw the preview line
-            ctx.save();
-            ctx.strokeStyle = "rgba(0,0,0,0.3)";
-            ctx.setLineDash([6, 6]);
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(previewPoints[0].x, previewPoints[0].y);
-            for (let i = 1; i < previewPoints.length; i++) {
-                ctx.lineTo(previewPoints[i].x, previewPoints[i].y);
+            const ctx = this.renderer.ctx;
+            if (ctx) {
+                // TODO abstract this to the renderers
+                ctx.save();
+                ctx.strokeStyle = this.semiTransparentBlack.toString();
+                ctx.setLineDash([6, 6]);
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(previewPoints[0].x, previewPoints[0].y);
+                for (let i = 1; i < previewPoints.length; i++) {
+                    ctx.lineTo(previewPoints[i].x, previewPoints[i].y);
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.restore();
             }
-            ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.restore();
+            else {
+                for (let i = 1; i < previewPoints.length - 1; i++)
+                    this.renderer.DrawLine(previewPoints[i].x, previewPoints[i].y, previewPoints[i+1].x, previewPoints[i+1].y, this.semiTransparentBlack, 2);
+            }
         }
 
         // Draw flying bubble
         if (this.shotBubble) {
-            DrawFillCircle(ctx, this.shotBubble.x, this.shotBubble.y, this.cellSize/2 - 2, this.shotBubble.color);
+            this.renderer.DrawFillCircle(this.shotBubble.x, this.shotBubble.y, this.cellSize/2 - 2, this.shotBubble.color);
         }
 
         // Draw border
-        DrawStrokeRectangle(ctx, this.gridOffset.x, this.gridOffset.y, this.gridCols * this.cellSize, this.gridRows * this.cellSize, "white", 2);
+        this.renderer.DrawStrokeRectangle(this.gridOffset.x, this.gridOffset.y, this.gridCols * this.cellSize, this.gridRows * this.cellSize, Color.white, 2);
 
         // Draw score
-        this.scoreLabel.Draw(ctx);
+        this.scoreLabel.Draw(renderer);
     }
 
     CheckMatches(x, y) {
@@ -273,7 +282,3 @@ class PuzzleBobbleGame extends Game {
         }
     }
 }
-
-// Initialize the game
-if (game === null)
-    game = new PuzzleBobbleGame();

@@ -1,6 +1,6 @@
 class SnakeGame extends Game {
-    constructor() {
-        super();
+    constructor(renderer) {
+        super(renderer);
 
         this.gridSize = { cols: 20, rows: 15 };
         this.cellSize = 24;
@@ -29,7 +29,7 @@ class SnakeGame extends Game {
         this.moveTimer = 0;
         this.score = 0;
         this.gameOver = false;
-        this.scoreLabel = new TextLabel("Score: 0", new Vector2(20, 20), "20px Comic Sans MS", "black", "left", "middle", false);
+        this.scoreLabel = new TextLabel("Score: 0", new Vector2(20, 20), "20px Comic Sans MS", Color.black, "left", "middle", false);
     }
 
     Update(deltaTime) {
@@ -104,40 +104,34 @@ class SnakeGame extends Game {
         return pos;
     }
 
-    Draw(ctx) {
-        super.Draw(ctx);
+    Draw() {
+        super.Draw();
 
         // Draw background
-        DrawFillRectangle(ctx, this.gridOffset.x, this.gridOffset.y, this.gridSize.cols * this.cellSize, this.gridSize.rows * this.cellSize, "#e0e0e0");
+        this.renderer.DrawFillRectangle(this.gridOffset.x, this.gridOffset.y, this.gridSize.cols * this.cellSize, this.gridSize.rows * this.cellSize, Color.lightGrey);
 
         // Draw snake
         for (let i = 0; i < this.snake.length; i++) {
-            DrawFillRectangle(
-                ctx,
+            this.renderer.DrawFillRectangle(
                 this.gridOffset.x + this.snake[i].x * this.cellSize,
                 this.gridOffset.y + this.snake[i].y * this.cellSize,
                 this.cellSize - 2, this.cellSize - 2,
-                i === 0 ? "green" : "lime"
+                i === 0 ? Color.green : Color.lime
             );
         }
 
         // Draw food
-        DrawFillRectangle(
-            ctx,
+        this.renderer.DrawFillRectangle(
             this.gridOffset.x + this.food.x * this.cellSize,
             this.gridOffset.y + this.food.y * this.cellSize,
             this.cellSize - 2, this.cellSize - 2,
-            "red"
+            Color.red
         );
 
         // Draw border
-        DrawStrokeRectangle(ctx, this.gridOffset.x, this.gridOffset.y, this.gridSize.cols * this.cellSize, this.gridSize.rows * this.cellSize, "black", 2);
+        this.renderer.DrawStrokeRectangle(this.gridOffset.x, this.gridOffset.y, this.gridSize.cols * this.cellSize, this.gridSize.rows * this.cellSize, Color.black, 2);
 
         // Draw score
-        this.scoreLabel.Draw(ctx);
+        this.scoreLabel.Draw(renderer);
     }
 }
-
-// Initialize the game
-if (game === null)
-    game = new SnakeGame();

@@ -94,10 +94,12 @@ class Color {
     static green  = Color.Green();
     static lime   = new Color(0, 1, 0, 1);
     static blue   = Color.Blue();
+    static cyan   = new Color(0, 1, 1, 1);
     static aqua   = Color.Aqua();
     static yellow = Color.Yellow();
     static orange = Color.Orange();
     static pink   = Color.Pink();
+    static purple = new Color(0.576, 0.439, 0.859, 1);
     static grey   = new Color(0.5, 0.5, 0.5, 1);
     static darkGrey  = new Color(0.663, 0.663, 0.663, 1);
     static lightGrey = new Color(0.827, 0.827, 0.827, 1);
@@ -168,9 +170,9 @@ class Color {
 
     Desaturate(desaturateValue=0.5) {
         const avg = (this.r + this.g + this.b) / 3;
-        this.r = Math.round(this.r + (avg - this.r) * desaturateValue);
-        this.g = Math.round(this.g + (avg - this.g) * desaturateValue);
-        this.b = Math.round(this.b + (avg - this.b) * desaturateValue);
+        this.r = this.r + (avg - this.r) * desaturateValue;
+        this.g = this.g + (avg - this.g) * desaturateValue;
+        this.b = this.b + (avg - this.b) * desaturateValue;
 
         return this;
     }

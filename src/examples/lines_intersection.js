@@ -1,6 +1,6 @@
 class LineIntersection extends Game {
-    constructor() {
-        super();
+    constructor(renderer) {
+        super(renderer);
 
         this.ball = null;
         
@@ -74,7 +74,7 @@ class LineIntersection extends Game {
 
         // start moving the ball
         if (Input.IsKeyDown(KEY_S)) {
-            this.ball.speed = 500;
+            this.ball.speed = 300;
         }
 
         if (this.ball.speed == 0) {
@@ -129,56 +129,36 @@ class LineIntersection extends Game {
         }
     }
 
-    Draw(ctx) {
-        DrawFillRectangle(ctx, 0, 0, this.screenWidth, this.screenHeight, "black");
+    Draw() {
+        this.renderer.DrawFillRectangle(0, 0, this.screenWidth, this.screenHeight, Color.black);
+        const ctx = this.renderer.ctx;
 
         // lines of the walls
         this.walls.forEach(wall => {
             // wall line
-            ctx.strokeStyle = "orange";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(wall.p1.x, wall.p1.y);
-            ctx.lineTo(wall.p2.x, wall.p2.y);
-            ctx.stroke();
+            this.renderer.DrawLine(wall.p1.x, wall.p1.y, wall.p2.x, wall.p2.y, Color.orange);
 
             // wall direction line
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = "red";
-            ctx.beginPath();
-            ctx.moveTo(wall.p1.x, wall.p1.y);
-            ctx.lineTo(wall.p1.x + wall.dir.x * 50, wall.p1.y + wall.dir.y * 50);
-            ctx.stroke();
+            this.renderer.DrawLine(wall.p1.x, wall.p1.y, wall.p1.x + wall.dir.x * 50, wall.p1.y + wall.dir.y * 50, Color.red);
+            
         });
 
         // line from the ball to infinity
-        ctx.strokeStyle = "yellow";
-        ctx.beginPath();
-        ctx.moveTo(this.ball.position.x, this.ball.position.y);
-        ctx.lineTo(this.ball.position.x + this.ball.dir.x * 1000, this.ball.position.y + this.ball.dir.y * 1000);
-        ctx.stroke();
+        this.renderer.DrawLine(this.ball.position.x, this.ball.position.y, this.ballFarPosition.x, this.ballFarPosition.y, Color.yellow);
         
         // line from the ball to the mouse
-        ctx.strokeStyle = "green";
-        ctx.beginPath();
-        ctx.moveTo(this.ball.position.x, this.ball.position.y);
-        ctx.lineTo(Input.mouse.x, Input.mouse.y);
-        ctx.stroke();
+        this.renderer.DrawLine(this.ball.position.x, this.ball.position.y, Input.mouse.x, Input.mouse.y, Color.green);
 
         // line from the intersection point following the bounce
-        ctx.strokeStyle = "blue";
-        ctx.beginPath();
-        ctx.moveTo(this.currentLineIntersection.x, this.currentLineIntersection.y);
-        ctx.lineTo(this.ballBouncePosition.x, this.ballBouncePosition.y);
-        ctx.stroke();
+        this.renderer.DrawLine(this.currentLineIntersection.x, this.currentLineIntersection.y, this.ballBouncePosition.x, this.ballBouncePosition.y, Color.blue);
 
         // intersection point
-        ctx.fillStyle = "red";
-        ctx.beginPath();
-        ctx.arc(this.currentLineIntersection.x, this.currentLineIntersection.y, 2, 0, PI2, true);
-        ctx.fill();
+        this.renderer.DrawCircle(this.currentLineIntersection.x, this.currentLineIntersection.y, 3, Color.red);
         
-        this.ball.Draw(ctx);
+        this.ball.Draw(this.renderer);
+
+        this.renderer.DrawText("Press 'A' to randomize the walls", 10, this.screenHeight - 30, "14px Arial", Color.white, "left");
+        this.renderer.DrawText("Press 'S' to launch the ball", 10, this.screenHeight - 10, "14px Arial", Color.white, "left");
     }
 
     BallBounce(wallDir) {
@@ -191,11 +171,9 @@ class LineIntersection extends Game {
     }
 }
 
-class Ball extends GameObject {
-    constructor(position, radious, speed) {
-        super(position);
-
-        this.circle = new Circle(position, radious, "white");
+class Ball extends CircleGO {
+    constructor(position, radius, speed) {
+        super(position, radius, Color.white);
 
         this.dir = Vector2.Zero();
         this.speed = speed;
@@ -212,27 +190,19 @@ class Ball extends GameObject {
 
         this.timeToBeRed -= deltaTime;
         if (this.timeToBeRed <= 0) {
-            this.circle.color = "white";
+            this.circle.color = Color.white;
         }
     }
 
-    Draw(ctx) {
-        this.circle.Draw(ctx);
+    Draw(renderer) {
+        super.Draw(renderer);
 
         // direction vector
-        ctx.strokeStyle = "red";
-        ctx.beginPath();
-        ctx.moveTo(this.position.x, this.position.y);
-        ctx.lineTo(this.position.x + this.dir.x * this.radious, this.position.y + this.dir.y * this.radious);
-        ctx.stroke();
+        renderer.DrawLine(this.position.x, this.position.y, this.position.x + this.dir.x * this.radious, this.position.y + this.dir.y * this.radious, Color.red);
     }
 
     Collision() {
-        this.circle.color = "red";
+        this.circle.color = Color.red;
         this.timeToBeRed = 0.2;
     }
 }
-
-// initialize the game
-if (game === null)
-    game = new LineIntersection();
