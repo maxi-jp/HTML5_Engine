@@ -269,6 +269,22 @@ class Sprite {
     DrawSectionBasic(sx, sy, sw, sh) {
         renderer.DrawImageSectionBasic(this.img, this.position.x, this.position.y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y, this.alpha);
     }
+
+    DrawAt(renderer, x, y) {
+        renderer.DrawImage(this.img, x, y, this._computedScale.x, this._computedScale.y, this.rotation, this.alpha);
+    }
+
+    DrawBasicAt(renderer, x, y) {
+        renderer.DrawImageBasic(this.img, x, y, this.img.width * this.scale.x, this.img.height * this.scale.y, this.alpha);
+    }
+    
+    DrawSectionAt(renderer, sx, sy, sw, sh, x, y) {
+        renderer.DrawImageSection(this.img, x, y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y, this.rotation, this.alpha);
+    }
+
+    DrawSectionBasicAt(renderer, sx, sy, sw, sh, x, y) {
+        renderer.DrawImageSectionBasic(this.img, x, y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y, this.alpha);
+    }
 }
 
 class SpriteSection extends Sprite {
@@ -284,6 +300,14 @@ class SpriteSection extends Sprite {
 
     DrawBasic(renderer) {
         this.DrawSectionBasic(renderer, this.rect.x, this.rect.y, this.rect.w, this.rect.h);
+    }
+
+    DrawAt(renderer, x, y) {
+        this.DrawSectionAt(renderer, this.rect.x, this.rect.y, this.rect.w, this.rect.h, x, y);
+    }
+
+    DrawBasicAt(renderer, x, y) {
+        this.DrawSectionBasicAt(renderer, this.rect.x, this.rect.y, this.rect.w, this.rect.h, x, y);
     }
 }
 

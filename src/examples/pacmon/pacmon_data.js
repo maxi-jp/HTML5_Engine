@@ -33,6 +33,11 @@ var PacMonData = {
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] 
     ],
 
+    level1Data: {
+        pacMonInitialNode: 932,
+        ghostsInitialNode: 472
+    },
+
     vec2directions: [
         new Vector2( 0, -1), // Up
         new Vector2( 2,  0), // Right
@@ -42,7 +47,7 @@ var PacMonData = {
 
     directions: {
         UP: 0,
-        RIGHT: 2,
+        RIGHT: 1,
         DOWN: 2,
         LEFT: 3,
         NEUTRAL: 4

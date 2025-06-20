@@ -1,3 +1,5 @@
+const Direction = PacMonData.directions;
+
 class Node {
     constructor(id, position, mainNode=false, pill=0) {
         this.id = id;
@@ -62,28 +64,28 @@ class Graph {
         return currentNode.neighbors[direction];
     }
 
-    Draw(ctx) {
+    Draw(renderer) {
         const initX = 4 + game.mazePosition.x;
         const initY = 4 + game.mazePosition.y;
         // Draw connections
         /*for (const node of this.nodes) {
             for (const neighbor of node.neighbors) {
-                DrawSegment(ctx, initX + node.position.x * this.nodeSize, initY + node.position.y * this.nodeSize, initX + neighbor.position.x * this.nodeSize, initY + neighbor.position.y * this.nodeSize, "blue");
+                renderer.DrawLine(initX + node.position.x * this.nodeSize, initY + node.position.y * this.nodeSize, initX + neighbor.position.x * this.nodeSize, initY + neighbor.position.y * this.nodeSize, Color.blue);
             }
         }*/
 
         // Draw nodes
         for (const node of this.nodes) {
-            //DrawFillCircle(ctx, initX + node.position.x * this.nodeSize, initY + node.position.y * this.nodeSize, 1, "red");
-            DrawFillRectangle(ctx, initX + node.position.x * this.nodeSize - 1, initY + node.position.y * this.nodeSize - 1, 1, 1, "red");
+            //renderer.DrawFillCircle(initX + node.position.x * this.nodeSize, initY + node.position.y * this.nodeSize, 1, Color.red);
+            renderer.DrawFillRectangle(initX + node.position.x * this.nodeSize - 1, initY + node.position.y * this.nodeSize - 1, 1, 1, Color.red);
         }
 
         // Draw main nodes
         for (let y = 0; y < this.mainNodes.length; y++) {
             for (let x = 0; x < this.mainNodes[y].length; x++) {
                 if (this.mainNodes[y][x]) {
-                    DrawFillCircle(ctx, 260 + this.mainNodes[y][x].position.x * this.nodeSize, 4 + this.mainNodes[y][x].position.y * this.nodeSize, 2, "green");
-                    //DrawFillRectangle(ctx, initX + this.mainNodes[y][x].position.x * this.nodeSize - 1, initY + this.mainNodes[y][x].position.y * this.nodeSize - 1, 1, 1, "green");
+                    renderer.DrawFillCircle(260 + this.mainNodes[y][x].position.x * this.nodeSize, 4 + this.mainNodes[y][x].position.y * this.nodeSize, 2, Color.green);
+                    //renderer.DrawFillRectangle(initX + this.mainNodes[y][x].position.x * this.nodeSize - 1, initY + this.mainNodes[y][x].position.y * this.nodeSize - 1, 1, 1, Color.green);
                 }
             }
         }
@@ -91,8 +93,8 @@ class Graph {
 }
 
 class PacMon extends Game {
-    constructor() {
-        super();
+    constructor(renderer) {
+        super(renderer);
         this.graphicAssets = {
             spritesheet: {
                 path: "src/examples/pacmon/assets/pacman.png",
@@ -100,7 +102,12 @@ class PacMon extends Game {
             }
         };
 
+        this.config.imageSmoothingEnabled = false;
+
         this.playerScore = 0;
+        this.scoreTextLabel = null;
+        this.playerLives = 3;
+        this.lifeSprite = null;
 
         this.pacman = null;
 
@@ -128,7 +135,6 @@ class PacMon extends Game {
         
         this.background = new Sprite(
             this.graphicAssets.spritesheet.img,
-            //new Vector2(112, 124),
             new Vector2(112 + this.mazePosition.x, 124 + this.mazePosition.y),
             0,
             1,
@@ -143,59 +149,33 @@ class PacMon extends Game {
         this.graph = new Graph(this.nodeSize);
         this.BuildGraph();
 
-        this.pacman = new Pacman(this.graphicAssets.spritesheet.img, this.graph, 3, this.mazePosition);
+        this.pacman = new Pacman(this.graphicAssets.spritesheet.img, this.graph, PacMonData.level1Data.pacMonInitialNode, this.mazePosition);
 
-        /*this.blinky = new Ghost(
-            new Vector2(200, 200),
-            0,
-            1,
-            this.graphicAssets["spritesheet"].img,
-            32,
-            32,
-            4,
-            [0.1, 0.1, 0.1, 0.1]
-        );
-        this.pinky = new Ghost(
-            new Vector2(250, 200),
-            0,
-            1,
-            this.graphicAssets["spritesheet"].img,
-            32,
-            32,
-            4,
-            [0.1, 0.1, 0.1, 0.1]
-        );
-        this.inky = new Ghost(
-            new Vector2(300, 200),
-            0,
-            1,
-            this.graphicAssets["spritesheet"].img,
-            32,
-            32,
-            4,
-            [0.1, 0.1, 0.1, 0.1]
-        );
-        this.clyde = new Ghost(
-            new Vector2(350, 200),
-            0,
-            1,
-            this.graphicAssets["spritesheet"].img,
-            32,
-            32,
-            4,
-            [0.1, 0.1, 0.1, 0.1]
-        );
+        this.blinky = new Ghost(this.graphicAssets.spritesheet.img, this.graph, PacMonData.level1Data.ghostsInitialNode, this.mazePosition, this.pacman);
+
+        // this.pinky = new Ghost(this.graphicAssets.spritesheet.img, this.graph, 3, this.mazePosition);
+        // this.inky = new Ghost(this.graphicAssets.spritesheet.img, this.graph, 3, this.mazePosition);
+        // this.clyde = new Ghost(this.graphicAssets.spritesheet.img, this.graph, 3, this.mazePosition);
 
         this.ghosts.push(this.blinky);
-        this.ghosts.push(this.pinky);
-        this.ghosts.push(this.inky);
-        this.ghosts.push(this.clyde);
+        // this.ghosts.push(this.pinky);
+        // this.ghosts.push(this.inky);
+        // this.ghosts.push(this.clyde);
         
         this.gameObjects.push(this.blinky);
-        this.gameObjects.push(this.pinky);
-        this.gameObjects.push(this.inky);
-        this.gameObjects.push(this.clyde);*/
+        // this.gameObjects.push(this.pinky);
+        // this.gameObjects.push(this.inky);
+        // this.gameObjects.push(this.clyde);
         
+        this.score = 0;
+        this.scoreTextLabel = new TextLabel("SCORE: " + this.playerScore, new Vector2(10, 20), "16px Courier New", Color.white, "left", "top"
+        );
+        this.playerLives = 3;
+        this.lifeSprite = new SpriteSection(
+            this.graphicAssets.spritesheet.img,
+            Vector2.Zero(),
+            0, 1, new Rect(470, 0, 16, 16) // Pac-Man icon (mouth half-open, facing right)
+        );
         
         this.gameObjects.push(this.pacman);
         this.pacman.Start();
@@ -307,6 +287,7 @@ class PacMon extends Game {
         for (let i = 0; i < this.pills.length; i++) {
             if (this.pacman.currentNode == this.pills[i].node) {
                 this.playerScore += this.pills[i].score;
+                this.scoreTextLabel.text = "SCORE: " + this.playerScore;
                 this.gameObjects.splice(this.gameObjects.indexOf(this.pills[i]), 1);
                 this.pills.splice(i, 1);
                 i--;
@@ -316,10 +297,16 @@ class PacMon extends Game {
         for (let i = 0; i < this.powerPellets.length; i++) {
             if (this.pacman.currentNode == this.powerPellets[i].node) {
                 this.playerScore += this.powerPellets[i].score;
+                this.scoreTextLabel.text = "SCORE: " + this.playerScore;
                 this.gameObjects.splice(this.gameObjects.indexOf(this.powerPellets[i]), 1);
                 this.powerPellets.splice(i, 1);
                 i--;
             }
+        }
+        
+        // Test losing a life
+        if (Input.IsKeyDown(KEY_Q) && this.playerLives > 0) {
+            this.LoseLife();
         }
     }
 
@@ -329,17 +316,34 @@ class PacMon extends Game {
         }
     }
 
-    Draw(ctx) {
-        DrawFillRectangle(ctx, 0, 0, 800, 600, "black");
+    LoseLife() {
+        this.playerLives--;
+
+        if (this.playerLives <= 0) {
+            // Game Over logic
+            alert("GAME OVER!");
+            if (this.pacman)
+                this.pacman.active = false;
+        }
+    }
+
+    Draw() {
+        this.renderer.DrawFillRectangle(0, 0, 800, 600, Color.black);
 
         //this.dummyBackground.DrawSection(ctx, 0, 0, 224, 248);
-        this.background.DrawSection(ctx, 228, 0, 224, 248);
+        this.background.DrawSection(this.renderer, 228, 0, 224, 248);
 
         // Draw the game objects
-        super.Draw(ctx);
+        super.Draw();
 
         // Draw the graph for visualization
-        this.graph.Draw(ctx);
+        this.graph.Draw(this.renderer);
+
+        this.scoreTextLabel.Draw(this.renderer);
+
+        for (let i = 0; i < this.playerLives; i++) {
+            this.lifeSprite.DrawBasicAt(this.renderer, 40 + (16 * i), 40);
+        }
     }
 }
 
@@ -361,17 +365,18 @@ class Pacman extends SSAnimationObjectComplex {
         this.currentNode = initialNode;
         this.mazePosition = mazePosition;
 
-        this.speed = 0.02; // time (in seconds) to move from one node to another
-        this.currentTimeStep = this.speed;
+        this.speed = 0.025; // time (in seconds) to move from one node to another
+        this.currentTimeStep = 0;
 
-        this.direction = 4; // current movement direction
-        this.nextDirection = 4; // direction to switch to when possible
+        this.direction = Direction.NEUTRAL; // current movement direction
+        this.nextDirection = Direction.NEUTRAL; // direction to switch to when possible
     }
 
     Start() {
         super.Start();
 
-        this.direction = 1;
+        this.direction = Direction.LEFT;
+        this.flipX = true;
     }
 
     Update(deltaTime) {
@@ -382,21 +387,21 @@ class Pacman extends SSAnimationObjectComplex {
 
         this.currentTimeStep -= deltaTime;
         if (this.currentTimeStep <= 0) {
-            this.currentTimeStep = this.speed;
+            this.currentTimeStep += this.speed;
 
             let nextNode = null;
 
-            if (this.nextDirection != 4) {
+            if (this.nextDirection != Direction.NEUTRAL) {
                 // player has set the next direction
                 nextNode = this.mazeGraph.GetNeighborNode(this.currentNode, this.nextDirection);
                 if (nextNode) {
                     this.direction = this.nextDirection;
-                    this.scale.x = this.direction == 1 ? 1 : -1;
-                    this.rotation = this.direction == 0 ? PIH : this.direction == 2 ? -PIH : 0;
+                    this.flipX = this.direction == Direction.LEFT;
+                    this.rotation = this.direction == Direction.UP ? -PIH : this.direction == Direction.DOWN ? PIH : 0;
                 }
             }
             
-            if (this.direction != 4) {
+            if (this.direction != Direction.NEUTRAL) {
                 if (this.currentNode.id == 615)
                     console.log(this.currentNode.id);
                 // move Pacman in the current direction
@@ -407,31 +412,31 @@ class Pacman extends SSAnimationObjectComplex {
                 }
                 else {
                     // stop movement if no valid next node exists
-                    //this.direction = 4;
+                    //this.direction = Direction.NEUTRAL;
                 }
             }
         }
     }
 
     HandleInput() {
-        //this.nextDirection = 4;
+        //this.nextDirection = Direction.NEUTRAL;
 
         if (Input.IsKeyPressed(KEY_UP) || Input.IsKeyPressed(KEY_W)) {
-            this.nextDirection = 0;
+            this.nextDirection = Direction.UP;
         }
         else if (Input.IsKeyPressed(KEY_DOWN) || Input.IsKeyPressed(KEY_S)) {
-            this.nextDirection = 2;
+            this.nextDirection = Direction.DOWN;
         }
         else if (Input.IsKeyPressed(KEY_LEFT) || Input.IsKeyPressed(KEY_A)) {
-            this.nextDirection = 3;
+            this.nextDirection = Direction.LEFT;
         }
         else if (Input.IsKeyPressed(KEY_RIGHT) || Input.IsKeyPressed(KEY_D)) {
-            this.nextDirection = 1;
+            this.nextDirection = Direction.RIGHT;
         }
     }
 
-    Draw(ctx) {
-        super.Draw(ctx);
+    Draw(rederer) {
+        super.Draw(rederer);
     }
 }
 
@@ -444,8 +449,8 @@ class Pill extends SpriteObject {
         this.score = 1;
     }
 
-    Draw(ctx) {
-        super.DrawSection(ctx, 8, 8, 8, 8);
+    Draw(rederer) {
+        super.DrawSection(rederer, 8, 8, 8, 8);
     }
 }
 
@@ -459,26 +464,162 @@ class PowerPellet extends SpriteObject {
         this.score = 10;
     }
 
-    Draw(ctx) {
-        super.DrawSection(ctx, 8, 24, 8, 8);
+    Draw(rederer) {
+        super.DrawSection(rederer, 8, 24, 8, 8);
     }
 }
 
 class Ghost extends SSAnimationObjectComplex {
-    constructor(position, rotation, scale, img) {
-        super(position, rotation, scale, img, [[new Rectangle(0, 0, 16, 16)]], []);
+    constructor(img, mazeGraph, initialNodeId, mazePosition, pacman) {
+        const initialNode = mazeGraph.FindNodeById(initialNodeId);
 
-        this.speed = 50;
+        super(
+            new Vector2(4 + initialNode.position.x * mazeGraph.nodeSize + mazePosition.x, 4 + initialNode.position.y * mazeGraph.nodeSize + mazePosition.y),
+            0,
+            1,
+            img,
+            [
+                [new Rect(519, 64, 16, 16), new Rect(535, 64, 16, 16)], // up
+                [new Rect(455, 64, 16, 16), new Rect(471, 64, 16, 16)], // right
+                [new Rect(551, 64, 16, 16), new Rect(567, 64, 16, 16)],  // down
+                [new Rect(487, 64, 16, 16), new Rect(503, 64, 16, 16)] // left
+            ],
+            [0.125, 0.125, 0.125, 0.125]
+        );
+
+        this.mazeGraph = mazeGraph;
+
+        this.currentNode = initialNode;
+        this.targetNode = null;
+        this.mazePosition = mazePosition;
+        this.pacman = pacman;
+
+        this.speed = 0.025;
+        
+        this.currentTimeStep = 0;
+        
+        this.direction = Direction.NEUTRAL; // current movement direction
+        this.lastDirection = Direction.NEUTRAL; // Direction used in the last successful step to reach current node
     }
 
     Update(deltaTime) {
         super.Update(deltaTime);
+
+        // Blinky will try to take the path that minimizes the straight-line distance to Pac-Man at every intersection, without turning back on itself unless it's a dead end.
+
+        // test the animation
+        // if (Input.IsKeyPressed(KEY_UP) || Input.IsKeyPressed(KEY_W)) {
+        //     this.direction = Direction.UP;
+        // }
+        // else if (Input.IsKeyPressed(KEY_DOWN) || Input.IsKeyPressed(KEY_S)) {
+        //     this.direction = Direction.DOWN;
+        // }
+        // else if (Input.IsKeyPressed(KEY_LEFT) || Input.IsKeyPressed(KEY_A)) {
+        //     this.direction = Direction.LEFT;
+        // }
+        // else if (Input.IsKeyPressed(KEY_RIGHT) || Input.IsKeyPressed(KEY_D)) {
+        //     this.direction = Direction.RIGHT;
+        // }
+
+        // if (this.direction !== Direction.NEUTRAL)
+        //     this.PlayAnimationLoop(this.direction, false);
+
+        if (!this.pacman || !this.pacman.currentNode || !this.active || !this.currentNode) {
+            return; // Pacman not ready, game over, or ghost inactive/misconfigured
+        }
+        this.targetNode = this.pacman.currentNode;
+
+        this.currentTimeStep -= deltaTime;
+        if (this.currentTimeStep <= 0) {
+            this.currentTimeStep += this.speed;
+
+            // --- Decision Making for Blinky ---
+            const possibleMoves = [];
+            const oppositeOfHowGhostArrived = (this.lastDirection + 2) % 4;
+            // Standard Pac-Man ghost tie-breaking order when choosing paths: Up, Left, Down, Right
+            const directionPriority = [Direction.UP, Direction.LEFT, Direction.DOWN, Direction.RIGHT];
+
+            for (const dir of directionPriority) {
+                const neighbor = this.currentNode.neighbors[dir];
+                if (neighbor) {
+                    let isReverseMove = (dir === oppositeOfHowGhostArrived);
+                    if (isReverseMove && this.lastDirection !== Direction.NEUTRAL) { // Don't forbid reverse if just started
+                        let otherChoicesExist = false;
+                        for (const check_dir of directionPriority) {
+                            if (check_dir !== dir && this.currentNode.neighbors[check_dir]) {
+                                otherChoicesExist = true;
+                                break;
+                            }
+                        }
+                        if (otherChoicesExist) continue; // Skip this reverse move, prefer others
+                    }
+                    possibleMoves.push({ direction: dir, node: neighbor });
+                }
+            }
+            
+            let newDirection = Direction.NEUTRAL;
+
+            if (possibleMoves.length === 0) {
+                // Ghost is stuck (e.g., 1x1 tunnel end). Try to reverse if that's an option.
+                if (this.currentNode.neighbors[oppositeOfHowGhostArrived] && this.lastDirection !== Direction.NEUTRAL) {
+                    newDirection = oppositeOfHowGhostArrived;
+                } else {
+                    newDirection = Direction.NEUTRAL; // Truly stuck
+                }
+            } else if (possibleMoves.length === 1) {
+                newDirection = possibleMoves[0].direction;
+            } else {
+                // Multiple choices: Blinky targets Pac-Man directly.
+                // Find move that minimizes Euclidean distance to targetNode, respecting priority for ties.
+                // possibleMoves is already sorted by directionPriority.
+                let bestMoveForTargeting = null;
+                let minDistanceSqToTarget = Infinity;
+
+                for (const move of possibleMoves) {
+                    const distSq = Vector2.SqrMagnitude(move.node.position, this.targetNode.position);
+                    if (distSq < minDistanceSqToTarget) {
+                        minDistanceSqToTarget = distSq;
+                        bestMoveForTargeting = move;
+                    }
+                    // If distSq === minDistanceSqToTarget, the current bestMoveForTargeting is kept
+                    // because possibleMoves was already sorted by UP, LEFT, DOWN, RIGHT priority.
+                }
+
+                if (bestMoveForTargeting) {
+                    newDirection = bestMoveForTargeting.direction;
+                } else {
+                     // Fallback, should not happen if possibleMoves.length > 1
+                    newDirection = possibleMoves[0].direction;
+                }
+            }
+            
+            this.lastDirection = newDirection;
+            // --- End Decision Making ---
+
+            // Update animation based on the chosen direction
+            if (this.lastDirection !== Direction.NEUTRAL) {
+                 if (this.actualAnimationIndex !== this.lastDirection) {
+                    this.PlayAnimationLoop(this.lastDirection, false);
+                 }
+            }
+
+            // Move to the next node if a direction is set
+            const nextNodeToMoveTo = this.currentNode.neighbors[this.lastDirection];
+            if (nextNodeToMoveTo) {
+                this.lastDirection = this.lastDirection; // Record how we are moving
+                this.currentNode = nextNodeToMoveTo;
+                this.position.Set(
+                    4 + this.currentNode.position.x * this.mazeGraph.nodeSize + this.mazePosition.x,
+                    4 + this.currentNode.position.y * this.mazeGraph.nodeSize + this.mazePosition.y
+                );
+            } else {
+                // If chosen direction leads nowhere (e.g., waiting at intersection, or error)
+                // Ghost effectively stops or waits. lastDirection isn't updated if no move is made.
+            }
+        }
     }
 
-    Draw(ctx) {
-        super.Draw(ctx);
+    Draw(rederer) {
+        super.Draw(rederer);
     }
 }
-
-if (game === null)
-    game = new PacMon();
