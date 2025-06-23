@@ -17,6 +17,12 @@ function GetRandomColor() {
     return `rgb(${r},${g},${b})`;
 }
 
+function SqrLength(v) {
+    const x2 = v.x * v.x;
+    const y2 = v.y * v.y;
+    return x2 + y2;
+}
+
 function CheckCollisionCircle(point, circlePosition, radius2) {
     // d^2 = (p.x - c.x)^2 + (p.y - c.y)^2
     // c = d < r
@@ -27,14 +33,15 @@ function CheckCollisionCircle(point, circlePosition, radius2) {
     return pointToCircleDistance2 < radius2;
 }
 
-function CheckCollisionTwoCircles(positionA, radius2A, positionB, radius2B) {
+function CheckCollisionTwoCircles(positionA, radiusA, positionB, radiusB) {
     // d^2 = (p.x - c.x)^2 + (p.y - c.y)^2
-    // c = d < (rA + rB)
+    // c = d < (rA + rB) -> d^2 < (rA + rB)^2
     const difX = positionA.x - positionB.x;
     const difY = positionA.y - positionB.y;
-    const pointToCircleDistance2 = difX * difX + difY * difY;
+    const distanceSquared = difX * difX + difY * difY;
+    const sumofRadius = radiusA + radiusB;
 
-    return pointToCircleDistance2 < (radius2A + radius2B);
+    return distanceSquared < (sumofRadius * sumofRadius);
 }
 
 function CheckCollisionRect(point, rectangle) {
@@ -46,6 +53,40 @@ function PointInsideRectangle(px, py, rx, ry, rw, rh) {
            px <= (rx + rw) &&
            py >= (ry) &&
            py <= (ry + rh);
+}
+
+function CheckCollisionTwoRects(rectA, rectB) {
+    return rectA.x < rectB.x + rectB.w &&
+           rectA.x + rectA.w > rectB.x &&
+           rectA.y < rectB.y + rectB.h &&
+           rectA.y + rectA.h > rectB.y;
+}
+
+function CheckCollisionCircleRect(circle, rect) {
+    // Find the closest point on the rectangle to the center of the circle
+    let testX = circle.position.x;
+    let testY = circle.position.y;
+
+    // Clamp X to rectangle's X range
+    if (circle.position.x < rect.x)
+        testX = rect.x;
+    else if (circle.position.x > rect.x + rect.w)
+        testX = rect.x + rect.w;
+
+    // Clamp Y to rectangle's Y range
+    if (circle.position.y < rect.y)
+        testY = rect.y;
+    else if (circle.position.y > rect.y + rect.h)
+        testY = rect.y + rect.h;
+
+    // Calculate the distance between the closest point and the circle's center
+    const distX = circle.position.x - testX;
+    const distY = circle.position.y - testY;
+    const distanceSquared = (distX * distX) + (distY * distY);
+
+    // Check if the distance is less than the circle's radius squared
+    const radius2 = circle.boundingRadius2 ? circle.boundingRadius2 : (circle.radius * circle.radius);
+    return distanceSquared < radius2;
 }
 
 function CheckCollisionPolygon(point, polygon) {
@@ -70,13 +111,25 @@ function DistancePointToSegmentSign(A, B, p) {
     return ((B.x - A.x) * (A.y - p.y)) - ((A.x - p.x) * (B.y - A.y));
 }
 
-function RotatePointAroundPoint(point, origin, angle) {
+function RotatePointAroundPoint(point, origin, angle, transformedPoint) {
     const dx = point.x - origin.x;
     const dy = point.y - origin.y;
-    return {
-        x: (Math.cos(angle) * dx) - (Math.sin(angle) * dy) + origin.x,
-        y: (Math.sin(angle) * dx) + (Math.cos(angle) * dy) + origin.y
+
+    const cosA = Math.cos(angle);
+    const sinA = Math.sin(angle);
+
+    const newX = (cosA * dx) - (sinA * dy) + origin.x;
+    const newY = (sinA * dx) + (cosA * dy) + origin.y;
+
+    if (transformedPoint) {
+        transformedPoint.x = newX;
+        transformedPoint.y = newY;
+        
+        return transformedPoint;
     }
+
+    // For consistency, return a Vector2 instance
+    return new Vector2(newX, newY);
 }
 
 function IntersectionBetweenLines(l1p1, l1p2, l2p1, l2p2) {
@@ -176,9 +229,14 @@ function Lerp(start, end, interpolationFactor) {
 }
 
 class Vector2 {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
+    _x = 0;
+    _y = 0;
+    _onChange = null;
+
+    constructor(x, y, onChange=null) {
+        this._x = x;
+        this._y = y;
+        this._onChange = onChange;
     }
 
     static Zero() {
@@ -189,9 +247,29 @@ class Vector2 {
         return new Vector2(vector.x, vector.y);
     }
 
+    get x() {
+        return this._x;
+    }
+    set x(val) {
+        this._x = val;
+        if (this._onChange)
+            this._onChange(this);
+    }
+
+    get y() {
+        return this._y;
+    }
+    set y(val) {
+        this._y = val;
+        if (this._onChange)
+            this._onChange(this);
+    }
+
     Set(x, y) {
-        this.x = x;
-        this.y = y;
+        this._x = x;
+        this._y = y;
+        if (this._onChange)
+            this._onChange(this);
     }
 
     Length() {
@@ -199,13 +277,13 @@ class Vector2 {
     }
 
     SqrLength() {
-        const x2 = this.x * this.x;
-        const y2 = this.y * this.y;
+        const x2 = this._x * this._x;
+        const y2 = this._y * this._y;
         return x2 + y2;
     }
 
     IsZero() {
-        return this.x === 0 && this.y === 0;
+        return this._x === 0 && this._y === 0;
     }
 
     static Magnitude(v1, v2) {
@@ -224,28 +302,28 @@ class Vector2 {
         const length = this.Length();
 
         if (length > 0) {
-            this.x = this.x / length;
-            this.y = this.y / length;
+            this._x = this._x / length;
+            this._y = this._y / length;
         }
     }
 
     Add(otherVector) {
-        this.x += otherVector.x;
-        this.y += otherVector.y;
+        this._x += otherVector.x;
+        this._y += otherVector.y;
     }
 
     Sub(otherVector) {
-        this.x -= otherVector.x;
-        this.y -= otherVector.y;
+        this._x -= otherVector.x;
+        this._y -= otherVector.y;
     }
 
     DotProduct(otherVector) {
-        return this.x * otherVector.x + this.y * otherVector.y;
+        return this._x * otherVector.x + this._y * otherVector.y;
     }
 
     MultiplyScalar(scalar) {
-        this.x *= scalar;
-        this.y *= scalar;
+        this._x *= scalar;
+        this._y *= scalar;
 
         return this;
     }
@@ -262,8 +340,8 @@ class Vector2 {
     }
 
     Random() {
-        this.x = (Math.random() * 2) - 1;
-        this.y = (Math.random() * 2) - 1;
+        this._x = (Math.random() * 2) - 1;
+        this._y = (Math.random() * 2) - 1;
     }
 
     RandomNormalized() {
@@ -279,16 +357,66 @@ class Vector2 {
     }
 
     Interpolate(otherVector, interpolationFactor) {
-        this.x = Lerp(this.x, otherVector.x, interpolationFactor);
-        this.y = Lerp(this.y, otherVector.y, interpolationFactor);
+        this._x = Lerp(this.x, otherVector.x, interpolationFactor);
+        this._y = Lerp(this.y, otherVector.y, interpolationFactor);
     }
 }
 
 class Rect {
+    _x = 0;
+    _y = 0;
+    _w = 0;
+    _h = 0;
+
     constructor(x, y, width, height) {
-        this.x = x;
-        this.y = y;
-        this.w = width;
-        this.h = height;
+        this._x = x;
+        this._y = y;
+        this._w = width;
+        this._h = height;
+
+        this.halfWidth = width / 2;
+        this.halfHeight = height / 2;
+    }
+
+    get x() {
+        return this._x;
+    }
+    get y() {
+        return this._y;
+    }
+    get w() {
+        return this._w;
+    }
+    get h() {
+        return this._h;
+    }
+
+    get width() {
+        return this._w;
+    }
+    get height() {
+        return this._h;
+    }
+
+    set x(value) {
+        this._x = value;
+    }
+    set y(value) {
+        this._y = value;
+    }
+    set w(value) {
+        this._w = value;
+        this.halfWidth = value / 2;
+    }
+    set h(value) {
+        this._h = value;
+        this.halfHeight = value / 2;
+    }
+
+    set width(value) {
+        this.w = value;
+    }
+    set height(value) {
+        this.h = value;
     }
 }
