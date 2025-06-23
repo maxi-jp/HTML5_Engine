@@ -90,6 +90,10 @@ class SpriteObject extends GameObject {
         this.flipY = false;
     }
 
+    get img() {
+        return this.sprite.img;
+    }
+
     get position() {
         return this._position;
     }
