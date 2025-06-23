@@ -3,6 +3,7 @@ class GameObject {
     _position;
     _rotation = 0;
     _scale = new Vector2(1, 1);
+    _collider;
 
     constructor(position) {
         this._position = Vector2.Copy(position);
@@ -26,6 +27,9 @@ class GameObject {
     get y() {
         return this._position.y;
     }
+    get collider() {
+        return this._collider;
+    }
 
     set active(value) {
         this._active = value;
@@ -42,10 +46,22 @@ class GameObject {
         else
             this._scale = value;
     }
+    set x(value) {
+        this._position.x = value;
+    }
+    set y(value) {
+        this._position.y = value;
+    }
+    set collider(value) {
+        this._collider = value;
+        this._collider.go = this;
+    }
 
     Start() {}
     Update(deltaTime){}
     Draw(ctx){}
+    OnCollisionEnter(myCollider, otherCollider) { }
+    OnCollisionExit(myCollider, otherCollider) { }
 }
 
 class RectangleGO extends GameObject {
