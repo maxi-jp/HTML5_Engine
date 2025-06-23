@@ -31,33 +31,36 @@ class FightingGame extends Game {
         this.timer = 60;
         this.timerId;
         this.displayText = document.querySelector('#displayText');
+
+        this.background = null;
+        this.shop = null;
+        this.playerA = null;
+        this.playerB = null;
     }
 
     Start() {
         super.Start();
 
-        this.renderer.Clear();
-
         // Create background
-        const background = new SpriteObject(
+        this.background = new SpriteObject(
             new Vector2(this.screenHalfWidth, this.screenHalfHeight),
             0,
             1,
             this.graphicAssets.background.img
         );
-        this.gameObjects.push(background);
+        this.gameObjects.push(this.background);
 
-        const shop = new SpriteObject(
+        this.shop = new SpriteObject(
             new Vector2(this.screenHalfWidth, this.screenHeight - 96 - 128 / 2),
             0,
             2.75,
             this.graphicAssets.shop.img
         );
-        this.gameObjects.push(shop);
+        this.gameObjects.push(this.shop);
 
 
         // Create Player, passing pre-loaded images
-        this.player = new Fighter({
+        this.playerA = new Fighter({
             position: new Vector2(200, 100),
             velocity: new Vector2(0, 0),
             offset: { x: 0, y: 0 }
@@ -80,11 +83,11 @@ class FightingGame extends Game {
                 height: 50
             }
         );
-        this.gameObjects.push(this.player);
+        this.gameObjects.push(this.playerA);
 
 
         // Create Enemy, passing pre-loaded images
-        this.enemy = new Fighter({
+        this.playerB = new Fighter({
             position: new Vector2(this.screenWidth - 250, 100),
             velocity: new Vector2(0, 0),
             color: 'blue',
@@ -108,7 +111,7 @@ class FightingGame extends Game {
                 height: 50
             }
         );
-        this.gameObjects.push(this.enemy);
+        this.gameObjects.push(this.playerB);
 
         this.decreaseTimer();
     }
@@ -117,61 +120,61 @@ class FightingGame extends Game {
         super.Update(deltaTime);
 
         // Player movement
-        this.player.velocity.x = 0;
+        this.playerA.velocity.x = 0;
         if (Input.IsKeyPressed(KEY_A)) {
-            this.player.velocity.x = -5;
-            this.player.switchSprite('run');
+            this.playerA.velocity.x = -5;
+            this.playerA.switchSprite('run');
         } else if (Input.IsKeyPressed(KEY_D)) {
-            this.player.velocity.x = 5;
-            this.player.switchSprite('run');
+            this.playerA.velocity.x = 5;
+            this.playerA.switchSprite('run');
         } else {
-            this.player.switchSprite('idle');
+            this.playerA.switchSprite('idle');
         }
 
-        if (this.player.velocity.y < 0) {
-            this.player.switchSprite('jump');
-        } else if (this.player.velocity.y > 0) {
-            this.player.switchSprite('fall');
+        if (this.playerA.velocity.y < 0) {
+            this.playerA.switchSprite('jump');
+        } else if (this.playerA.velocity.y > 0) {
+            this.playerA.switchSprite('fall');
         }
 
         if (Input.IsKeyDown(KEY_W)) {
-            if (this.player.position.y === 334) { // Allow jump only from ground
-                 this.player.velocity.y = -20;
+            if (this.playerA.position.y === 334) { // Allow jump only from ground
+                 this.playerA.velocity.y = -20;
             }
         }
         
         if (Input.IsKeyDown(KEY_SPACE)) {
-            this.player.attack();
+            this.playerA.attack();
         }
 
         // Enemy movement (basic AI)
-        this.enemy.velocity.x = 0;
-        this.enemy.switchSprite('idle');
+        this.playerB.velocity.x = 0;
+        this.playerB.switchSprite('idle');
 
 
         // Collision detection & health update
-        if (this.rectangularCollision({ rectangle1: this.player, rectangle2: this.enemy }) && this.player.isAttacking && this.player.actualFrame === 4) {
-            this.enemy.takeHit();
-            this.player.isAttacking = false;
-            document.querySelector('#enemyHealth').style.width = this.enemy.health + '%';
+        if (this.rectangularCollision({ rectangle1: this.playerA, rectangle2: this.playerB }) && this.playerA.isAttacking && this.playerA.actualFrame === 4) {
+            this.playerB.takeHit();
+            this.playerA.isAttacking = false;
+            document.querySelector('#enemyHealth').style.width = this.playerB.health + '%';
         }
-        if (this.player.isAttacking && this.player.actualFrame === 4) {
-             this.player.isAttacking = false;
+        if (this.playerA.isAttacking && this.playerA.actualFrame === 4) {
+             this.playerA.isAttacking = false;
         }
 
 
-        if (this.rectangularCollision({ rectangle1: this.enemy, rectangle2: this.player }) && this.enemy.isAttacking && this.enemy.actualFrame === 2) {
-            this.player.takeHit();
-            this.enemy.isAttacking = false;
-            document.querySelector('#playerHealth').style.width = this.player.health + '%';
+        if (this.rectangularCollision({ rectangle1: this.playerB, rectangle2: this.playerA }) && this.playerB.isAttacking && this.playerB.actualFrame === 2) {
+            this.playerA.takeHit();
+            this.playerB.isAttacking = false;
+            document.querySelector('#playerHealth').style.width = this.playerA.health + '%';
         }
-         if (this.enemy.isAttacking && this.enemy.actualFrame === 2) {
-             this.enemy.isAttacking = false;
+         if (this.playerB.isAttacking && this.playerB.actualFrame === 2) {
+             this.playerB.isAttacking = false;
         }
 
         // End game based on health
-        if (this.enemy.health <= 0 || this.player.health <= 0) {
-            this.determineWinner({ player: this.player, enemy: this.enemy, timerId: this.timerId });
+        if (this.playerB.health <= 0 || this.playerA.health <= 0) {
+            this.determineWinner({ player: this.playerA, enemy: this.playerB, timerId: this.timerId });
         }
     }
     
@@ -211,7 +214,7 @@ class FightingGame extends Game {
         }
 
         if (this.timer === 0) {
-            this.determineWinner({ player: this.player, enemy: this.enemy, timerId: this.timerId });
+            this.determineWinner({ player: this.playerA, enemy: this.playerB, timerId: this.timerId });
         }
     }
 }
