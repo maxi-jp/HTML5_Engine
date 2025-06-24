@@ -435,6 +435,7 @@ class TextLabelFillAndStroke {
 // #endregion
 
 // #region Collider classes
+
 class CollisionManager {
     /**
      * Checks for collision between two Collider objects.
@@ -460,13 +461,41 @@ class CollisionManager {
         else if (colliderA instanceof RectangleCollider && colliderB instanceof CircleCollider) {
             return CollisionManager.CheckCircleRect(colliderB, colliderA);
         }
-        // Polygon collisions (and rotated rectangles) are more complex and typically require
-        // advanced algorithms like the Separating Axis Theorem (SAT).
-        // These are not implemented in this basic CollisionManager.
-        else if (colliderA instanceof PolygonCollider || colliderB instanceof PolygonCollider) {
+        // Circle-Polygon collision
+        else if (colliderA instanceof CircleCollider && colliderB instanceof PolygonCollider) {
+            return CheckCollisionCirclePolygon(colliderA.position, colliderA.boundingRadius, colliderB.transformedPoints);
+        }
+        // Polygon-Circle collision (swap order for consistency)
+        else if (colliderA instanceof PolygonCollider && colliderB instanceof CircleCollider) {
+            return CheckCollisionCirclePolygon(colliderB.position, colliderB.boundingRadius, colliderA.transformedPoints);
+        }
+        // Polygon-Rectangle collision (can be treated as Polygon-Polygon for simplicity, or specific SAT)
+        else if (colliderA instanceof PolygonCollider && colliderB instanceof RectangleCollider) {
+            // Convert rectangle to polygon points for CheckCollisionPolygonPolygon
+            const rectPoints = [
+                { x: colliderB.rect.x, y: colliderB.rect.y },
+                { x: colliderB.rect.x + colliderB.rect.w, y: colliderB.rect.y },
+                { x: colliderB.rect.x + colliderB.rect.w, y: colliderB.rect.y + colliderB.rect.h },
+                { x: colliderB.rect.x, y: colliderB.rect.y + colliderB.rect.h }
+            ];
+            return CheckCollisionPolygonPolygon(colliderA.transformedPoints, rectPoints);
+        }
+        // Rectangle-Polygon collision (swap order for consistency)
+        else if (colliderA instanceof RectangleCollider && colliderB instanceof PolygonCollider) {
+            const rectPoints = [
+                { x: colliderA.rect.x, y: colliderA.rect.y },
+                { x: colliderA.rect.x + colliderA.rect.w, y: colliderA.rect.y },
+                { x: colliderA.rect.x + colliderA.rect.w, y: colliderA.rect.y + colliderA.rect.h },
+                { x: colliderA.rect.x, y: colliderA.rect.y + colliderA.rect.h }
+            ];
+            return CheckCollisionPolygonPolygon(rectPoints, colliderB.transformedPoints);
+        }
+        // Polygon-Polygon collision
+        else if (colliderA instanceof PolygonCollider && colliderB instanceof PolygonCollider) {
             // console.warn("Collision detection for PolygonCollider (or rotated rectangles) requires advanced algorithms like SAT, which are not implemented in this basic CollisionManager.");
             console.warn("Unsuported colision type (PolygonCollider).")
             return false; // Currently unsupported for detailed narrow-phase
+            return CheckCollisionPolygonPolygon(colliderA.transformedPoints, colliderB.transformedPoints);
         }
         return false; // Unknown or unsupported collider types
     }
@@ -506,13 +535,13 @@ class CollisionManager {
 class Collider {
     static defaultColor   = new Color(1, 0, 0, 0.2); // Red for no collision
     static collisionColor = new Color(0, 1, 0, 0.2); // Green for collision
+    static bRAdColor = new Color(0, 0, 0, 0.1); // grey transparent for the bounding radius
 
     static nextColliderId = 0; // for unique IDs
 
     _go;
 
     constructor(position, boundingRadius, gameObject=null) {
-        this.position = position;
         this.boundingRadius = boundingRadius;
         this.boundingRadius2 = this.boundingRadius * this.boundingRadius;
         this.isColliding = false;
@@ -521,8 +550,18 @@ class Collider {
 
         this.id = Collider.nextColliderId++;
 
-        if (gameObject)
+        if (gameObject) {
             this._go = gameObject;
+            this.positionOffset = Vector2.Copy(position);
+            this.position = position;
+        }
+        else {
+            this.position = position;
+        }
+
+        this.onCollisionEnterCallback = null;
+        this.onCollisionExitCallback = null;
+        this.onClickCallback = null;
     }
 
     get go() {
@@ -548,31 +587,72 @@ class Collider {
         this.position.y = value;
     }
 
+    set go(value) {
+        this._go = value;
+        if (!this.positionOffset)
+            this.positionOffset = Vector2.Zero();
+    }
+    set gameObject(value) {
+        this._go = value;
+        if (!this.positionOffset)
+            this.positionOffset = Vector2.Zero();
+    }
+
     Draw(renderer) { }
+
+    UpdateFromGO() {
+        this.position.Set(this._go.position.x + this.positionOffset.x, this._go.position.y + this.positionOffset.y);
+    }
 
     UpdatePosition(newPosition) {
         this.position.Set(newPosition.x, newPosition.y);
     }
+    
+    OnCollisionEnter(otherCollider) {
+        if (this.onCollisionEnterCallback)
+            this.onCollisionEnterCallback(otherCollider);
+        if (this._go)
+            this._go.OnCollisionEnter(otherCollider);
+    }
+
+    OnCollisionExit(otherCollider) {
+        if (this.onCollisionExitCallback)
+            this.onCollisionExitCallback(otherCollider);
+        if (this._go)
+            this._go.OnCollisionExit(otherCollider);
+    }
+
+    OnClick() {
+        if (this.onClickCallback)
+            this.onClickCallback();
+        if (this._go)
+            this._go.OnClick();
+    }
+
+    IsPointInside(x, y) { return false; }
 }
 
 class RectangleCollider extends Collider {
-    constructor(position, width, height) {
-        // Pass a callback to update rect when position changes
-        const onChange = (vec) => {
+    constructor(position, width, height, gameObject=null) {
+        const pos = gameObject ? new Vector2(position.x + width / 2, position.y + height / 2) : new Vector2(position.x, position.y);
+        const boundingRadius = Math.sqrt(width * width + height * height) / 2;
+
+        super(pos, boundingRadius, gameObject);
+        this.position.onChange = (vec) => {
             this.rect.x = vec.x - this.rect.halfWidth;
             this.rect.y = vec.y - this.rect.halfHeight;
         };
-        const pos = new Vector2(position.x, position.y, onChange);
-        const boundingRadius = Math.sqrt(width * width + height * height) / 2;
-
-        super(pos, boundingRadius);
         this.rect = new Rect(position.x - width / 2, position.y - height / 2, width, height);
     }
 
     Draw(renderer) {
-        renderer.DrawFillCircle(this.position.x, this.position.y, this.boundingRadius, this.color);
+        renderer.DrawFillCircle(this.position.x, this.position.y, this.boundingRadius, Collider.bRAdColor);
         
         renderer.DrawFillRectangle(this.rect.x, this.rect.y, this.rect.w, this.rect.h, this.color);
+    }
+
+    IsPointInside(x, y) {
+        return CheckPointInsideRectangle(x, y, this.rect.x, this.rect.y, this.rect.w, this.rect.h);
     }
 }
 
@@ -585,18 +665,23 @@ class CircleCollider extends Collider {
     Draw(renderer) {
         renderer.DrawFillCircle(this.position.x, this.position.y, this.radius, this.color);
     }
+
+    IsPointInside(x, y) {
+        return CheckPointInsideCircle(x, y, this.position, this.boundingRadius2);
+    }
 }
 
 class PolygonCollider extends Collider {
-    constructor(position, rotation, points) {
-        super(position, 0);
+    constructor(position, rotation, points, gameObject=null) {
+        super(position, 0, gameObject);
         this.rotation = rotation;
         this.points = points;
-        this.transformedPoints = new Array(this.points.lenght);
+        this.transformedPoints = new Array(this.points.length);
         for (let i = 0; i < this.points.length; i++) {
             this.transformedPoints[i] = Vector2.Copy(this.points[i]);
         }
         this._calculateBoundingRadius();
+        this.UpdatePositionAndRotation(position, rotation);
     }
 
     _calculateBoundingRadius() {
@@ -623,14 +708,32 @@ class PolygonCollider extends Collider {
         this.position.Set(newPosition.x, newPosition.y);
         this.rotation = newRotation;
 
+        const cosA = Math.cos(this.rotation);
+        const sinA = Math.sin(this.rotation);
+
+        // Transform local points to world space
         for (let i = 0; i < this.points.length; i++) {
-            this.transformedPoints[i].Set(this.points[i].x + newPosition.x, this.points[i].y + newPosition.y);
-            RotatePointAroundPoint(this.transformedPoints[i], newPosition, this.rotation, this.transformedPoints[i]);
+            const p = this.points[i]; // The original local point, relative to (0,0)
+
+            // Rotate the local point around the local origin (0,0)
+            const rotatedX = (cosA * p.x) - (sinA * p.y);
+            const rotatedY = (sinA * p.x) + (cosA * p.y);
+
+            // Translate the rotated point by the collider's world position
+            this.transformedPoints[i].Set(rotatedX + this.position.x, rotatedY + this.position.y);
         }
     }
 
     Draw(renderer) {
+        renderer.DrawFillCircle(this.position.x, this.position.y, this.boundingRadius, Collider.bRAdColor);
         renderer.DrawPolygon(this.transformedPoints, this.color);
+    }
+
+    IsPointInside(x, y) {
+        if (CheckPointInsideCircle(x, y, this.position, this.boundingRadius2))
+            return CheckPointInsidePolygon(x, y, this.transformedPoints);
+        else
+            return false;
     }
 }
 

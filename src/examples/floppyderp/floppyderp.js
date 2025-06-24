@@ -157,7 +157,7 @@ class FloppyDerp extends Game {
         // mute/unmute
         let soundSpriteClicked = false;
         if (Input.IsKeyDown(KEY_M) ||
-            Input.IsMouseDown() && PointInsideRectangle(Input.mouse.x, Input.mouse.y, this.soundMuteSprite.position.x - 16, this.soundMuteSprite.position.y - 16, 32, 32)) {
+            Input.IsMouseDown() && CheckPointInsideRectangle(Input.mouse.x, Input.mouse.y, this.soundMuteSprite.position.x - 16, this.soundMuteSprite.position.y - 16, 32, 32)) {
             this.audioActive = !this.audioActive;
             soundSpriteClicked = true;
         }

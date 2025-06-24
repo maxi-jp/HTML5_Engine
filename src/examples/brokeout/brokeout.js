@@ -171,7 +171,7 @@ class Ball extends GameObject {
     }
 
     CheckPlayerPaddleCollision(paddle) {
-        if (CheckCollisionRect(this.position, paddle.rectangle)) {
+        if (CheckPointInsideRect(this.position, paddle.rectangle)) {
             const difX = (this.direction.x > 0) ? this.position.x - paddle.position.x : paddle.position.x + paddle.rectangle.width - this.position.x;
             const difY = (this.direction.y > 0) ? this.position.y - paddle.position.y : paddle.position.y + paddle.rectangle.height - this.position.y;
 
@@ -226,7 +226,7 @@ class Ball extends GameObject {
     }
 
     CheckBrickCollision(brick) {
-        if(CheckCollisionRect(this.position, brick.rectangle)) {
+        if(CheckPointInsideRect(this.position, brick.rectangle)) {
             const difX = (this.direction.x > 0) ? this.position.x - brick.position.x : brick.position.x + brick.rectangle.width - this.position.x;
             const difY = (this.direction.y > 0) ? this.position.y - brick.position.y : brick.position.y + brick.rectangle.height - this.position.y;
 

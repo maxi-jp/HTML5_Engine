@@ -14,6 +14,7 @@ class Game {
         //     audioAnalyzer: true,    // if true it will create an audio analyzer when loading the audio assets
         //     analyzerfftSize: 128,   // size of the audio analyzer fft, default is 128
         //     analyzerSmoothing: 0.5, // smoothing of the audio analyzer, default is 0.5
+        //     drawColliders: false,   // smoothing of the audio analyzer, default is 0.5
         // };
 
         this.graphicAssets = null;
@@ -98,6 +99,14 @@ class Game {
                 gameObject.Update(deltaTime);
         });
 
+        // Colliders onClick events
+        this.colliders.forEach((collider) => {
+            if (Input.mouse.down)
+                if (collider.IsPointInside(Input.mouse.x, Input.mouse.y)) {
+                collider.OnClick();
+            }
+        });
+
         // Collision Detection and Event Dispatching
         this.detectedCollisions.clear();
 
@@ -172,6 +181,12 @@ class Game {
             if (gameObject.active)
                 gameObject.Draw(this.renderer);
         });
+
+        if (this.config.drawColliders) {
+            this.colliders.forEach((collider) => {
+                collider.Draw(this.renderer);
+            });
+        }
     }
 
     Destroy(gameObject) {

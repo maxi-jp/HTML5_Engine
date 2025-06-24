@@ -17,98 +17,54 @@ function GetRandomColor() {
     return `rgb(${r},${g},${b})`;
 }
 
+// #region Math helper functions
+
 function SqrLength(v) {
     const x2 = v.x * v.x;
     const y2 = v.y * v.y;
     return x2 + y2;
 }
 
-function CheckCollisionCircle(point, circlePosition, radius2) {
-    // d^2 = (p.x - c.x)^2 + (p.y - c.y)^2
-    // c = d < r
-    const difX = point.x - circlePosition.x;
-    const difY = point.y - circlePosition.y;
-    const pointToCircleDistance2 = difX * difX + difY * difY;
-
-    return pointToCircleDistance2 < radius2;
+function DistanceSquaredPointToPoint(p1x, p1y, p2x, p2y) {
+    const dx = p2x - p1x;
+    const dy = p2y - p1y;
+    return dx * dx + dy * dy;
 }
 
-function CheckCollisionTwoCircles(positionA, radiusA, positionB, radiusB) {
-    // d^2 = (p.x - c.x)^2 + (p.y - c.y)^2
-    // c = d < (rA + rB) -> d^2 < (rA + rB)^2
-    const difX = positionA.x - positionB.x;
-    const difY = positionA.y - positionB.y;
-    const distanceSquared = difX * difX + difY * difY;
-    const sumofRadius = radiusA + radiusB;
-
-    return distanceSquared < (sumofRadius * sumofRadius);
-}
-
-function CheckCollisionRect(point, rectangle) {
-    return PointInsideRectangle(point.x, point.y, rectangle.position.x, rectangle.position.y, rectangle.width, rectangle.height);
-}
-
-function PointInsideRectangle(px, py, rx, ry, rw, rh) {
-    return px >= (rx) &&
-           px <= (rx + rw) &&
-           py >= (ry) &&
-           py <= (ry + rh);
-}
-
-function CheckCollisionTwoRects(rectA, rectB) {
-    return rectA.x < rectB.x + rectB.w &&
-           rectA.x + rectA.w > rectB.x &&
-           rectA.y < rectB.y + rectB.h &&
-           rectA.y + rectA.h > rectB.y;
-}
-
-function CheckCollisionCircleRect(circle, rect) {
-    // Find the closest point on the rectangle to the center of the circle
-    let testX = circle.position.x;
-    let testY = circle.position.y;
-
-    // Clamp X to rectangle's X range
-    if (circle.position.x < rect.x)
-        testX = rect.x;
-    else if (circle.position.x > rect.x + rect.w)
-        testX = rect.x + rect.w;
-
-    // Clamp Y to rectangle's Y range
-    if (circle.position.y < rect.y)
-        testY = rect.y;
-    else if (circle.position.y > rect.y + rect.h)
-        testY = rect.y + rect.h;
-
-    // Calculate the distance between the closest point and the circle's center
-    const distX = circle.position.x - testX;
-    const distY = circle.position.y - testY;
-    const distanceSquared = (distX * distX) + (distY * distY);
-
-    // Check if the distance is less than the circle's radius squared
-    const radius2 = circle.boundingRadius2 ? circle.boundingRadius2 : (circle.radius * circle.radius);
-    return distanceSquared < radius2;
-}
-
-function CheckCollisionPolygon(point, polygon) {
-    var count = polygon.length;
-
-    for (let i = 0; i < polygon.length; i++) {
-        const d = DistancePointToSegmentSign(polygon[i], polygon[(i + 1) % polygon.length], point);
-        if (d < 0)
-            count--;
-    }
-
-    return (count == 0) || (count == polygon.length);
-}
-
-function DistancePointToSegment(A, B, p) {
+function DistancePointToSegment(A, B, px, py) {
     const difXAB = A.x - B.x;
     const difYAB = A.y - B.y;
-    return (((B.x - A.x) * (A.y - p.y)) - ((A.x - p.x) * (B.y - A.y))) / (Math.sqrt(difXAB * difXAB) + (difYAB * difYAB));
+    return (((B.x - A.x) * (A.y - py)) - ((A.x - px) * (B.y - A.y))) / (Math.sqrt(difXAB * difXAB + difYAB * difYAB));
 }
 
-function DistancePointToSegmentSign(A, B, p) {
-    return ((B.x - A.x) * (A.y - p.y)) - ((A.x - p.x) * (B.y - A.y));
+function DistancePointToSegmentSign(A, B, px, py) {
+    return ((B.x - A.x) * (A.y - py)) - ((A.x - px) * (B.y - A.y));
+}
+
+// Find the closest point on a line segment to a given point
+function GetClosestPointOnSegment(A, B, P) {
+    const APx = P.x - A.x;
+    const APy = P.y - A.y;
+    const ABx = B.x - A.x;
+    const ABy = B.y - A.y;
+
+    const magAB2 = ABx * ABx + ABy * ABy;
+    let t = 0;
+    if (magAB2 > 0) { // Avoid division by zero for zero-length segments
+        t = (APx * ABx + APy * ABy) / magAB2;
+        t = Math.max(0, Math.min(1, t)); // Clamp t to [0, 1] to stay within the segment
+    }
+
+    const closestX = A.x + t * ABx;
+    const closestY = A.y + t * ABy;
+
+    return { x: closestX, y: closestY };
+}
+
+// Squared distance from a point P to a line segment AB
+function DistanceSquaredPointToSegment(A, B, P) {
+    const closest = GetClosestPointOnSegment(A, B, P);
+    return DistanceSquaredPointToPoint(P.x, P.y, closest.x, closest.y);
 }
 
 function RotatePointAroundPoint(point, origin, angle, transformedPoint) {
@@ -228,6 +184,140 @@ function Lerp(start, end, interpolationFactor) {
     return start + (end - start) * interpolationFactor;
 }
 
+// #endregion
+
+// #region Point-inside-geometry-forms functions
+
+function CheckPointInsideCircle(px, py, circlePosition, radius2) {
+    // d^2 = (p.x - c.x)^2 + (p.y - c.y)^2
+    // c = d < r
+    const difX = px - circlePosition.x;
+    const difY = py - circlePosition.y;
+    const pointToCircleDistance2 = difX * difX + difY * difY;
+
+    return pointToCircleDistance2 < radius2;
+}
+
+function CheckPointInsideRect(point, rectangle) {
+    return CheckPointInsideRectangle(point.x, point.y, rectangle.position.x, rectangle.position.y, rectangle.width, rectangle.height);
+}
+
+function CheckPointInsideRectangle(px, py, rx, ry, rw, rh) {
+    return px >= (rx) &&
+           px <= (rx + rw) &&
+           py >= (ry) &&
+           py <= (ry + rh);
+}
+
+function CheckPointInsidePolygon(px, py, polygon) {
+    let count = polygon.length;
+
+    for (let i = 0; i < polygon.length; i++) {
+        const d = DistancePointToSegmentSign(polygon[i], polygon[(i + 1) % polygon.length], px, py);
+        if (d < 0)
+            count--;
+    }
+
+    return (count == 0) || (count == polygon.length);
+}
+
+
+// #endregion
+
+// #region Collisions between geometry forms functions
+
+function CheckCollisionTwoCircles(positionA, radiusA, positionB, radiusB) {
+    // d^2 = (p.x - c.x)^2 + (p.y - c.y)^2
+    // c = d < (rA + rB) -> d^2 < (rA + rB)^2
+    const difX = positionA.x - positionB.x;
+    const difY = positionA.y - positionB.y;
+    const distanceSquared = difX * difX + difY * difY;
+    const sumofRadius = radiusA + radiusB;
+
+    return distanceSquared < (sumofRadius * sumofRadius);
+}
+
+function CheckCollisionTwoRects(rectA, rectB) {
+    return rectA.x < rectB.x + rectB.w &&
+           rectA.x + rectA.w > rectB.x &&
+           rectA.y < rectB.y + rectB.h &&
+           rectA.y + rectA.h > rectB.y;
+}
+
+function CheckCollisionCircleRect(circle, rect) {
+    // Find the closest point on the rectangle to the center of the circle
+    let testX = circle.position.x;
+    let testY = circle.position.y;
+
+    // Clamp X to rectangle's X range
+    if (circle.position.x < rect.x)
+        testX = rect.x;
+    else if (circle.position.x > rect.x + rect.w)
+        testX = rect.x + rect.w;
+
+    // Clamp Y to rectangle's Y range
+    if (circle.position.y < rect.y)
+        testY = rect.y;
+    else if (circle.position.y > rect.y + rect.h)
+        testY = rect.y + rect.h;
+
+    // Calculate the distance between the closest point and the circle's center
+    const distX = circle.position.x - testX;
+    const distY = circle.position.y - testY;
+    const distanceSquared = (distX * distX) + (distY * distY);
+
+    // Check if the distance is less than the circle's radius squared
+    const radius2 = circle.boundingRadius2 ? circle.boundingRadius2 : (circle.radius * circle.radius);
+    return distanceSquared < radius2;
+}
+
+function CheckCollisionCirclePolygon(circlePosition, circleRadius, polygonPoints) {
+    // Check if the circle's center is inside the polygon
+    if (CheckPointInsidePolygon(circlePosition.x, circlePosition.y, polygonPoints)) {
+        return true;
+    }
+
+    const radiusSq = circleRadius * circleRadius;
+
+    // Check distance from circle center to each edge of the polygon
+    for (let i = 0; i < polygonPoints.length; i++) {
+        const p1 = polygonPoints[i];
+        const p2 = polygonPoints[(i + 1) % polygonPoints.length];
+
+        const distSq = DistanceSquaredPointToSegment(p1, p2, circlePosition);
+        if (distSq < radiusSq) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function CheckCollisionPolygonPolygon(polygon1Points, polygon2Points) {
+    // This is a complex collision detection problem, typically solved using the
+    // Separating Axis Theorem (SAT). A full SAT implementation is beyond the
+    // scope of a simple helper function and would require more extensive
+    // vector and projection utilities.
+
+    // Simple, but not robust, vertex-in-polygon check:
+    for (const p1 of polygon1Points) {
+        if (CheckPointInsidePolygon(p1.x, p1.y, polygon2Points)) {
+            return true;
+        }
+    }
+    for (const p2 of polygon2Points) {
+        if (CheckPointInsidePolygon(p2.x, p2.y, polygon1Points)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// #endregion
+
+// #region Vector2 class
+
 class Vector2 {
     _x = 0;
     _y = 0;
@@ -254,6 +344,9 @@ class Vector2 {
         this._x = val;
         if (this._onChange)
             this._onChange(this);
+    }
+    set onChange(onChange) {
+        this._onChange = onChange;
     }
 
     get y() {
@@ -362,6 +455,10 @@ class Vector2 {
     }
 }
 
+// #endregion
+
+// #region Other geometry form classes
+
 class Rect {
     _x = 0;
     _y = 0;
@@ -420,3 +517,5 @@ class Rect {
         this.h = value;
     }
 }
+
+// #endregion

@@ -54,14 +54,18 @@ class GameObject {
     }
     set collider(value) {
         this._collider = value;
-        this._collider.go = this;
     }
 
-    Start() {}
-    Update(deltaTime){}
-    Draw(ctx){}
+    Start() { }
+
+    Update(deltaTime) {
+        this._collider?.UpdateFromGO();
+    }
+
+    Draw(ctx) { }
     OnCollisionEnter(myCollider, otherCollider) { }
     OnCollisionExit(myCollider, otherCollider) { }
+    OnClick() { }
 }
 
 class RectangleGO extends GameObject {
@@ -69,10 +73,6 @@ class RectangleGO extends GameObject {
         super(position);
         this.rectangle = new Rectangle(this._position, width, height, color, stroke, lineWidth);
     }
-
-    Start() { }
-
-    Update(deltaTime) { }
 
     Draw(renderer) {
         renderer.DrawRectangle(this.position.x, this.position.y, this.rectangle.width, this.rectangle.height, this.rectangle.color, this.rectangle.stroke, this.rectangle.lineWidth, this.rotation);
@@ -84,10 +84,6 @@ class CircleGO extends GameObject {
         super(position);
         this.circle = new Circle(this._position, radius, color, stroke=false, lineWidth=1)
     }
-
-    Start() { }
-
-    Update(deltaTime) { }
 
     Draw(renderer) {
         renderer.DrawCircle(this.position.x, this.position.y, this.circle.radius, this.circle.color, this.circle.stroke, this.circle.lineWidth);
@@ -158,9 +154,6 @@ class SpriteObject extends GameObject {
         this.sprite.flipY = value;
     }
 
-    Start() {}
-    Update(deltaTime) {}
-
     Draw(renderer) {
         this.sprite.Draw(renderer);
     }
@@ -184,10 +177,10 @@ class SSAnimationObjectBasic extends SpriteObject {
 
         this.spritePosition = new Vector2(0, 0); // only used if debugMode
     }
-    
-    Start() {}
 
     Update(deltaTime) {
+        super.Update(deltaTime);
+
         this.actualFrameCountTime += deltaTime;
         if (this.actualFrameCountTime >= this.framesDuration) {
             // update the animation with the new frame
@@ -236,10 +229,10 @@ class SSAnimationObjectComplex extends SpriteObject {
 
         this.spritePosition = new Vector2(0, 0);
     }
-    
-    Start() {}
 
     Update(deltaTime) {
+        super.Update(deltaTime);
+
         this.actualFrameCountTime += deltaTime;
         if (this.actualFrameCountTime >= this.framesDurations[this.actualAnimationIndex]) {
             // update the animation with the new frame

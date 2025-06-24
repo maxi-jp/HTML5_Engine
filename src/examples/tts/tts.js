@@ -80,7 +80,7 @@ class TTS extends Game {
             if (bullet.active) {
                 for (let j = 0; j < this.enemies.length; j++) {
                     // check bullets[i] - enemies[j] collision
-                    const collision = CheckCollisionCircle(bullet.position, this.enemies[j].position, this.enemies[j].boundingRadious2);
+                    const collision = CheckPointInsideCircle(bullet.position.x, bullet.position.y, this.enemies[j].position, this.enemies[j].boundingRadious2);
 
                     if (collision) {
                         if (this.enemies[j].Damage(bullet.damage)) {
