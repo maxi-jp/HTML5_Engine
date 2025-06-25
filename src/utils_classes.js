@@ -469,33 +469,17 @@ class CollisionManager {
         else if (colliderA instanceof PolygonCollider && colliderB instanceof CircleCollider) {
             return CheckCollisionCirclePolygon(colliderB.position, colliderB.boundingRadius, colliderA.transformedPoints);
         }
-        // Polygon-Rectangle collision (can be treated as Polygon-Polygon for simplicity, or specific SAT)
+        // Polygon-Rectangle collision
         else if (colliderA instanceof PolygonCollider && colliderB instanceof RectangleCollider) {
-            // Convert rectangle to polygon points for CheckCollisionPolygonPolygon
-            const rectPoints = [
-                { x: colliderB.rect.x, y: colliderB.rect.y },
-                { x: colliderB.rect.x + colliderB.rect.w, y: colliderB.rect.y },
-                { x: colliderB.rect.x + colliderB.rect.w, y: colliderB.rect.y + colliderB.rect.h },
-                { x: colliderB.rect.x, y: colliderB.rect.y + colliderB.rect.h }
-            ];
-            return CheckCollisionPolygonPolygon(colliderA.transformedPoints, rectPoints);
+            return CheckCollisionPolygonPolygon(colliderA.transformedPoints, colliderB.rect.points, false);
         }
-        // Rectangle-Polygon collision (swap order for consistency)
+        // Rectangle-Polygon collision
         else if (colliderA instanceof RectangleCollider && colliderB instanceof PolygonCollider) {
-            const rectPoints = [
-                { x: colliderA.rect.x, y: colliderA.rect.y },
-                { x: colliderA.rect.x + colliderA.rect.w, y: colliderA.rect.y },
-                { x: colliderA.rect.x + colliderA.rect.w, y: colliderA.rect.y + colliderA.rect.h },
-                { x: colliderA.rect.x, y: colliderA.rect.y + colliderA.rect.h }
-            ];
-            return CheckCollisionPolygonPolygon(rectPoints, colliderB.transformedPoints);
+            return CheckCollisionPolygonPolygon(colliderB.transformedPoints, colliderA.rect.points, false);
         }
         // Polygon-Polygon collision
         else if (colliderA instanceof PolygonCollider && colliderB instanceof PolygonCollider) {
-            // console.warn("Collision detection for PolygonCollider (or rotated rectangles) requires advanced algorithms like SAT, which are not implemented in this basic CollisionManager.");
-            console.warn("Unsuported colision type (PolygonCollider).")
-            return false; // Currently unsupported for detailed narrow-phase
-            return CheckCollisionPolygonPolygon(colliderA.transformedPoints, colliderB.transformedPoints);
+            return CheckCollisionPolygonPolygon(colliderA.transformedPoints, colliderB.transformedPoints, false);
         }
         return false; // Unknown or unsupported collider types
     }
@@ -694,6 +678,12 @@ class PolygonCollider extends Collider {
 
         this.boundingRadius = Math.sqrt(maxDistSq);
         this.boundingRadius2 = maxDistSq;
+    }
+    
+    UpdateFromGO() {
+        this.UpdatePositionAndRotation(this._go.position, this._go.rotation);
+    
+        //this.position.Set(this._go.position.x + this.positionOffset.x, this._go.position.y + this.positionOffset.y);
     }
 
     UpdatePosition(newPosition) {

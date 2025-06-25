@@ -293,13 +293,16 @@ function CheckCollisionCirclePolygon(circlePosition, circleRadius, polygonPoints
     return false;
 }
 
-function CheckCollisionPolygonPolygon(polygon1Points, polygon2Points) {
+function CheckCollisionPolygonPolygon(polygon1Points, polygon2Points, accurate=false) {
     // This is a complex collision detection problem, typically solved using the
     // Separating Axis Theorem (SAT). A full SAT implementation is beyond the
     // scope of a simple helper function and would require more extensive
     // vector and projection utilities.
 
-    // Simple, but not robust, vertex-in-polygon check:
+    // if accurate is false it only check vertex-in-polygon
+    // if accurate is true it also checks edge-intersections
+
+    // Vertex-in-polygon check:
     for (const p1 of polygon1Points) {
         if (CheckPointInsidePolygon(p1.x, p1.y, polygon2Points)) {
             return true;
@@ -308,6 +311,23 @@ function CheckCollisionPolygonPolygon(polygon1Points, polygon2Points) {
     for (const p2 of polygon2Points) {
         if (CheckPointInsidePolygon(p2.x, p2.y, polygon1Points)) {
             return true;
+        }
+    }
+
+    // Check if any edge of polygon1 intersects with any edge of polygon2.
+    if (accurate) {
+        for (let i = 0; i < polygon1Points.length; i++) {
+            const p1_start = polygon1Points[i];
+            const p1_end = polygon1Points[(i + 1) % polygon1Points.length];
+
+            for (let j = 0; j < polygon2Points.length; j++) {
+                const p2_start = polygon2Points[j];
+                const p2_end = polygon2Points[(j + 1) % polygon2Points.length];
+
+                if (IntersectionBetweenLines(p1_start, p1_end, p2_start, p2_end).det !== 0) {
+                    return true;
+                }
+            }
         }
     }
 
@@ -473,6 +493,15 @@ class Rect {
 
         this.halfWidth = width / 2;
         this.halfHeight = height / 2;
+
+        this.points = [
+            { x: 0, y: 0 },
+            { x: 0, y: 0 },
+            { x: 0, y: 0 },
+            { x: 0, y: 0 }
+        ];
+
+        this._updatePoints();
     }
 
     get x() {
@@ -497,17 +526,21 @@ class Rect {
 
     set x(value) {
         this._x = value;
+        this._updatePoints();
     }
     set y(value) {
         this._y = value;
+        this._updatePoints();
     }
     set w(value) {
         this._w = value;
         this.halfWidth = value / 2;
+        this._updatePoints();
     }
     set h(value) {
         this._h = value;
         this.halfHeight = value / 2;
+        this._updatePoints();
     }
 
     set width(value) {
@@ -515,6 +548,17 @@ class Rect {
     }
     set height(value) {
         this.h = value;
+    }
+
+    _updatePoints() {
+        this.points[0].x = this._x;
+        this.points[0].y = this._y;
+        this.points[1].x = this._x + this._w;
+        this.points[1].y = this._y;
+        this.points[2].x = this._x + this._w;
+        this.points[2].y = this._y + this._h;
+        this.points[3].x = this._x;
+        this.points[3].y = this._y + this._h;
     }
 }
 
