@@ -200,6 +200,8 @@ class Sprite {
         this._computedScale = new Vector2(this._scale.x, this._scale.y);
         this._computedScale.x *= this._flipX ? -1 : 1;
         this._computedScale.y *= this._flipY ? -1 : 1;
+
+        this.pivot = { x: 0, y: 0 };
     }
 
     get width() {
@@ -255,23 +257,23 @@ class Sprite {
     }
 
     Draw(renderer) {
-        renderer.DrawImage(this.img, this.position.x, this.position.y, this._computedScale.x, this._computedScale.y, this.rotation, this.alpha);
+        renderer.DrawImage(this.img, this.position.x, this.position.y, this._computedScale.x, this._computedScale.y, this.rotation, this.pivot, this.alpha);
     }
 
     DrawBasic(renderer) {
-        renderer.DrawImageBasic(this.img, this.position.x, this.position.y, this.img.width * this.scale.x, this.img.height * this.scale.y, this.alpha);
+        renderer.DrawImageBasic(this.img, this.position.x + this.pivot.x, this.position.y + this.pivot.y, this.img.width * this.scale.x, this.img.height * this.scale.y, this.alpha);
     }
     
     DrawSection(renderer, sx, sy, sw, sh) {
-        renderer.DrawImageSection(this.img, this.position.x, this.position.y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y, this.rotation, this.alpha);
+        renderer.DrawImageSection(this.img, this.position.x, this.position.y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y, this.rotation, this.pivot, this.alpha);
     }
 
     DrawSectionBasic(sx, sy, sw, sh) {
-        renderer.DrawImageSectionBasic(this.img, this.position.x, this.position.y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y, this.alpha);
+        renderer.DrawImageSectionBasic(this.img, this.position.x + this.pivot.x, this.position.y + this.pivot.y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y, this.alpha);
     }
 
     DrawAt(renderer, x, y) {
-        renderer.DrawImage(this.img, x, y, this._computedScale.x, this._computedScale.y, this.rotation, this.alpha);
+        renderer.DrawImage(this.img, x, y, this._computedScale.x, this._computedScale.y, this.rotation, this.pivot, this.alpha);
     }
 
     DrawBasicAt(renderer, x, y) {
@@ -279,7 +281,7 @@ class Sprite {
     }
     
     DrawSectionAt(renderer, sx, sy, sw, sh, x, y) {
-        renderer.DrawImageSection(this.img, x, y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y, this.rotation, this.alpha);
+        renderer.DrawImageSection(this.img, x, y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y, this.rotation, this.pivot, this.alpha);
     }
 
     DrawSectionBasicAt(renderer, sx, sy, sw, sh, x, y) {
@@ -618,10 +620,10 @@ class Collider {
 
 class RectangleCollider extends Collider {
     constructor(position, width, height, gameObject=null) {
-        const pos = gameObject ? new Vector2(position.x + width / 2, position.y + height / 2) : new Vector2(position.x, position.y);
+        // const pos = gameObject ? new Vector2(position.x + width / 2, position.y + height / 2) : new Vector2(position.x, position.y);
         const boundingRadius = Math.sqrt(width * width + height * height) / 2;
 
-        super(pos, boundingRadius, gameObject);
+        super(position, boundingRadius, gameObject);
         this.position.onChange = (vec) => {
             this.rect.x = vec.x - this.rect.halfWidth;
             this.rect.y = vec.y - this.rect.halfHeight;

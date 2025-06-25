@@ -2,6 +2,8 @@ const PI2 = Math.PI * 2;
 const PIH = Math.PI / 2;
 const degToRad = Math.PI / 180;
 
+const coord = { x: 0, y: 0 };
+
 function RandomBetweenInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }

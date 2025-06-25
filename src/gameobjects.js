@@ -3,6 +3,7 @@ class GameObject {
     _position;
     _rotation = 0;
     _scale = new Vector2(1, 1);
+    _pivot = { x: 0, y: 0 };
     _collider;
 
     constructor(position) {
@@ -26,6 +27,9 @@ class GameObject {
     }
     get y() {
         return this._position.y;
+    }
+    get pivot() {
+        return this._pivot;
     }
     get collider() {
         return this._collider;
@@ -52,6 +56,10 @@ class GameObject {
     set y(value) {
         this._position.y = value;
     }
+    set pivot(value) {
+        this._pivot.x = value.x;
+        this._pivot.y = value.y;
+    }
     set collider(value) {
         this._collider = value;
     }
@@ -75,7 +83,7 @@ class RectangleGO extends GameObject {
     }
 
     Draw(renderer) {
-        renderer.DrawRectangle(this.position.x, this.position.y, this.rectangle.width, this.rectangle.height, this.rectangle.color, this.rectangle.stroke, this.rectangle.lineWidth, this.rotation);
+        renderer.DrawRectangle(this.position.x, this.position.y, this.rectangle.width, this.rectangle.height, this.rectangle.color, this.rectangle.stroke, this.rectangle.lineWidth, this.rotation, this.pivot);
     }
 }
 
@@ -154,6 +162,16 @@ class SpriteObject extends GameObject {
         this.sprite.flipY = value;
     }
 
+    set pivot(value) {
+        this._pivot = value.x;
+        this._pivot = value.y;
+        this.sprite.pivot.x = value.x;
+        this.sprite.pivot.y = value.y;
+    }
+
+    Update(deltaTime) {
+    }
+
     Draw(renderer) {
         this.sprite.Draw(renderer);
     }
@@ -164,7 +182,7 @@ class SpriteObject extends GameObject {
 }
 
 class SSAnimationObjectBasic extends SpriteObject {
-    constructor(position, rotation, scale, img, frameWidth, frameHeight, frameCount, framesDuration)     {
+    constructor(position, rotation, scale, img, frameWidth, frameHeight, frameCount, framesDuration) {
         super(position, rotation, scale, img);
 
         this.framesDuration = framesDuration;
@@ -197,11 +215,6 @@ class SSAnimationObjectBasic extends SpriteObject {
 
     Draw(renderer) {
         this.sprite.DrawSection(renderer, this.actualFrame * this.frameWidth, this.actualAnimation * this.frameHeight, this.frameWidth, this.frameHeight, 0, 0, this.frameWidth, this.frameHeight);
-        
-        if (debugMode) {
-            renderer.ctx.strokeStyle = "red";
-            renderer.ctx.strokeRect(this.spritePosition.x, this.spritePosition.y, this.frameWidth * this.scale.x, this.frameHeight * this.scale.y);
-        }
     }
 
     PlayAnimationLoop(animationId, resetToFrame0=true) {

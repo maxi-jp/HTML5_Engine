@@ -32,9 +32,9 @@ class Renderer {
     // Draw primitives
     DrawLine(x1, y1, x2, y2, color=Color.black, lineWidth = 1) {}
     DrawPolygon(points, strokeColor=Color.black, lineWidth=1, fill=false, fillColor=Color.black) {}
-    DrawRectangle(x, y, w, h, color=Color.black, stroke=false, lineWidth=1, rot=0) {}
-    DrawStrokeRectangle(x, y, w, h, color=Color.black, lineWidth=1, rot=0) {}
-    DrawFillRectangle(x, y, w, h, color=Color.black, rot=0) {}
+    DrawRectangle(x, y, w, h, color=Color.black, stroke=false, lineWidth=1, rot=0, pivot=coord) {}
+    DrawStrokeRectangle(x, y, w, h, color=Color.black, lineWidth=1, rot=0, pivot=coord) {}
+    DrawFillRectangle(x, y, w, h, color=Color.black, rot=0, pivot=coord) {}
     DrawCircle(x, y, radius, color=Color.black, stroke=false, lineWidth=1) {}
     DrawFillCircle(x, y, radius, color=Color.black) {}
     DrawStrokeCircle(x, y, radius, color=Color.black, lineWidth=1) {}
@@ -45,9 +45,9 @@ class Renderer {
     DrawStrokeText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic") {}
 
     // Draw sprites
-    DrawImage(img, x, y, scaleX, scaleY, rot=0, alpha=1.0) {}
+    DrawImage(img, x, y, scaleX, scaleY, rot=0, pivot=coord, alpha=1.0) {}
     DrawImageBasic(img, x, y, w=img.width, h=img.height, alpha=1.0) {}
-    DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0, alpha=1.0) {}
+    DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0, pivot=coord, alpha=1.0) {}
     DrawImageSectionBasic(img, x, y, sx, sy, sw, sh, scaleX, scaleY, alpha=1.0) {}
 
     // other Draw methods
@@ -107,41 +107,41 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.stroke();
     }
 
-    DrawRectangle(x, y, w, h, color=Color.black, stroke=false, lineWidth=1, rot=0) {
+    DrawRectangle(x, y, w, h, color=Color.black, stroke=false, lineWidth=1, rot=0, pivot=coord) {
         if (stroke) {
-            this.DrawStrokeRectangle(x, y, w, h, color, lineWidth, rot);
+            this.DrawStrokeRectangle(x, y, w, h, color, lineWidth, rot, pivot);
         }
         else {
-            this.DrawFillRectangle(x, y, w, h, color, rot);
+            this.DrawFillRectangle(x, y, w, h, color, rot, pivot);
         }
     }
     
-    DrawStrokeRectangle(x, y, w, h, color=Color.black, lineWidth=1, rot=0) {
+    DrawStrokeRectangle(x, y, w, h, color=Color.black, lineWidth=1, rot=0, pivot=coord) {
         this.ctx.strokeStyle = color;
         this.ctx.lineWidth = lineWidth;
         if (rot !== 0) {
             this.ctx.save();
             this.ctx.translate(x, y);
             this.ctx.rotate(rot);
-            this.ctx.strokeRect(-w / 2, -h / 2, w, h);
+            this.ctx.strokeRect(-w / 2 - pivot.x, -h / 2 - pivot.y, w, h);
             this.ctx.restore();
         }
         else {
-            this.ctx.strokeRect(x, y, w, h);
+            this.ctx.strokeRect(x - pivot.x - w / 2, y - pivot.y - h / 2, w, h);
         }
     }
 
-    DrawFillRectangle(x, y, w, h, color=Color.black, rot=0) {
+    DrawFillRectangle(x, y, w, h, color=Color.black, rot=0, pivot=coord) {
         this.ctx.fillStyle = color;
         if (rot !== 0) {
             this.ctx.save();
             this.ctx.translate(x, y);
             this.ctx.rotate(rot);
-            this.ctx.fillRect(-w / 2, -h / 2, w, h);
+            this.ctx.fillRect(-w / 2 - pivot.x, -h / 2 - pivot.y, w, h);
             this.ctx.restore();
         }
         else {
-            this.ctx.fillRect(x, y, w, h);
+            this.ctx.fillRect(x - pivot.x - w / 2, y - pivot.y - h / 2, w, h);
         }
     }
 
@@ -198,7 +198,7 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.strokeText(text, x, y);
     }
 
-    DrawImage(img, x, y, scaleX, scaleY, rot=0, alpha=1.0) {
+    DrawImage(img, x, y, scaleX, scaleY, rot=0, pivot=coord, alpha=1.0) {
         this.ctx.globalAlpha = alpha;
         this.ctx.save();
 
@@ -206,7 +206,7 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.rotate(rot);
         this.ctx.scale(scaleX, scaleY);
 
-        this.ctx.drawImage(img, -img.halfWidth, -img.halfHeight);
+        this.ctx.drawImage(img, -img.halfWidth - pivot.x, -img.halfHeight - pivot.y);
 
         this.ctx.restore();
         this.ctx.globalAlpha = 1.0;
@@ -218,7 +218,7 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.globalAlpha = 1.0;
     }
 
-    DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0, alpha=1.0) {
+    DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0, pivot=coord, alpha=1.0) {
         this.ctx.save();
         
         this.ctx.translate(x, y);
@@ -227,12 +227,13 @@ class Canvas2DRenderer extends Renderer {
         
         if (debugMode) {
             this.ctx.strokeStyle = "red";
-            this.ctx.strokeRect(-sw/2, -sh/2, sw, sh);
+            this.ctx.lineWidth = 1;
+            this.ctx.strokeRect(-sw/2 - pivot.x, -sh/2 - pivot.y, sw, sh);
         }
 
         this.ctx.globalAlpha = alpha;
 
-        this.ctx.drawImage(img, sx, sy, sw, sh, -sw/2, -sh/2, sw, sh);
+        this.ctx.drawImage(img, sx, sy, sw, sh, -sw/2 - pivot.x, -sh/2 - pivot.y, sw, sh);
 
         this.ctx.globalAlpha = 1.0;
         
@@ -337,20 +338,6 @@ class WebGLRenderer extends Renderer {
 
         this.textTexture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, this.textTexture);
-
-        // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-        //  // Upload a 1x1 transparent pixel to make the texture data-complete.
-        // const level = 0;
-        // const internalFormat = gl.RGBA;
-        // const width = 1;
-        // const height = 1;
-        // const border = 0;
-        // const srcFormat = gl.RGBA;
-        // const srcType = gl.UNSIGNED_BYTE;
-        // const pixel = new Uint8Array([0, 0, 0, 0]); // Transparent black
-        // gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
-        //               width, height, border, srcFormat, srcType,
-        //               pixel);
 
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -484,6 +471,7 @@ class WebGLRenderer extends Renderer {
         gl.uniform2f(this.basicRectShader.translationLoc, 0, 0);
         gl.uniform1f(this.basicRectShader.rotationLoc, 0);
         gl.uniform2f(this.basicRectShader.sizeLoc, 1, 1);
+        gl.uniform2f(this.basicRectShader.pivotLoc, 0, 0);
 
         // Fill polygon if requested
         if (fill && points.length >= 3) {
@@ -501,44 +489,35 @@ class WebGLRenderer extends Renderer {
         gl.deleteBuffer(buffer);
     }
 
-    DrawRectangle(x, y, w, h, color, stroke=false, lineWidth=1, rot=0) {
+    DrawRectangle(x, y, w, h, color, stroke=false, lineWidth=1, rot=0, pivot=coord) {
         if (stroke) {
-            this.DrawStrokeRectangle(x, y, w, h, color, lineWidth, rot);
+            this.DrawStrokeRectangle(x, y, w, h, color, lineWidth, rot, pivot);
         } else {
-            this.DrawFillRectangle(x, y, w, h, color, rot);
+            this.DrawFillRectangle(x, y, w, h, color, rot, pivot);
         }
     }
 
-    DrawStrokeRectangle(x, y, w, h, color, lineWidth=1, rot=0) {
-        if (rot === 0) {
-            x += w/2;
-            y += h/2;
-        }
-
-        // Rectangle corners centered at (x, y)
-        const hw = w / 2, hh = h / 2;
-        // Apply rotation and translation
-        const cosR = Math.cos(rot), sinR = Math.sin(rot);
-        // update vertices array
-        this.auxRectVertices[0].x = x - hw * cosR + hh * sinR;
-        this.auxRectVertices[0].y = y - hw * sinR - hh * cosR;
-        this.auxRectVertices[1].x = x + hw * cosR + hh * sinR;
-        this.auxRectVertices[1].y = y + hw * sinR - hh * cosR;
-        this.auxRectVertices[2].x = x + hw * cosR - hh * sinR;
-        this.auxRectVertices[2].y = y + hw * sinR + hh * cosR;
-        this.auxRectVertices[3].x = x - hw * cosR - hh * sinR;
-        this.auxRectVertices[3].y = y - hw * sinR + hh * cosR;
-        
-        this.DrawPolygon(this.auxRectVertices, color, lineWidth);
-    }
-
-    DrawFillRectangle(x, y, w, h, color, rot=0) {
+    DrawStrokeRectangle(x, y, w, h, color, lineWidth=1, rot=0, pivot=coord) {
         const gl = this.gl;
+        this.basicRectShader.UseForCustomBuffer(gl, this.basicRectShader.outlineBuffer);
 
-        if (rot === 0) {
-            x += w/2;
-            y += h/2;
-        }
+        // Set uniforms
+        gl.uniform2f(this.basicRectShader.resolutionLoc, this.canvas.width, this.canvas.height);
+        gl.uniform2f(this.basicRectShader.translationLoc, x, y);
+        gl.uniform1f(this.basicRectShader.rotationLoc, rot);
+        gl.uniform2f(this.basicRectShader.sizeLoc, w, h);
+        gl.uniform2f(this.basicRectShader.pivotLoc, pivot.x, pivot.y);
+        gl.uniform4fv(this.basicRectShader.colorLoc, color.rgba);
+
+        // Set line width (may be ignored on some platforms)
+        gl.lineWidth(lineWidth);
+
+        // Draw the outline (5 points, LINE_STRIP)
+        gl.drawArrays(gl.LINE_STRIP, 0, 5);
+    }
+
+    DrawFillRectangle(x, y, w, h, color, rot=0, pivot=coord) {
+        const gl = this.gl;
 
         this.basicRectShader.Use(this.gl);
 
@@ -547,8 +526,7 @@ class WebGLRenderer extends Renderer {
         gl.uniform2f(this.basicRectShader.translationLoc, x, y);
         gl.uniform1f(this.basicRectShader.rotationLoc, rot);
         gl.uniform2f(this.basicRectShader.sizeLoc, w, h);
-
-        // Color
+        gl.uniform2f(this.basicRectShader.pivotLoc, pivot.x, pivot.y);
         gl.uniform4fv(this.basicRectShader.colorLoc, color.rgba);
 
         // Draw
@@ -566,6 +544,8 @@ class WebGLRenderer extends Renderer {
     DrawFillCircle(x, y, radius, color=Color.black) {
         const gl = this.gl;
         
+        // TODO let this new vertices calculation and the buffer creation to the shader and just pass the position to update the points
+        // same with the DrawStrokeCircle
         for (let i = 0; i < this.circleVerts.length; i += 2) {
             const angle = (i / this.circleNumSegments) * PI2;
             this.circleVerts[i] = x + Math.cos(angle) * radius;
@@ -587,6 +567,7 @@ class WebGLRenderer extends Renderer {
         gl.uniform2f(this.basicRectShader.translationLoc, 0, 0);
         gl.uniform1f(this.basicRectShader.rotationLoc, 0);
         gl.uniform2f(this.basicRectShader.sizeLoc, 1, 1);
+        gl.uniform2f(this.basicRectShader.pivotLoc, 0, 0);
         gl.uniform4fv(this.basicRectShader.colorLoc, color.rgba);
 
         gl.drawArrays(gl.TRIANGLE_FAN, 0, this.circleNumSegments);
@@ -618,6 +599,7 @@ class WebGLRenderer extends Renderer {
         gl.uniform2f(this.basicRectShader.translationLoc, 0, 0);
         gl.uniform1f(this.basicRectShader.rotationLoc, 0);
         gl.uniform2f(this.basicRectShader.sizeLoc, 1, 1);
+        gl.uniform2f(this.basicRectShader.pivotLoc, 0, 0);
         gl.uniform4fv(this.basicRectShader.colorLoc, color.rgba);
 
         gl.lineWidth(lineWidth); // May be ignored on most platforms
@@ -645,6 +627,7 @@ class WebGLRenderer extends Renderer {
         gl.uniform1f(this.spriteShader.texRotationLoc, 0);
         gl.uniform2f(this.spriteShader.texSizeLoc, width, height);
         gl.uniform1f(this.spriteShader.texAlphaLoc, 1.0);
+        gl.uniform2f(this.spriteShader.pivotLoc, 0, 0);
         
         // Bind texture
         gl.activeTexture(gl.TEXTURE0);
@@ -662,7 +645,7 @@ class WebGLRenderer extends Renderer {
         this.DrawText(text, x, y, font, color, align, baseline, true, lineWidth);
     }
 
-    DrawImage(img, x, y, scaleX, scaleY, rot=0, alpha=1.0) {
+    DrawImage(img, x, y, scaleX, scaleY, rot=0, pivot=coord, alpha=1.0) {
         const gl = this.gl;
         this.spriteShader.Use(gl);
         
@@ -671,6 +654,7 @@ class WebGLRenderer extends Renderer {
         gl.uniform2f(this.spriteShader.texTranslationLoc, x, y);
         gl.uniform1f(this.spriteShader.texRotationLoc, rot || 0);
         gl.uniform2f(this.spriteShader.texSizeLoc, scaleX * img.width, scaleY * img.height);
+        gl.uniform2f(this.spriteShader.pivotLoc, pivot.x * scaleX, pivot.y * scaleY);
         gl.uniform1f(this.spriteShader.texAlphaLoc, alpha);
 
         // Bind texture
@@ -684,10 +668,10 @@ class WebGLRenderer extends Renderer {
     }
 
     DrawImageBasic(img, x, y, w=img.width, h=img.height, alpha=1.0) {
-        this.DrawImage(img, x + w / 2, y + h / 2, w / img.width, h / img.height, 0, alpha);
+        this.DrawImage(img, x + w / 2, y + h / 2, w / img.width, h / img.height, 0, coord, alpha);
     }
 
-    DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0, alpha=1.0) {
+    DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0, pivot=coord, alpha=1.0) {
         const gl = this.gl;
         const shader = this.spriteShader;
 
@@ -719,6 +703,7 @@ class WebGLRenderer extends Renderer {
         gl.uniform2f(shader.texTranslationLoc, x, y);
         gl.uniform1f(shader.texRotationLoc, rot || 0);
         gl.uniform2f(shader.texSizeLoc, sw * scaleX, sh * scaleY);
+        gl.uniform2f(shader.pivotLoc, pivot.x * scaleX, pivot.y * scaleY);
         gl.uniform1f(shader.texAlphaLoc, alpha);
 
         // Bind texture
@@ -805,22 +790,33 @@ class BasicRectShader {
              0.5,  0.5,
         ];
 
+        // Outline vertices for a rectangle (LINE_STRIP, 5 points to close the loop)
+        // used when rendering a stroke rectangle (DrawStrokeRectangle method)
+        this.outlineVerts = new Float32Array([
+            -0.5, -0.5, // bottom-left
+             0.5, -0.5, // bottom-right
+             0.5,  0.5, // top-right
+            -0.5,  0.5, // top-left
+            -0.5, -0.5  // close loop
+        ]);
+
         // Vertex shader (solid color)
         this.vsQuadSource = `
             attribute vec2 a_position;
             uniform vec2 u_resolution;
             uniform vec2 u_translation;
             uniform float u_rotation;
+            uniform vec2 u_pivot;
             uniform vec2 u_size;
             uniform mat3 u_viewMatrix;
             void main() {
                 // Scale - Rotate
+                vec2 local = a_position * u_size - u_pivot;
                 float cosR = cos(u_rotation);
                 float sinR = sin(u_rotation);
-                vec2 scaled = a_position * u_size;
                 vec2 rotated = vec2(
-                    scaled.x * cosR - scaled.y * sinR,
-                    scaled.x * sinR + scaled.y * cosR
+                    local.x * cosR - local.y * sinR,
+                    local.x * sinR + local.y * cosR
                 );
                 vec2 pos = rotated + u_translation;
                 vec3 localPos = vec3(pos, 1.0);
@@ -852,13 +848,18 @@ class BasicRectShader {
         this.rotationLoc = gl.getUniformLocation(this.program, "u_rotation");
         this.viewMatrixLoc = gl.getUniformLocation(this.program, "u_viewMatrix");
         this.sizeLoc = gl.getUniformLocation(this.program, "u_size");
+        this.pivotLoc = gl.getUniformLocation(this.program, "u_pivot");
         this.colorLoc = gl.getUniformLocation(this.program, "u_color");
 
         // Create a buffer for a unit rectangle centered at (0,0)
         this.buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-        
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.quadVerts), gl.STATIC_DRAW);
+
+        // Another buffer for the outline vertices (for the DrawStrokeRectangle method)
+        this.outlineBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.outlineBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.outlineVerts, gl.STATIC_DRAW);
 
         // Set temporal viewMatrix
         gl.useProgram(this.program);
@@ -916,16 +917,17 @@ class SpriteShader {
             uniform vec2 u_translation;
             uniform float u_rotation;
             uniform vec2 u_size;
+            uniform vec2 u_pivot;
             uniform mat3 u_viewMatrix;
             varying vec2 v_texcoord;
             void main() {
                 // Scale first, then rotate
+                vec2 local = a_position * u_size - u_pivot;
                 float cosR = cos(u_rotation);
                 float sinR = sin(u_rotation);
-                vec2 scaled = a_position * u_size;
                 vec2 rotated = vec2(
-                    scaled.x * cosR - scaled.y * sinR,
-                    scaled.x * sinR + scaled.y * cosR
+                    local.x * cosR - local.y * sinR,
+                    local.x * sinR + local.y * cosR
                 );
                 vec2 pos = rotated + u_translation;
                 vec3 localPos = vec3(pos, 1.0);
@@ -964,6 +966,7 @@ class SpriteShader {
         this.texRotationLoc = gl.getUniformLocation(this.program, "u_rotation");
         this.viewMatrixLoc = gl.getUniformLocation(this.program, "u_viewMatrix");
         this.texSizeLoc = gl.getUniformLocation(this.program, "u_size");
+        this.pivotLoc = gl.getUniformLocation(this.program, "u_pivot");
         this.texSamplerLoc = gl.getUniformLocation(this.program, "u_texture");
         this.texAlphaLoc = gl.getUniformLocation(this.program, "u_alpha");
 
@@ -1018,8 +1021,8 @@ class GradientRectShader {
             uniform vec2 u_resolution;
             uniform vec2 u_translation;
             uniform float u_rotation;
-            uniform vec2 u_size;
             uniform mat3 u_viewMatrix;
+            uniform vec2 u_size;
             varying vec2 v_localPos;
             void main() {
                 // Scale first, then rotate
