@@ -131,7 +131,7 @@ class FloppyDerp extends Game {
         this.nextTubeSpawn = 0.0;
         this.bgColorVar = 0.0;
         this.bgColorStep = 0;
-        this.bgGradient = new LinearGradient(this.renderer, 320, 0, 320, this.screenWidth, [
+        this.bgGradient = new LinearGradient(this.renderer, new Vector2(0, 1), [
             [ 0.0, Color.FromHex('#040311') ],
             [ 0.05, Color.Black() ],
             [ 1.0, this.bgColorMixed ]

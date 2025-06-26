@@ -314,25 +314,70 @@ class SpriteSection extends Sprite {
 }
 
 class LinearGradient {
-    constructor(renderer, x0, y0, x1, y1, colorStops=[]) {
+    constructor(renderer, direction, colorStops=[]) {
         this.renderer = renderer;
-        this.x0 = x0;
-        this.y0 = y0;
-        this.x1 = x1;
-        this.y1 = y1;
+        this.direction = direction.Normalize();
+        this.angle = this.direction.Angle();
         this.colorStops = [];
+
+        // for 2d ctx
+        this.gradient = null;
+
+        // for WebGL
+        this.gradientStart = Vector2.Zero();
+        this.gradientEnd = Vector2.Zero();
         this.webglTexture = null;
+
+        this.lastX = 0;
+        this.lastY = 0;
+        this.lastW = 0;
+        this.lastH = 0;
 
         colorStops.forEach(cs => this.AddColorStop(cs[0], cs[1]));
 
-        if (renderer.ctx) {
-            this.gradient = renderer.ctx.createLinearGradient(x0, y0, x1, y1);
+        if (this.renderer.ctx) {
+            this.gradient = renderer.ctx.createLinearGradient(0, 0, 0, 0);
             colorStops.forEach(cs => {
-                this.gradient.addColorStop(cs[0], cs[1]);
+                this.gradient.addColorStop(cs[0], cs[1].toString());
             });
         }
-        else if (renderer instanceof WebGLRenderer) {
+        else if (this.renderer instanceof WebGLRenderer) {
             this.webglTexture = GradientRectShader.CreateGradientTexture(renderer.gl, this.colorStops);
+        }
+    }
+
+    UpdateSize(x, y, w, h) {
+        if (this.lastX === x && this.lastY === y && this.lastW === w && this.lastH === h) {
+            return;
+        }
+
+        this.lastX = x;
+        this.lastY = y;
+        this.lastW = w;
+        this.lastH = h;
+
+        const cx = x + w / 2;
+        const cy = y + h / 2;
+        const dx = this.direction.x;
+        const dy = this.direction.y;
+
+        // Calculate the projected half-length of the rectangle's diagonal onto the gradient direction
+        const halfLength = (Math.abs(w * dx) + Math.abs(h * dy)) / 2;
+
+        const x0 = cx - halfLength * dx;
+        const y0 = cy - halfLength * dy;
+        const x1 = cx + halfLength * dx;
+        const y1 = cy + halfLength * dy;
+
+        if (this.renderer.ctx) {
+            this.gradient = this.renderer.ctx.createLinearGradient(x0, y0, x1, y1);
+            this.colorStops.forEach(cs => {
+                this.gradient.addColorStop(cs.offset, cs.color.toString());
+            });
+        }
+        else if (this.renderer instanceof WebGLRenderer) {
+            this.gradientStart.Set(x0, y0);
+            this.gradientEnd.Set(x1, y1);
         }
     }
 
@@ -343,9 +388,24 @@ class LinearGradient {
     SetColorStop(offsetId, color) {
         this.colorStops[offsetId].color = color;
         if (this.renderer.ctx) {
-            this.gradient = renderer.ctx.createLinearGradient(this.x0, this.y0, this.x1, this.y1);
+            // Recalculate gradient with the last known dimensions to update colors
+            const cx = this.lastX + this.lastW / 2;
+            const cy = this.lastY + this.lastH / 2;
+            const dx = this.direction.x;
+            const dy = this.direction.y;
+
+            // Calculate the projected half-length of the rectangle's diagonal onto the gradient direction
+            const halfLength = (Math.abs(this.lastW * dx) + Math.abs(this.lastH * dy)) / 2;
+
+            const x0 = cx - halfLength * dx;
+            const y0 = cy - halfLength * dy;
+            const x1 = cx + halfLength * dx;
+            const y1 = cy + halfLength * dy;
+
+            this.gradient = this.renderer.ctx.createLinearGradient(x0, y0, x1, y1);
+
             this.colorStops.forEach(cs => {
-                this.gradient.addColorStop(cs.offset, cs.color);
+                this.gradient.addColorStop(cs.offset, cs.color.toString());
             });
         }
         else {

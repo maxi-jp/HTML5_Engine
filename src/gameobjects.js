@@ -533,7 +533,7 @@ class BackgroundLayer {
         this.position.y = this.initialPosition.y + (this.camera.position.y * (1 - this.speed.y));
     }
 
-    Draw(ctx) {}
+    Draw(renderer) {}
 }
 
 class StaticColorLayer {
@@ -544,24 +544,21 @@ class StaticColorLayer {
 
     Update() {}
 
-    Draw(ctx) {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.camera.x, this.camera.y, canvas.width, canvas.height);
+    Draw(renderer) {
+        renderer.DrawFillBasicRectangle(this.camera.x, this.camera.y, canvas.width, canvas.height, this.color);
     }
 }
 
 class StaticGradientLayer {
-    constructor(direction, colorStops) {
-        direction.Normalize();
-        this.gradient = new LinearGradient(0, 0, direction.x * canvas.width, direction.y * canvas.height, colorStops);
+    constructor(renderer, direction, colorStops) {
+        this.gradient = new LinearGradient(renderer, direction, colorStops);
         this.camera = null;
     }
 
     Update() {}
 
-    Draw(ctx) {
-        ctx.fillStyle = this.gradient.gradient;
-        ctx.fillRect(this.camera.x, this.camera.y, canvas.width, canvas.height);
+    Draw(renderer) {
+        renderer.DrawGradientRectangle(this.camera.x, this.camera.y, canvas.width, canvas.height, this.gradient);
     }
 }
 
@@ -576,8 +573,8 @@ class SpriteBackgroundLayer extends BackgroundLayer {
             this.sprite = new SpriteSection(img, position, rotation, scale, section);
     }
 
-    Draw(ctx) {
-        this.sprite.DrawBasic(ctx);
+    Draw(renderer) {
+        this.sprite.DrawBasic(renderer);
     }
 }
 
@@ -602,9 +599,9 @@ class MultispritesBackgroundLayer extends BackgroundLayer {
         });
     }
 
-    Draw(ctx) {
+    Draw(renderer) {
         this.sprites.forEach(sprite => {
-            sprite.DrawBasic(ctx);
+            sprite.DrawBasic(renderer);
         });
     }
 }
@@ -634,11 +631,11 @@ class TilesetBackgroundLayer extends BackgroundLayer {
         this.position.y = this.initialPosition.y + (this.camera.position.y * (1 - this.speed.y));
     }
 
-    Draw(ctx) {
+    Draw(renderer) {
         this.tilesetMap.forEach(tileRow => {
             tileRow.forEach(tile => {
                 const rect = this.tilesetConfig[tile].rect;
-                this.DrawSectionBasic(ctx, rect.x, rect.y, rect.w, rect.h);
+                this.DrawSectionBasic(renderer, rect.x, rect.y, rect.w, rect.h);
             })
         });
     }
@@ -667,7 +664,7 @@ class BackgroundLayers {
         this.layers.forEach(layer => layer.Update(deltaTime));
     }
 
-    Draw(ctx) {
-        this.layers.forEach(layer => layer.Draw(ctx));
+    Draw(renderer) {
+        this.layers.forEach(layer => layer.Draw(renderer));
     }
 }

@@ -21,6 +21,12 @@ function GetRandomColor() {
 
 // #region Math helper functions
 
+function Length(x, y) {
+    const x2 = x * x;
+    const y2 = y * y;
+    return Math.sqrt(x2 + y2);
+}
+
 function SqrLength(v) {
     const x2 = v.x * v.x;
     const y2 = v.y * v.y;
@@ -420,6 +426,8 @@ class Vector2 {
             this._x = this._x / length;
             this._y = this._y / length;
         }
+
+        return this;
     }
 
     Add(otherVector) {
@@ -441,6 +449,10 @@ class Vector2 {
         this._y *= scalar;
 
         return this;
+    }
+
+    Angle() {
+        return Math.atan2(this._y, this._x);
     }
 
     AngleBetween(otherVector) {

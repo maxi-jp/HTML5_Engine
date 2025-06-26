@@ -269,6 +269,7 @@ class Canvas2DRenderer extends Renderer {
     }
 
     DrawGradientRectangle(x, y, w, h, gradient) {
+        gradient.UpdateSize(x, y, w, h);
         this.ctx.fillStyle = gradient.gradient;
         this.ctx.fillRect(x, y, w, h);
     }
@@ -739,17 +740,21 @@ class WebGLRenderer extends Renderer {
     
     DrawGradientRectangle(x, y, w, h, gradient) {
         // TODO this would be far more optimal if instead of using a texture, it'll use vertex color
-        // Only supports two color stops: top and bottom
+        gradient.UpdateSize(x, y, w, h);
+        
         const gl = this.gl;
         const shader = this.gradientRectShader;
 
         shader.Use(gl);
         
         gl.uniform2f(shader.resolutionLoc, this.canvas.width, this.canvas.height);
-        // Center the rectangle at (x + w/2, y + h/2)
         gl.uniform2f(shader.translationLoc, x + w/2, y + h/2);
         gl.uniform1f(shader.rotationLoc, 0);
         gl.uniform2f(shader.sizeLoc, w, h);
+
+        // Pass gradient start and end points
+        gl.uniform2f(shader.gradientStartLoc, gradient.gradientStart.x, gradient.gradientStart.y);
+        gl.uniform2f(shader.gradientEndLoc, gradient.gradientEnd.x, gradient.gradientEnd.y);
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, gradient.webglTexture);
@@ -1059,12 +1064,16 @@ class GradientRectShader {
             uniform float u_rotation;
             uniform mat3 u_viewMatrix;
             uniform vec2 u_size;
-            varying vec2 v_localPos;
+            uniform vec2 u_gradientStart; // Original world-space gradient start
+            uniform vec2 u_gradientEnd;   // Original world-space gradient end
+            varying vec2 v_worldPos;
+            varying vec2 v_gradientStartTransformed; // Transformed gradient start (camera space)
+            varying vec2 v_gradientEndTransformed;   // Transformed gradient end (camera space)
             void main() {
                 // Scale first, then rotate
+                vec2 scaled = a_position * u_size;
                 float cosR = cos(u_rotation);
                 float sinR = sin(u_rotation);
-                vec2 scaled = a_position * u_size;
                 vec2 rotated = vec2(
                     scaled.x * cosR - scaled.y * sinR,
                     scaled.x * sinR + scaled.y * cosR
@@ -1079,17 +1088,32 @@ class GradientRectShader {
                 gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
 
                 // Pass local quad position (0..1) to fragment
-                v_localPos = a_position * 0.5 + 0.5;
+                v_worldPos = worldPos.xy;
+                // Transform gradient start/end points by the view matrix
+                v_gradientStartTransformed = (u_viewMatrix * vec3(u_gradientStart, 1.0)).xy;
+                v_gradientEndTransformed = (u_viewMatrix * vec3(u_gradientEnd, 1.0)).xy;
             }
         `;
 
         // Fragment shader: linear gradient following a 1D texture
         this.fsSource = `
             precision mediump float;
-            varying vec2 v_localPos;
+            varying vec2 v_worldPos;
             uniform sampler2D u_gradient;
+            varying vec2 v_gradientStartTransformed; // Transformed gradient start (camera space)
+            varying vec2 v_gradientEndTransformed;   // Transformed gradient end (camera space)
             void main() {
-                gl_FragColor = texture2D(u_gradient, vec2(v_localPos.y, 0.0));
+                // All calculations are now in camera space
+                vec2 gradientVec = v_gradientEndTransformed - v_gradientStartTransformed;
+                float gradientLenSq = dot(gradientVec, gradientVec);
+                if (gradientLenSq == 0.0) {
+                    gl_FragColor = texture2D(u_gradient, vec2(0.0, 0.5));
+                    return;
+                }
+                vec2 pointVec = v_worldPos - v_gradientStartTransformed;
+                float projection = dot(pointVec, gradientVec);
+                float t = clamp(projection / gradientLenSq, 0.0, 1.0);
+                gl_FragColor = texture2D(u_gradient, vec2(t, 0.5));
             }
         `;
 
@@ -1103,8 +1127,9 @@ class GradientRectShader {
         this.rotationLoc = gl.getUniformLocation(this.program, "u_rotation");
         this.viewMatrixLoc = gl.getUniformLocation(this.program, "u_viewMatrix");
         this.sizeLoc = gl.getUniformLocation(this.program, "u_size");
-        this.colorALoc = gl.getUniformLocation(this.program, "u_colorA");
-        this.colorBLoc = gl.getUniformLocation(this.program, "u_colorB");
+        this.gradientLoc = gl.getUniformLocation(this.program, "u_gradient");
+        this.gradientStartLoc = gl.getUniformLocation(this.program, "u_gradientStart");
+        this.gradientEndLoc = gl.getUniformLocation(this.program, "u_gradientEnd");
 
         // Create a buffer for a unit rectangle centered at (0,0)
         this.buffer = gl.createBuffer();

@@ -1,6 +1,6 @@
 class Parallax extends Game {
-    constructor() {
-        super();
+    constructor(renderer) {
+        super(renderer);
 
         this.config = { imageSmoothingEnabled: false };
 
@@ -37,9 +37,9 @@ class Parallax extends Game {
 
         // create the parallax background -----------------------------------------------------
         // layer 0: static black
-        const bgLayer0 = new StaticColorLayer('black');
-        // layer 1: a "night sky" gradient (transparent to dark blue)
-        const bgLayer1 = new StaticGradientLayer(new Vector2(0.2, 1), [[0, "transparent"], [1, "#365B93"]]);
+        const bgLayer0 = new StaticColorLayer(Color.black);
+        // layer 1: a "night sky" gradient (transparent to dark blue "#365B93")  (0.2, 1)
+        const bgLayer1 = new StaticGradientLayer(this.renderer, new Vector2(this.screenWidth, this.screenHeight), [[0, Color.white], [1, Color.black]]);
         // layer 2: mountains in a full-size-sprite
         const bgLayerMountain = new SpriteBackgroundLayer(this.graphicAssets.mountain.img, new Vector2(-100, canvas.height - this.graphicAssets.mountain.img.height - 30), 0, 1, new Vector2(0.05, 0.01));
         // layer 3: a set of individual sprite trees
@@ -51,12 +51,13 @@ class Parallax extends Game {
                 new SpriteSection(this.graphicAssets.trees.img, new Vector2(600, 0), 0, 1, new Rect(386, 0, 142, 240)), // tree 3
                 new SpriteSection(this.graphicAssets.trees.img, new Vector2(900, 0), 0, 1, new Rect(528, 0, 216, 240)) // tree 4
             ],
-            new Vector2(0.8, 0.8));
+            new Vector2(0.8, 0.8)
+        );
         // layer 4: a set of tiles
         // TODO 
         // const bgLayerTiles = new TilesetBackgroundLayer();
         // finally componse all the layers in the background
-        this.background = new BackgroundLayers(this.camera, [bgLayer0, bgLayer1, bgLayerMountain, bgLayerTrees]);
+        this.background = new BackgroundLayers(this.camera, [bgLayer0, bgLayer1]);//, bgLayerMountain, bgLayerTrees]);
         this.background.Start();
     }
 
@@ -80,19 +81,21 @@ class Parallax extends Game {
         this.background.Update(deltaTime);
     }
 
-    Draw(ctx) {
-        this.camera.PreDraw(ctx);
+    Draw() {
+        this.camera.PreDraw(this.renderer);
 
         // draw the background
-        this.background.Draw(ctx);
+        this.background.Draw(this.renderer);
 
         // draw the gameObjects
-        super.Draw(ctx);
+        super.Draw();
 
-        this.camera.PostDraw(ctx);
+        this.camera.PostDraw(this.renderer);
+
+        // var grad = this.renderer.ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        // grad.addColorStop(0, "white");
+        // grad.addColorStop(1, "black");
+        // this.renderer.ctx.fillStyle = grad;
+        // this.renderer.ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 }
-
-// initialize the game
-if (game === null)
-    game = new Parallax();

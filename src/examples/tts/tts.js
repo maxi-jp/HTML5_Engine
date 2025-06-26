@@ -41,7 +41,7 @@ class TTS extends Game {
         super.Start();
 
         // configure background gradient
-        this.bgGrad = new LinearGradient(this.renderer, 0, 0, 0, canvas.height, [
+        this.bgGrad = new LinearGradient(this.renderer, new Vector2(0, 1), [
             [0, "#191200"],
             [0.1, "#000000"],
             [0.35, "#07073e"],
