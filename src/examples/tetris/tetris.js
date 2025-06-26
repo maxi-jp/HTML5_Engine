@@ -223,8 +223,8 @@ class Tetris extends Game {
         for (let y = 0; y < this.grid.length; y++) {
             for (let x = 0; x < this.grid[y].length; x++) {
                 if (this.grid[y][x] !== 0) {
-                    this.renderer.DrawFillRectangle(this.gridPosition.x + x * this.squareSize, this.gridPosition.y + y * this.squareSize, this.squareSize, this.squareSize, Color.grey);
-                    this.renderer.DrawStrokeRectangle(this.gridPosition.x + x * this.squareSize, this.gridPosition.y + y * this.squareSize, this.squareSize, this.squareSize, Color.black, 1);
+                    this.renderer.DrawFillBasicRectangle(this.gridPosition.x + x * this.squareSize, this.gridPosition.y + y * this.squareSize, this.squareSize, this.squareSize, Color.grey);
+                    this.renderer.DrawStrokeBasicRectangle(this.gridPosition.x + x * this.squareSize, this.gridPosition.y + y * this.squareSize, this.squareSize, this.squareSize, Color.black, 1);
                 }
             }
         }
@@ -236,16 +236,16 @@ class Tetris extends Game {
         this.DrawPiece(renderer, this.currentPiece, this.gridPosition.x + this.currentPiece.position.x * this.squareSize, this.gridPosition.y + this.currentPiece.position.y * this.squareSize);
         
         // Border of the grid
-        this.renderer.DrawStrokeRectangle(this.gridPosition.x, this.gridPosition.y, this.gridSize.cols * this.squareSize, this.gridSize.rows * this.squareSize, Color.black, 2);
+        this.renderer.DrawStrokeBasicRectangle(this.gridPosition.x, this.gridPosition.y, this.gridSize.cols * this.squareSize, this.gridSize.rows * this.squareSize, Color.black, 2);
         
         // Draw the next pieces
-        this.renderer.DrawStrokeRectangle(this.gridPosition.x + this.gridSize.cols * this.squareSize + 20, this.gridPosition.y, 6 * this.squareSize, 4 * this.squareSize, Color.black, 2);
+        this.renderer.DrawStrokeBasicRectangle(this.gridPosition.x + this.gridSize.cols * this.squareSize + 20, this.gridPosition.y, 6 * this.squareSize, 4 * this.squareSize, Color.black, 2);
         for (let i = 0; i < this.nextPieces.length; i++) {
             this.DrawPiece(renderer, this.nextPieces[i], this.gridPosition.x + (this.gridSize.cols + 1) * this.squareSize + 20, this.gridPosition.y + 20 + (i * 4 * this.squareSize));
         }
 
         // Draw the saved piece
-        this.renderer.DrawStrokeRectangle( this.gridPosition.x - 6 * this.squareSize - 20, this.gridPosition.y, 6 * this.squareSize, 4 * this.squareSize, Color.black, 2);
+        this.renderer.DrawStrokeBasicRectangle( this.gridPosition.x - 6 * this.squareSize - 20, this.gridPosition.y, 6 * this.squareSize, 4 * this.squareSize, Color.black, 2);
         if (this.savedPiece !== null) {
             this.DrawPiece(renderer, this.savedPiece, this.gridPosition.x - 6 * this.squareSize - 20, this.gridPosition.y + 20);
         }
@@ -490,7 +490,7 @@ class Tetris extends Game {
 
     DrawPiece(renderer, piece, x, y) {
         // Debug bounding box
-        renderer.DrawStrokeRectangle(x, y, this.squareSize * 4, this.squareSize * 4, Color.grey, 1);
+        renderer.DrawStrokeBasicRectangle(x, y, this.squareSize * 4, this.squareSize * 4, Color.grey, 1);
 
         for (let j = 0; j < piece.shape.length; j++) {
             for (let i = 0; i < piece.shape[j].length; i++) {
@@ -498,8 +498,8 @@ class Tetris extends Game {
                     const coordX = x + i * this.squareSize;
                     const coordY = y + j * this.squareSize;
 
-                    renderer.DrawFillRectangle(coordX, coordY, this.squareSize, this.squareSize, piece.color);
-                    renderer.DrawStrokeRectangle(coordX, coordY, this.squareSize, this.squareSize, Color.black, 1);
+                    renderer.DrawFillBasicRectangle(coordX, coordY, this.squareSize, this.squareSize, piece.color);
+                    renderer.DrawStrokeBasicRectangle(coordX, coordY, this.squareSize, this.squareSize, Color.black, 1);
                 }
             }
         }

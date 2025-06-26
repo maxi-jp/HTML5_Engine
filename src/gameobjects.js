@@ -82,6 +82,20 @@ class RectangleGO extends GameObject {
         this.rectangle = new Rectangle(this._position, width, height, color, stroke, lineWidth);
     }
 
+    get width() {
+        return this.rectangle.width;
+    }
+    get height() {
+        return this.rectangle.height;
+    }
+
+    set width(value) {
+        this.rectangle.width = value;
+    }
+    set height(value) {
+        this.rectangle.height = value;
+    }
+
     Draw(renderer) {
         renderer.DrawRectangle(this.position.x, this.position.y, this.rectangle.width, this.rectangle.height, this.rectangle.color, this.rectangle.stroke, this.rectangle.lineWidth, this.rotation, this.pivot);
     }
@@ -258,12 +272,11 @@ class SSAnimationObjectComplex extends SpriteObject {
         );
     }
 
-    Draw(ctx) {
-        this.sprite.DrawSection(ctx, this.actualRectFrame.x, this.actualRectFrame.y, this.actualRectFrame.w, this.actualRectFrame.h, 0, 0, this.actualRectFrame.w, this.actualRectFrame.h);
+    Draw(renderer) {
+        this.sprite.DrawSection(renderer, this.actualRectFrame.x, this.actualRectFrame.y, this.actualRectFrame.w, this.actualRectFrame.h, 0, 0, this.actualRectFrame.w, this.actualRectFrame.h);
 
         if (debugMode) {
-            ctx.strokeStyle = "red";
-            ctx.strokeRect(this.spritePosition.x, this.spritePosition.y, this.actualRectFrame.w * this.scale.x, this.actualRectFrame.h * this.scale.y);
+            renderer.DrawStrokeBasicRectangle(this.spritePosition.x, this.spritePosition.y, this.actualRectFrame.w * this.scale.x, this.actualRectFrame.h * this.scale.y);
         }
     }
 

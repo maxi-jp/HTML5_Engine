@@ -186,20 +186,20 @@ class ColumnsGame extends Game {
     Draw() {
         super.Draw();
         // Draw background
-        this.renderer.DrawFillRectangle(this.gridOffset.x, this.gridOffset.y, this.gridCols * this.cellSize, this.gridRows * this.cellSize, Color.lightGrey);
+        this.renderer.DrawFillBasicRectangle(this.gridOffset.x, this.gridOffset.y, this.gridCols * this.cellSize, this.gridRows * this.cellSize, Color.lightGrey);
 
         // Draw grid
         for (let y = 0; y < this.gridRows; y++) {
             for (let x = 0; x < this.gridCols; x++) {
                 if (this.grid[y][x]) {
-                    this.renderer.DrawFillRectangle(
+                    this.renderer.DrawFillBasicRectangle(
                         this.gridOffset.x + x * this.cellSize + 2,
                         this.gridOffset.y + y * this.cellSize + 2,
                         this.cellSize - 4, this.cellSize - 4,
                         this.grid[y][x]
                     );
                 }
-                this.renderer.DrawStrokeRectangle(
+                this.renderer.DrawStrokeBasicRectangle(
                     this.gridOffset.x + x * this.cellSize,
                     this.gridOffset.y + y * this.cellSize,
                     this.cellSize, this.cellSize,
@@ -214,7 +214,7 @@ class ColumnsGame extends Game {
                 let bx = this.falling.pos.x;
                 let by = this.falling.pos.y - i;
                 if (by >= 0 && by < this.gridRows) {
-                    this.renderer.DrawFillRectangle(
+                    this.renderer.DrawFillBasicRectangle(
                         this.gridOffset.x + bx * this.cellSize + 2,
                         this.gridOffset.y + by * this.cellSize + 2,
                         this.cellSize - 4, this.cellSize - 4,
@@ -225,7 +225,7 @@ class ColumnsGame extends Game {
         }
 
         // Draw border
-        this.renderer.DrawStrokeRectangle(this.gridOffset.x, this.gridOffset.y, this.gridCols * this.cellSize, this.gridRows * this.cellSize, Color.white, 2);
+        this.renderer.DrawStrokeBasicRectangle(this.gridOffset.x, this.gridOffset.y, this.gridCols * this.cellSize, this.gridRows * this.cellSize, Color.white, 2);
 
         // Draw score
         this.scoreLabel.Draw(renderer);

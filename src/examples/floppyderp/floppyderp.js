@@ -75,12 +75,12 @@ class FloppyDerp extends Game {
         this.timeSinceLastJump = 0; // elapsed time since the last jump
         this.jumpsCount = 0;
 
-        this.tubeGap = 100;     // pixeles del hueco entre tubos
+        this.tubeGap = 120;     // pixeles del hueco entre tubos
         this.tubeGapYMin = 100; // posición inferior mínima del hueco entre tubos
         this.tubeGapYMax = this.screenHeight - this.tubeGapYMin; // posición superior máxima del hueco
         this.tubeGapDif = this.tubeGapYMax - this.tubeGapYMin; // margen en el que puede situarse el próximo hueco
 
-        this.tubeSpawnMin = 0.5; // min time (in seconds) to spawn a new pair of tubes
+        this.tubeSpawnMin = 0.75; // min time (in seconds) to spawn a new pair of tubes
         this.tubeSpawnMax = 1.25; // max time (in seconds) to spawn a new pair of tubes
         this.tubeSpawnDif = this.tubeSpawnMax - this.tubeSpawnMin;
         this.nextTubeSpawn = 0.0; // next time a new pair of tubes will spawn

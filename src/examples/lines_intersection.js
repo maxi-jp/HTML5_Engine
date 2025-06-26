@@ -130,7 +130,7 @@ class LineIntersection extends Game {
     }
 
     Draw() {
-        this.renderer.DrawFillRectangle(0, 0, this.screenWidth, this.screenHeight, Color.black);
+        this.renderer.DrawFillBasicRectangle(0, 0, this.screenWidth, this.screenHeight, Color.black);
         const ctx = this.renderer.ctx;
 
         // lines of the walls

@@ -379,10 +379,11 @@ class Rectangle {
         this.color = color;
         this.stroke = stroke;
         this.lineWidth = lineWidth;
+        this.pivot = { x: -width/2, y: -height/2 };
     }
 
     Draw(renderer) {
-        renderer.DrawRectangle(this.position.x, this.position.y, this.width, this.height, this.color, this.stroke, this.lineWidth);
+        renderer.DrawRectangle(this.position.x, this.position.y, this.width, this.height, this.color, this.stroke, this.lineWidth, 0, this.pivot);
     }
 }
 

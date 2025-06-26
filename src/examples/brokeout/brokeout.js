@@ -74,7 +74,7 @@ class BrokeOut extends Game {
 
     Draw() {
         // black background
-        this.renderer.DrawFillRectangle(0, 0, this.screenWidth, this.screenHeight, Color.black)
+        this.renderer.DrawFillRectangle(this.screenHalfWidth, this.screenHalfHeight, this.screenWidth, this.screenHeight, Color.black)
 
         // draw the game objects
         super.Draw();
@@ -253,13 +253,14 @@ class Ball extends GameObject {
     }
 }
 
-class Paddle extends GameObject {
+class Paddle extends RectangleGO {
     constructor(position, width, height, speed) {
-        super(position);
+        super(position, width, height, Color.red);
+
+        // set the pivot point in the top-left corner
+        this.pivot = { x: -width/2, y: -height/2 };
 
         this.initialPosition = Vector2.Copy(position);
-
-        this.rectangle = new Rectangle(this.position, width, height, Color.red);
 
         this.speed = speed;
         this.movement = 0;
@@ -285,32 +286,23 @@ class Paddle extends GameObject {
         // check left-right limits
         if (this.position.x < 0)
             this.position.x = 0;
-        else if (this.position.x + this.rectangle.width > game.screenWidth)
-            this.position.x = game.screenWidth - this.rectangle.width;
-    }
-
-    Draw(renderer) {
-        this.rectangle.Draw(renderer);
+        else if (this.position.x + this.width > game.screenWidth)
+            this.position.x = game.screenWidth - this.width;
     }
 }
 
-class Brick extends GameObject {
+class Brick extends RectangleGO {
     constructor(position, width, height, color, strengh=1) {
-        super(position);
+        super(position, width, height, color);
+        
+        // set the pivot point in the top-left corner
+        this.pivot = { x: -width/2, y: -height/2 };
 
         this.strengh = strengh;
         this.score = strengh;
-
-        this.rectangle = new Rectangle(this.position, width, height, color);
     }
-
-    Start() {}
 
     Update(deltaTime) {}
-
-    Draw(renderer) {
-        this.rectangle.Draw(renderer);
-    }
 
     Hit(hitPower = 1) {
         this.strengh -= hitPower;

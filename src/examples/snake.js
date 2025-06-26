@@ -108,11 +108,11 @@ class SnakeGame extends Game {
         super.Draw();
 
         // Draw background
-        this.renderer.DrawFillRectangle(this.gridOffset.x, this.gridOffset.y, this.gridSize.cols * this.cellSize, this.gridSize.rows * this.cellSize, Color.lightGrey);
+        this.renderer.DrawFillBasicRectangle(this.gridOffset.x, this.gridOffset.y, this.gridSize.cols * this.cellSize, this.gridSize.rows * this.cellSize, Color.lightGrey);
 
         // Draw snake
         for (let i = 0; i < this.snake.length; i++) {
-            this.renderer.DrawFillRectangle(
+            this.renderer.DrawFillBasicRectangle(
                 this.gridOffset.x + this.snake[i].x * this.cellSize,
                 this.gridOffset.y + this.snake[i].y * this.cellSize,
                 this.cellSize - 2, this.cellSize - 2,
@@ -121,7 +121,7 @@ class SnakeGame extends Game {
         }
 
         // Draw food
-        this.renderer.DrawFillRectangle(
+        this.renderer.DrawFillBasicRectangle(
             this.gridOffset.x + this.food.x * this.cellSize,
             this.gridOffset.y + this.food.y * this.cellSize,
             this.cellSize - 2, this.cellSize - 2,
@@ -129,7 +129,7 @@ class SnakeGame extends Game {
         );
 
         // Draw border
-        this.renderer.DrawStrokeRectangle(this.gridOffset.x, this.gridOffset.y, this.gridSize.cols * this.cellSize, this.gridSize.rows * this.cellSize, Color.black, 2);
+        this.renderer.DrawStrokeBasicRectangle(this.gridOffset.x, this.gridOffset.y, this.gridSize.cols * this.cellSize, this.gridSize.rows * this.cellSize, Color.black, 2);
 
         // Draw score
         this.scoreLabel.Draw(renderer);

@@ -162,12 +162,12 @@ class AudioTest extends Game {
         }
         else if (!audioPlayer.IsPlaying(this.currentAudio) && this.audioAssets[this.currentAudio]?.audio.currentTime > 0) {
             // Draw two vertical lines if paused
-            this.renderer.DrawFillRectangle(Input.mouse.x - 8, Input.mouse.y - 10, 4, 20, Color.orange);
-            this.renderer.DrawFillRectangle(Input.mouse.x + 4, Input.mouse.y - 10, 4, 20, Color.orange);
+            this.renderer.DrawFillRectangle(Input.mouse.x - 6, Input.mouse.y, 4, 20, Color.orange);
+            this.renderer.DrawFillRectangle(Input.mouse.x + 6, Input.mouse.y, 4, 20, Color.orange);
         }
         else {
             // Draw a square when stopped
-            this.renderer.DrawFillRectangle(Input.mouse.x - 10, Input.mouse.y - 10, 20, 20, Color.red);
+            this.renderer.DrawFillRectangle(Input.mouse.x, Input.mouse.y, 20, 20, Color.red);
         }
         
         //this.renderer.DrawCircle(Input.mouse.x, Input.mouse.y, 12, Color.red);

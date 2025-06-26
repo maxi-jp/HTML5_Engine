@@ -328,7 +328,7 @@ class PacMon extends Game {
     }
 
     Draw() {
-        this.renderer.DrawFillRectangle(0, 0, 800, 600, Color.black);
+        this.renderer.DrawFillBasicRectangle(0, 0, 800, 600, Color.black);
 
         //this.dummyBackground.DrawSection(ctx, 0, 0, 224, 248);
         this.background.DrawSection(this.renderer, 228, 0, 224, 248);

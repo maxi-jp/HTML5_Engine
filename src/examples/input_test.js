@@ -11,19 +11,20 @@ class InputAsset {
         this.keyUpCount = 0;
         this.pressed = false;
         this.value = value;
+
+        this.pivot = { x: -width / 2, y: -height / 2 };
     }
 
     DawAsRectangle(renderer) {
         // rectangles fill
-        renderer.DrawFillRectangle(this.position.x, this.position.y, this.width, this.height, this.color);
+        renderer.DrawFillRectangle(this.position.x, this.position.y, this.width, this.height, this.color, 0, this.pivot);
 
-        // rectangles stroke line
-        renderer.DrawStrokeRectangle(this.position.x, this.position.y, this.width, this.height);
+        // rectangles stroke line   (x, y, w, h, color=Color.black, lineWidth=1, rot=0, pivot=coord)
+        renderer.DrawStrokeRectangle(this.position.x, this.position.y, this.width, this.height, Color.black, 1, 0, this.pivot);
 
         // rectangles text
         renderer.DrawFillText(this.key, this.position.x + this.width / 2, this.position.y + this.height - 12, "bold 32px Arial", Color.black, "center");
 
-        
         renderer.DrawFillText("↓" + this.keyDownCount, this.position.x + 1, this.position.y + 12, "normal 12px Arial", Color.black, "left");
         renderer.DrawFillText("↑" + this.keyUpCount, this.position.x + this.width - 2, this.position.y + 12, "normal 12px Arial", Color.black, "right");
     }

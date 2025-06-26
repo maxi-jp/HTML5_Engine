@@ -66,7 +66,7 @@ class BasicGame extends Game {
         this.animationObjectBasic2.PlayAnimationLoop(1);
 
         // big black background rectangle
-        this.blackRect = new Rectangle(new Vector2(this.screenHalfWidth, this.screenHeight * 3 / 4), this.screenWidth, this.screenHalfHeight);
+        this.blackRect = new Rectangle(new Vector2(0, this.screenHalfHeight), this.screenWidth, this.screenHalfHeight);
         
         // blue fill circle
         this.blueCircle = new Circle(new Vector2(400, 100), 40, Color.blue);

@@ -35,6 +35,9 @@ class Renderer {
     DrawRectangle(x, y, w, h, color=Color.black, stroke=false, lineWidth=1, rot=0, pivot=coord) {}
     DrawStrokeRectangle(x, y, w, h, color=Color.black, lineWidth=1, rot=0, pivot=coord) {}
     DrawFillRectangle(x, y, w, h, color=Color.black, rot=0, pivot=coord) {}
+    DrawBasicRectangle(x, y, w, h, color=Color.black, stroke=false, lineWidth=1) {}
+    DrawStrokeBasicRectangle(x, y, w, h, color=Color.black, lineWidth=1) {}
+    DrawFillBasicRectangle(x, y, w, h, color=Color.black) {}
     DrawCircle(x, y, radius, color=Color.black, stroke=false, lineWidth=1) {}
     DrawFillCircle(x, y, radius, color=Color.black) {}
     DrawStrokeCircle(x, y, radius, color=Color.black, lineWidth=1) {}
@@ -145,6 +148,25 @@ class Canvas2DRenderer extends Renderer {
         }
     }
 
+    DrawBasicRectangle(x, y, w, h, color=Color.black, stroke=false, lineWidth=1) {
+        if (stroke) {
+            this.DrawStrokeBasicRectangle(x, y, w, h, color, lineWidth);
+        }
+        else {
+            this.DrawFillBasicRectangle(x, y, w, h, color);
+        }
+    }
+
+    DrawStrokeBasicRectangle(x, y, w, h, color=Color.black, lineWidth=1) {
+        this.ctx.strokeStyle = color;
+        this.ctx.lineWidth = lineWidth;
+        this.ctx.strokeRect(x, y, w, h);
+    }
+
+    DrawFillBasicRectangle(x, y, w, h, color=Color.black) {
+        this.ctx.fillStyle = color;
+        this.ctx.fillRect(x, y, w, h);
+    }
     
     DrawCircle(x, y, radius, color=Color.black, stroke=false, lineWidth=1) {
         if (stroke) {
@@ -516,6 +538,42 @@ class WebGLRenderer extends Renderer {
 
         // Set uniforms
         this.basicRectShader.SetUniforms(gl, this.canvas.width, this.canvas.height, x, y, rot, w, h, pivot.x, pivot.y, color.rgba);
+
+        // Draw
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+
+    DrawBasicRectangle(x, y, w, h, color=Color.black, stroke=false, lineWidth=1) {
+        if (stroke) {
+            this.DrawStrokeBasicRectangle(x, y, w, h, color, lineWidth);
+        }
+        else {
+            this.DrawFillBasicRectangle(x, y, w, h, color);
+        }
+    }
+
+    DrawStrokeBasicRectangle(x, y, w, h, color=Color.black, lineWidth=1) {
+        const gl = this.gl;
+
+        this.basicRectShader.UseForCustomBuffer(gl, this.basicRectShader.outlineBuffer);
+
+        // Set uniforms
+        this.basicRectShader.SetUniforms(gl, this.canvas.width, this.canvas.height, x, y, 0, w, h, -w/2, -h/2, color.rgba);
+
+        // Set line width (may be ignored on some platforms)
+        gl.lineWidth(lineWidth);
+
+        // Draw the outline (5 points, LINE_STRIP)
+        gl.drawArrays(gl.LINE_STRIP, 0, 5);
+    }
+
+    DrawFillBasicRectangle(x, y, w, h, color=Color.black) {
+        const gl = this.gl;
+
+        this.basicRectShader.Use(gl);
+
+        // Set uniforms
+        this.basicRectShader.SetUniforms(gl, this.canvas.width, this.canvas.height, x, y, 0, w, h, -w/2, -h/2, color.rgba);
 
         // Draw
         gl.drawArrays(gl.TRIANGLES, 0, 6);
