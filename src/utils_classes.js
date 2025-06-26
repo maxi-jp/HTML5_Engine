@@ -634,7 +634,7 @@ class RectangleCollider extends Collider {
     Draw(renderer) {
         renderer.DrawFillCircle(this.position.x, this.position.y, this.boundingRadius, Collider.bRAdColor);
         
-        renderer.DrawFillRectangle(this.rect.x, this.rect.y, this.rect.w, this.rect.h, this.color);
+        renderer.DrawFillRectangle(this.rect.x + this.rect.halfWidth, this.rect.y + this.rect.halfHeight, this.rect.w, this.rect.h, this.color);
     }
 
     IsPointInside(x, y) {
@@ -684,8 +684,6 @@ class PolygonCollider extends Collider {
     
     UpdateFromGO() {
         this.UpdatePositionAndRotation(this._go.position, this._go.rotation);
-    
-        //this.position.Set(this._go.position.x + this.positionOffset.x, this._go.position.y + this.positionOffset.y);
     }
 
     UpdatePosition(newPosition) {
@@ -726,118 +724,6 @@ class PolygonCollider extends Collider {
             return CheckPointInsidePolygon(x, y, this.transformedPoints);
         else
             return false;
-    }
-}
-
-// #endregion
-
-// #region HelperCTXFunctions
-// TODO delete these functions (already impelemnted on the renderer)
-
-function DrawRectangle(ctx, x, y, width, height, color, stroke=false, lineWidth=1) {
-    // TODO moved to the renderer: delete it
-    if (stroke) {
-        DrawStrokeRectangle(ctx, x, y, width, height, color, lineWidth);
-    }
-    else {
-        DrawFillRectangle(ctx, x, y, width, height, color);
-    }
-}
-
-function DrawFillRectangle(ctx, x, y, width, height, color) {
-    // TODO moved to the renderer: delete it
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, width, height);
-}
-
-function DrawStrokeRectangle(ctx, x, y, width, height, color, lineWidth=1) {
-    // TODO moved to the renderer: delete it
-    ctx.strokeStyle = color;
-    ctx.lineWidth = lineWidth;
-    ctx.strokeRect(x, y, width, height);
-}
-
-function DrawText(ctx, text, x, y, font, color="black", align="center", baseline="alphabetic", stroke=false) {
-    // TODO delete it, already done in the renderer
-    if (stroke) {
-        DrawStrokeText(ctx, text, x, y, font, color, align, baseline);
-    }
-    else {
-        DrawFillText(ctx, text, x, y, font, color, align, baseline);
-    }
-}
-
-function DrawFillText(ctx, text, x, y, font, color="black", align="center", baseline="alphabetic") {
-    // TODO delete it, already done in the renderer
-    ctx.font = font;
-    ctx.textAlign = align;
-    ctx.textBaseline = baseline;
-    ctx.fillStyle = color;
-    ctx.fillText(text, x, y);
-}
-
-function DrawStrokeText(ctx, text, x, y, font, color="black", align="center", baseline="alphabetic") {
-    // TODO delete it, already done in the renderer
-    ctx.font = font;
-    ctx.textAlign = align;
-    ctx.textBaseline = baseline;
-    ctx.strokeStyle = color;
-    ctx.strokeText(text, x, y);
-}
-
-function DrawSegment(ctx, x1, y1, x2, y2, color, lineWidth=1) {
-    // TODO delete it, already done in the renderer
-    ctx.strokeStyle = color;
-    ctx.lineWidth = lineWidth;
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-}
-
-function DrawPolygon(ctx, coordinates, strokeColor="black", lineWidth=1, fill=false, fillColor="black") {
-    // TODO delete it, already done in the renderer
-    ctx.strokeStyle = strokeColor;
-    ctx.lineWidth = lineWidth;
-    ctx.beginPath();
-    ctx.moveTo(coordinates[0].x, coordinates[0].y);
-    for (let i = 1; i < coordinates.length; i++) {
-        ctx.lineTo(coordinates[i].x, coordinates[i].y);
-    }
-    ctx.closePath();
-    if (fill) {
-        ctx.fillStyle = fillColor;
-        ctx.fill();
-    }
-    ctx.stroke();
-}
-
-function DrawFillCircle(ctx, x, y, radius, color) {
-    // TODO delete it, already done in the renderer
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, PI2, false);
-    ctx.fill();
-    ctx.closePath();
-}
-
-function DrawStrokeCircle(ctx, x, y, radius, color, lineWidth=1) {
-    // TODO delete it, already done in the renderer
-    ctx.strokeStyle = color;
-    ctx.lineWidth = lineWidth;
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, PI2, false);
-    ctx.stroke();
-    ctx.closePath();
-}
-
-function DrawCircle(ctx, x, y, radius, color, stroke=false, lineWidth=1) {
-    // TODO delete it, already done in the renderer
-    if (stroke) {
-        DrawStrokeCircle(ctx, x, y, radius, color, lineWidth);
-    }
-    else {
-        DrawFillCircle(ctx, x, y, radius, color);
     }
 }
 

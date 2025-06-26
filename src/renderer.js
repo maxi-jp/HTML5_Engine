@@ -282,7 +282,17 @@ class WebGLRenderer extends Renderer {
             { x:  1, y: -1},
             { x:  1, y:  1},
             { x: -1, y:  1}
-        ]
+        ];
+
+        // auxiliar texcoord buffer for drawin a texture section (two triangles) (used in DrawImageSection)
+        this.auxTexcoords = new Float32Array([
+            0.0, 0,0,
+            0.0, 0,0,
+            0.0, 0,0,
+            0.0, 0,0,
+            0.0, 0,0,
+            0.0, 0,0,
+        ]);
 
         // auxiliar structure for circle vertices
         this.circleNumSegments = 64;
@@ -419,10 +429,7 @@ class WebGLRenderer extends Renderer {
         const gl = this.gl;
 
         // buffer for the two points
-        this.lineVertices[0] = x1;
-        this.lineVertices[1] = y1;
-        this.lineVertices[2] = x2;
-        this.lineVertices[3] = y2;
+        this.lineVertices.set([x1, y1, x2, y2]);
 
         const buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -431,13 +438,7 @@ class WebGLRenderer extends Renderer {
         this.basicRectShader.UseForCustomBuffer(gl, buffer);
 
         // Set uniforms (no rotation/scale, just pass through)
-        gl.uniform2f(this.basicRectShader.resolutionLoc, this.canvas.width, this.canvas.height);
-        gl.uniform2f(this.basicRectShader.translationLoc, 0, 0);
-        gl.uniform1f(this.basicRectShader.rotationLoc, 0);
-        gl.uniform2f(this.basicRectShader.sizeLoc, 1, 1);
-
-        // Color
-        gl.uniform4fv(this.basicRectShader.colorLoc, color.rgba);
+        this.basicRectShader.SetUniforms(gl, this.canvas.width, this.canvas.height, 0, 0, 0, 1, 1, 0, 0, color.rgba);
 
         // Set line width (ignored on some platforms)
         gl.lineWidth(lineWidth);
@@ -467,11 +468,7 @@ class WebGLRenderer extends Renderer {
 
         this.basicRectShader.UseForCustomBuffer(gl, buffer);
 
-        gl.uniform2f(this.basicRectShader.resolutionLoc, this.canvas.width, this.canvas.height);
-        gl.uniform2f(this.basicRectShader.translationLoc, 0, 0);
-        gl.uniform1f(this.basicRectShader.rotationLoc, 0);
-        gl.uniform2f(this.basicRectShader.sizeLoc, 1, 1);
-        gl.uniform2f(this.basicRectShader.pivotLoc, 0, 0);
+        this.basicRectShader.SetUniforms(gl, this.canvas.width, this.canvas.height, 0, 0, 0, 1, 1, 0, 0, strokeColor.rgba);
 
         // Fill polygon if requested
         if (fill && points.length >= 3) {
@@ -499,15 +496,11 @@ class WebGLRenderer extends Renderer {
 
     DrawStrokeRectangle(x, y, w, h, color, lineWidth=1, rot=0, pivot=coord) {
         const gl = this.gl;
+
         this.basicRectShader.UseForCustomBuffer(gl, this.basicRectShader.outlineBuffer);
 
         // Set uniforms
-        gl.uniform2f(this.basicRectShader.resolutionLoc, this.canvas.width, this.canvas.height);
-        gl.uniform2f(this.basicRectShader.translationLoc, x, y);
-        gl.uniform1f(this.basicRectShader.rotationLoc, rot);
-        gl.uniform2f(this.basicRectShader.sizeLoc, w, h);
-        gl.uniform2f(this.basicRectShader.pivotLoc, pivot.x, pivot.y);
-        gl.uniform4fv(this.basicRectShader.colorLoc, color.rgba);
+        this.basicRectShader.SetUniforms(gl, this.canvas.width, this.canvas.height, x, y, rot, w, h, pivot.x, pivot.y, color.rgba);
 
         // Set line width (may be ignored on some platforms)
         gl.lineWidth(lineWidth);
@@ -519,15 +512,10 @@ class WebGLRenderer extends Renderer {
     DrawFillRectangle(x, y, w, h, color, rot=0, pivot=coord) {
         const gl = this.gl;
 
-        this.basicRectShader.Use(this.gl);
+        this.basicRectShader.Use(gl);
 
         // Set uniforms
-        gl.uniform2f(this.basicRectShader.resolutionLoc, this.canvas.width, this.canvas.height);
-        gl.uniform2f(this.basicRectShader.translationLoc, x, y);
-        gl.uniform1f(this.basicRectShader.rotationLoc, rot);
-        gl.uniform2f(this.basicRectShader.sizeLoc, w, h);
-        gl.uniform2f(this.basicRectShader.pivotLoc, pivot.x, pivot.y);
-        gl.uniform4fv(this.basicRectShader.colorLoc, color.rgba);
+        this.basicRectShader.SetUniforms(gl, this.canvas.width, this.canvas.height, x, y, rot, w, h, pivot.x, pivot.y, color.rgba);
 
         // Draw
         gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -562,13 +550,8 @@ class WebGLRenderer extends Renderer {
         // Use the shader with this custom buffer
         this.basicRectShader.UseForCustomBuffer(gl, buffer);
 
-        // Set uniforms using the shader's locations
-        gl.uniform2f(this.basicRectShader.resolutionLoc, this.canvas.width, this.canvas.height);
-        gl.uniform2f(this.basicRectShader.translationLoc, 0, 0);
-        gl.uniform1f(this.basicRectShader.rotationLoc, 0);
-        gl.uniform2f(this.basicRectShader.sizeLoc, 1, 1);
-        gl.uniform2f(this.basicRectShader.pivotLoc, 0, 0);
-        gl.uniform4fv(this.basicRectShader.colorLoc, color.rgba);
+        // Set uniforms
+        this.basicRectShader.SetUniforms(gl, this.canvas.width, this.canvas.height, 0, 0, 0, 1, 1, 0, 0, color.rgba);
 
         gl.drawArrays(gl.TRIANGLE_FAN, 0, this.circleNumSegments);
 
@@ -594,13 +577,8 @@ class WebGLRenderer extends Renderer {
         // Use the shader with this custom buffer
         this.basicRectShader.UseForCustomBuffer(gl, buffer);
 
-        // Set uniforms using the shader's locations
-        gl.uniform2f(this.basicRectShader.resolutionLoc, this.canvas.width, this.canvas.height);
-        gl.uniform2f(this.basicRectShader.translationLoc, 0, 0);
-        gl.uniform1f(this.basicRectShader.rotationLoc, 0);
-        gl.uniform2f(this.basicRectShader.sizeLoc, 1, 1);
-        gl.uniform2f(this.basicRectShader.pivotLoc, 0, 0);
-        gl.uniform4fv(this.basicRectShader.colorLoc, color.rgba);
+        // Set uniforms
+        this.basicRectShader.SetUniforms(gl, this.canvas.width, this.canvas.height, 0, 0, 0, 1, 1, 0, 0, color.rgba);
 
         gl.lineWidth(lineWidth); // May be ignored on most platforms
         gl.drawArrays(gl.LINE_STRIP, 0, this.circleNumSegments);
@@ -622,17 +600,10 @@ class WebGLRenderer extends Renderer {
         // Draw as a textured quad using the SpriteShader
         this.spriteShader.Use(gl);
         
-        gl.uniform2f(this.spriteShader.texResolutionLoc, this.canvas.width, this.canvas.height);
-        gl.uniform2f(this.spriteShader.texTranslationLoc, tx, ty);
-        gl.uniform1f(this.spriteShader.texRotationLoc, 0);
-        gl.uniform2f(this.spriteShader.texSizeLoc, width, height);
-        gl.uniform1f(this.spriteShader.texAlphaLoc, 1.0);
-        gl.uniform2f(this.spriteShader.pivotLoc, 0, 0);
+        this.spriteShader.SetUniforms(gl, this.canvas.width, this.canvas.height, tx, ty, 0, width, height, 0, 0, 1.0);
         
         // Bind texture
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, this.textTexture);
-        gl.uniform1i(this.spriteShader.texSamplerLoc, 0);
+        this.spriteShader.BindTexture(gl, this.textTexture);
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
@@ -650,18 +621,10 @@ class WebGLRenderer extends Renderer {
         this.spriteShader.Use(gl);
         
         // Set uniforms using the spriteShader's locations
-        gl.uniform2f(this.spriteShader.texResolutionLoc, this.canvas.width, this.canvas.height);
-        gl.uniform2f(this.spriteShader.texTranslationLoc, x, y);
-        gl.uniform1f(this.spriteShader.texRotationLoc, rot || 0);
-        gl.uniform2f(this.spriteShader.texSizeLoc, scaleX * img.width, scaleY * img.height);
-        gl.uniform2f(this.spriteShader.pivotLoc, pivot.x * scaleX, pivot.y * scaleY);
-        gl.uniform1f(this.spriteShader.texAlphaLoc, alpha);
+        this.spriteShader.SetUniforms(gl, this.canvas.width, this.canvas.height, x, y, rot || 0, scaleX * img.width, scaleY * img.height, pivot.x * scaleX, pivot.y * scaleY, alpha);
 
         // Bind texture
-        const tex = this.GetTexture(img);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.uniform1i(this.spriteShader.texSamplerLoc, 0);
+        this.spriteShader.BindTexture(gl, this.GetTexture(img));
 
         // Draw
         gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -682,7 +645,7 @@ class WebGLRenderer extends Renderer {
         const texBottom = (sy + sh) / img.height;
 
         // Build texcoord buffer for the section (two triangles)
-        const texcoords = new Float32Array([
+        this.auxTexcoords.set([
             texLeft,  texTop,
             texRight, texTop,
             texLeft,  texBottom,
@@ -694,30 +657,22 @@ class WebGLRenderer extends Renderer {
         // Use the shader and set up position buffer
         shader.Use(gl);
 
-        // Override the texcoord buffer for this draw
+        // Update texcoord buffer for this draw
         gl.bindBuffer(gl.ARRAY_BUFFER, shader.texcoordBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, texcoords, gl.DYNAMIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.auxTexcoords, gl.DYNAMIC_DRAW);
 
         // Set uniforms
-        gl.uniform2f(shader.texResolutionLoc, this.canvas.width, this.canvas.height);
-        gl.uniform2f(shader.texTranslationLoc, x, y);
-        gl.uniform1f(shader.texRotationLoc, rot || 0);
-        gl.uniform2f(shader.texSizeLoc, sw * scaleX, sh * scaleY);
-        gl.uniform2f(shader.pivotLoc, pivot.x * scaleX, pivot.y * scaleY);
-        gl.uniform1f(shader.texAlphaLoc, alpha);
+        shader.SetUniforms(gl, this.canvas.width, this.canvas.height, x, y, rot || 0, sw * scaleX, sh * scaleY, pivot.x * scaleX, pivot.y * scaleY, alpha);
 
         // Bind texture
-        const tex = this.GetTexture(img);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.uniform1i(shader.texSamplerLoc, 0);
+        shader.BindTexture(gl, this.GetTexture(img));
 
         // Draw
         gl.drawArrays(gl.TRIANGLES, 0, 6);
 
         // Restore the default texcoords for future draws
         gl.bindBuffer(gl.ARRAY_BUFFER, shader.texcoordBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(shader.texcoords), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, shader.texcoords, gl.STATIC_DRAW);
     }
 
     DrawImageSectionBasic(img, x, y, sx, sy, sw, sh, scaleX, scaleY, alpha=1.0) {
@@ -781,14 +736,14 @@ class WebGLRenderer extends Renderer {
 class BasicRectShader {
     constructor(gl) {
         // Rectangle from (-0.5, -0.5) to (0.5, 0.5)
-        this.quadVerts = [
+        this.quadVerts = new Float32Array([
             -0.5, -0.5,
              0.5, -0.5,
             -0.5,  0.5,
             -0.5,  0.5,
              0.5, -0.5,
              0.5,  0.5,
-        ];
+        ]);
 
         // Outline vertices for a rectangle (LINE_STRIP, 5 points to close the loop)
         // used when rendering a stroke rectangle (DrawStrokeRectangle method)
@@ -854,7 +809,7 @@ class BasicRectShader {
         // Create a buffer for a unit rectangle centered at (0,0)
         this.buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.quadVerts), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.quadVerts, gl.STATIC_DRAW);
 
         // Another buffer for the outline vertices (for the DrawStrokeRectangle method)
         this.outlineBuffer = gl.createBuffer();
@@ -885,29 +840,38 @@ class BasicRectShader {
         gl.enableVertexAttribArray(this.positionLoc);
         gl.vertexAttribPointer(this.positionLoc, 2, gl.FLOAT, false, 0, 0);
     }
+    
+    SetUniforms(gl, resolutionX, resolutionY, translationX, translationY, rotation, sizeX, sizeY, pivotX, pivotY, color) {
+        gl.uniform2f(this.resolutionLoc, resolutionX, resolutionY);
+        gl.uniform2f(this.translationLoc, translationX, translationY);
+        gl.uniform1f(this.rotationLoc, rotation);
+        gl.uniform2f(this.sizeLoc, sizeX, sizeY);
+        gl.uniform2f(this.pivotLoc, pivotX, pivotY);
+        gl.uniform4fv(this.colorLoc, color);
+    }
 }
 
 class SpriteShader {
     constructor(gl) {
         // Rectangle from (-0.5, -0.5) to (0.5, 0.5)
-        this.quadVerts = [
+        this.quadVerts = new Float32Array([
             -0.5, -0.5,
              0.5, -0.5,
             -0.5,  0.5,
             -0.5,  0.5,
              0.5, -0.5,
              0.5,  0.5,
-        ];
+        ]);
 
         // Texture coordinates
-        this.texcoords = [
+        this.texcoords = new Float32Array([
             0, 0,
             1, 0,
             0, 1,
             0, 1,
             1, 0,
             1, 1,
-        ];
+        ]);
 
         // Vertex shader for textured quad
         this.vsTextureSource = `
@@ -973,13 +937,12 @@ class SpriteShader {
         // Create a buffer for quad positions
         this.texBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.texBuffer);
-        
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.quadVerts), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.quadVerts, gl.STATIC_DRAW);
 
         // Texture coordinates buffer
         this.texcoordBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.texcoordBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.texcoords), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.texcoords, gl.STATIC_DRAW);
 
         // Set temporal viewMatrix
         gl.useProgram(this.program);
@@ -1001,19 +964,34 @@ class SpriteShader {
         gl.enableVertexAttribArray(this.texTexcoordLoc);
         gl.vertexAttribPointer(this.texTexcoordLoc, 2, gl.FLOAT, false, 0, 0);
     }
+
+    SetUniforms(gl, resolutionX, resolutionY, translationX, translationY, rotation, sizeX, sizeY, pivotX, pivotY, alpha) {
+        gl.uniform2f(this.texResolutionLoc, resolutionX, resolutionY);
+        gl.uniform2f(this.texTranslationLoc, translationX, translationY);
+        gl.uniform1f(this.texRotationLoc, rotation);
+        gl.uniform2f(this.texSizeLoc, sizeX, sizeY);
+        gl.uniform2f(this.pivotLoc, pivotX, pivotY);
+        gl.uniform1f(this.texAlphaLoc, alpha);
+    }
+
+    BindTexture(gl, texture) {
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.uniform1i(this.texSamplerLoc, 0);
+    }
 }
 
 class GradientRectShader {
     constructor(gl) {
         // Rectangle from (-0.5, -0.5) to (0.5, 0.5)
-        this.quadVerts = [
+        this.quadVerts = new Float32Array([
             -0.5, -0.5,
              0.5, -0.5,
             -0.5,  0.5,
             -0.5,  0.5,
              0.5, -0.5,
              0.5,  0.5,
-        ];
+        ]);
 
         // Vertex shader: pass local position (0..1) for gradient
         this.vsSource = `
@@ -1073,7 +1051,7 @@ class GradientRectShader {
         // Create a buffer for a unit rectangle centered at (0,0)
         this.buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.quadVerts), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.quadVerts, gl.STATIC_DRAW);
 
         // Set temporal viewMatrix
         gl.useProgram(this.program);

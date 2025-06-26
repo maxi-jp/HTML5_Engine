@@ -169,9 +169,6 @@ class SpriteObject extends GameObject {
         this.sprite.pivot.y = value.y;
     }
 
-    Update(deltaTime) {
-    }
-
     Draw(renderer) {
         this.sprite.Draw(renderer);
     }
