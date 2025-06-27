@@ -463,18 +463,86 @@ class Circle {
 
 class TextLabel {
     constructor(text, position, font, color="black", align="center", baseline="bottom", stroke=false, lineWidth=1) {
-        this.text = text;
+        this._text = text;
+        this._font = font;
+        this._color = color;
+
         this.position = position;
-        this.font = font;
-        this.color = color;
         this.align = align;
         this.baseline = baseline;
         this.stroke = stroke;
         this.lineWidth = lineWidth;
+
+        this._textureNeedsUpdate = true; // Flag to indicate if texture needs re-rendering
+        this._webglTexture = null;
+
+        if (renderer instanceof WebGLRenderer) {
+            this._webglTexture = renderer.CreateTextTexture();
+        }
+
+        this._textureWidth = 0;
+        this._textureHeight = 0;
+        this._textureX = 0;
+        this._textureY = 0;
+    }
+
+    get text() {
+        return this._text;
+    }
+    get font() {
+        return this._font;
+    }
+    get color() {
+        return this._color;
+    }
+
+    set text(value) {
+        if (this._text !== value) {
+            this._text = value;
+            this._textureNeedsUpdate = true;
+        }
+    }
+
+    set font(value) {
+        if (this._font !== value) {
+            this._font = value;
+            this._textureNeedsUpdate = true;
+        }
+    }
+
+    set color(value) {
+        if (this._color !== value) {
+            this._color = value;
+            this._textureNeedsUpdate = true;
+        }
     }
 
     Draw(renderer) {
-        renderer.DrawText(this.text, this.position.x, this.position.y, this.font, this.color, this.align, this.baseline, this.stroke, this.lineWidth);
+        // Only update texture if text, font, color, etc. changed, or if explicitly flagged
+        if (renderer instanceof WebGLRenderer) {
+            if (this._textureNeedsUpdate) {
+                const { width, height, x: tx, y: ty } = renderer.PrepareText(this._text, this.position.x, this.position.y, this._font, this._color, this.align, this.baseline, this.stroke, this.lineWidth);
+
+                if (!this._webglTexture) {
+                    this._webglTexture = renderer.CreateTextTexture();
+                }
+
+                renderer.gl.bindTexture(renderer.gl.TEXTURE_2D, this._webglTexture);
+                renderer.gl.texImage2D(renderer.gl.TEXTURE_2D, 0, renderer.gl.RGBA, renderer.gl.RGBA, renderer.gl.UNSIGNED_BYTE, renderer.textCanvas);
+                
+                this._textureWidth = width;
+                this._textureHeight = height;
+                this._textureX = tx;
+                this._textureY = ty;
+
+                this._textureNeedsUpdate = false; // Mark as updated
+            }
+
+            renderer.DrawTextCached(this._webglTexture, this._textureX, this._textureY, this._textureWidth, this._textureHeight);
+        }
+        else {
+            renderer.DrawText(this._text, this.position.x, this.position.y, this._font, this._color, this.align, this.baseline, this.stroke, this.lineWidth);
+        }
     }
 }
 

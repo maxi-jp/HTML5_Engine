@@ -296,8 +296,12 @@ class WebGLRenderer extends Renderer {
             0, 0, 1  // -camera.x, -camera.y, 1
         ]);
 
-        // auxiliar line vertices
-        this.lineVertices = new Float32Array([ 0.0, 0.0, 0.0, 0.0 ]);
+        // auxiliar line vertices and buffer
+        this.lineVertices = new Float32Array(4);
+        this.lineBuffer = gl.createBuffer();
+
+        // auxiliar polygon buffer
+        this.polygonBuffer = gl.createBuffer();
 
         // auxiliar rectangle vertices
         this.auxRectVertices = [
@@ -320,20 +324,31 @@ class WebGLRenderer extends Renderer {
         // auxiliar structure for circle vertices
         this.circleNumSegments = 64;
         this.circleVerts = new Float32Array(this.circleNumSegments * 2);
+        this.circleBuffer = gl.createBuffer();
 
-        // axuliar canvas for rendering text
+        // axuliar canvas for measure text
         this.textCanvas = document.createElement('canvas');
         this.textCanvasCtx = this.textCanvas.getContext('2d');
-        this.InitTextTexture();
+
+        // auxiliar texture for rendering text from the auxiliar canvas (very ineficient)
+        this.textTexture = this.CreateTextTexture();
 
         // enable blending for pngs transparency
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         
-        // shaders
+        // Shaders
         this.basicRectShader = new BasicRectShader(this.gl);
         this.spriteShader = new SpriteShader(this.gl);
         this.gradientRectShader = new GradientRectShader(this.gl);
+        
+        // Setup shaders to bind buffers and enable vertex attributes
+        this.basicRectShader.Setup(this.gl);
+        this.spriteShader.Setup(this.gl);
+        this.gradientRectShader.Setup(this.gl);
+
+        this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        this.gl.clearColor(0, 0, 0, 0); // TODO delete this after testing different pngs
     }
 
     set width(value) {
@@ -366,11 +381,11 @@ class WebGLRenderer extends Renderer {
         return img._webglTexture;
     }
 
-    InitTextTexture() {
+    CreateTextTexture() {
         const gl = this.gl;
 
-        this.textTexture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, this.textTexture);
+        const texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
 
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -378,11 +393,13 @@ class WebGLRenderer extends Renderer {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
         gl.bindTexture(gl.TEXTURE_2D, null); // Unbind after setting params
+
+        return texture;
     }
 
     PrepareText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic", stroke=false, lineWidth=1) {
-        const ctx = this.textCanvasCtx;
         const textCanvas = this.textCanvas;
+        const ctx = this.textCanvasCtx;
 
         ctx.font = font;
         ctx.textAlign = align;
@@ -431,6 +448,7 @@ class WebGLRenderer extends Renderer {
 
         if (stroke) {
             ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
             ctx.strokeText(text, drawX, drawY);
         }
         else {
@@ -442,35 +460,28 @@ class WebGLRenderer extends Renderer {
     }
 
     Clear() {
-        this.gl.clearColor(0, 0, 0, 0); // TODO delete this after testing different pngs
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-        
-        this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     }
 
     DrawLine(x1, y1, x2, y2, color=Color.black, lineWidth=1) {
         const gl = this.gl;
 
-        // buffer for the two points
+        // update buffer for the two points
         this.lineVertices.set([x1, y1, x2, y2]);
-
-        const buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.lineBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, this.lineVertices, gl.STREAM_DRAW);
         
-        this.basicRectShader.UseForCustomBuffer(gl, buffer);
+        // gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.lineVertices);
+        this.basicRectShader.UseForCustomBuffer(gl, this.lineBuffer);
 
-        // Set uniforms (no rotation/scale, just pass through)
+        // // Set uniforms (no rotation/scale, just pass through)
         this.basicRectShader.SetUniforms(gl, this.canvas.width, this.canvas.height, 0, 0, 0, 1, 1, 0, 0, color.rgba);
 
-        // Set line width (ignored on some platforms)
+        // // Set line width (ignored on some platforms)
         gl.lineWidth(lineWidth);
 
-        // Draw the line
+        // // Draw the line
         gl.drawArrays(gl.LINES, 0, 2);
-
-        // Clean up
-        gl.deleteBuffer(buffer);
     }
 
     DrawPolygon(points, strokeColor=Color.black, lineWidth=1, fill=false, fillColor=Color.black) {
@@ -485,11 +496,10 @@ class WebGLRenderer extends Renderer {
         // Convert points to a flat Float32Array
         const vertices = new Float32Array(points.flatMap(p => [p.x, p.y]));
 
-        const buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.polygonBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STREAM_DRAW);
 
-        this.basicRectShader.UseForCustomBuffer(gl, buffer);
+        this.basicRectShader.UseForCustomBuffer(gl, this.polygonBuffer);
 
         this.basicRectShader.SetUniforms(gl, this.canvas.width, this.canvas.height, 0, 0, 0, 1, 1, 0, 0, strokeColor.rgba);
 
@@ -505,8 +515,6 @@ class WebGLRenderer extends Renderer {
             gl.lineWidth(lineWidth);
             gl.drawArrays(gl.LINE_LOOP, 0, points.length);
         }
-
-        gl.deleteBuffer(buffer);
     }
 
     DrawRectangle(x, y, w, h, color, stroke=false, lineWidth=1, rot=0, pivot=coord) {
@@ -599,25 +607,16 @@ class WebGLRenderer extends Renderer {
             this.circleVerts[i + 1] = y + Math.sin(angle) * radius;
         }
 
-        // insert center point into the circle vertices
-        // this.circleVerts.unshift(x, y);
-
-        const buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.circleBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, this.circleVerts, gl.STREAM_DRAW);
 
         // Use the shader with this custom buffer
-        this.basicRectShader.UseForCustomBuffer(gl, buffer);
+        this.basicRectShader.UseForCustomBuffer(gl, this.circleBuffer);
 
         // Set uniforms
         this.basicRectShader.SetUniforms(gl, this.canvas.width, this.canvas.height, 0, 0, 0, 1, 1, 0, 0, color.rgba);
 
         gl.drawArrays(gl.TRIANGLE_FAN, 0, this.circleNumSegments);
-
-        gl.deleteBuffer(buffer);
-
-        // this.circleVerts.shift();
-        // this.circleVerts.shift(); // Remove the center point
     }
 
     DrawStrokeCircle(x, y, radius, color=Color.black, lineWidth=1) {
@@ -629,20 +628,17 @@ class WebGLRenderer extends Renderer {
             this.circleVerts[i + 1] = y + Math.sin(angle) * radius;
         }
 
-        const buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.circleBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, this.circleVerts, gl.STREAM_DRAW);
 
         // Use the shader with this custom buffer
-        this.basicRectShader.UseForCustomBuffer(gl, buffer);
+        this.basicRectShader.UseForCustomBuffer(gl, this.circleBuffer);
 
         // Set uniforms
         this.basicRectShader.SetUniforms(gl, this.canvas.width, this.canvas.height, 0, 0, 0, 1, 1, 0, 0, color.rgba);
 
         gl.lineWidth(lineWidth); // May be ignored on most platforms
         gl.drawArrays(gl.LINE_STRIP, 0, this.circleNumSegments);
-
-        gl.deleteBuffer(buffer);
     }
 
     DrawText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic", stroke=false, lineWidth=1) {
@@ -673,6 +669,20 @@ class WebGLRenderer extends Renderer {
 
     DrawStrokeText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic", lineWidth=1) {
         this.DrawText(text, x, y, font, color, align, baseline, true, lineWidth);
+    }
+
+    DrawTextCached(texture, x, y, width, height) {
+        const gl = this.gl;
+        
+        // Draw as a textured quad using the SpriteShader
+        this.spriteShader.Use(gl);
+        
+        this.spriteShader.SetUniforms(gl, this.canvas.width, this.canvas.height, x, y, 0, width, height, 0, 0, 1.0);
+        
+        // Bind texture
+        this.spriteShader.BindTexture(gl, texture);
+
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
 
     DrawImage(img, x, y, scaleX, scaleY, rot=0, pivot=coord, alpha=1.0) {
@@ -718,7 +728,7 @@ class WebGLRenderer extends Renderer {
 
         // Update texcoord buffer for this draw
         gl.bindBuffer(gl.ARRAY_BUFFER, shader.texcoordBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this.auxTexcoords, gl.DYNAMIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.auxTexcoords, gl.STREAM_DRAW);
 
         // Set uniforms
         shader.SetUniforms(gl, this.canvas.width, this.canvas.height, x, y, rot || 0, sw * scaleX, sh * scaleY, pivot.x * scaleX, pivot.y * scaleY, alpha);
@@ -796,6 +806,7 @@ class WebGLRenderer extends Renderer {
 }
 
 // #region WebGL shader objects
+
 class BasicRectShader {
     constructor(gl) {
         // Rectangle from (-0.5, -0.5) to (0.5, 0.5)
@@ -888,11 +899,18 @@ class BasicRectShader {
         ]));
     }
 
-    Use(gl) {
+    Setup(gl) {
         gl.useProgram(this.program);
         
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         gl.enableVertexAttribArray(this.positionLoc);
+        gl.vertexAttribPointer(this.positionLoc, 2, gl.FLOAT, false, 0, 0);
+    }
+
+    Use(gl) {
+        gl.useProgram(this.program);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         gl.vertexAttribPointer(this.positionLoc, 2, gl.FLOAT, false, 0, 0);
     }
 
@@ -1016,7 +1034,7 @@ class SpriteShader {
         ]));
     }
 
-    Use(gl) {
+    Setup(gl) {
         gl.useProgram(this.program);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.texBuffer);
@@ -1025,6 +1043,16 @@ class SpriteShader {
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.texcoordBuffer);
         gl.enableVertexAttribArray(this.texTexcoordLoc);
+        gl.vertexAttribPointer(this.texTexcoordLoc, 2, gl.FLOAT, false, 0, 0);
+    }
+
+    Use(gl) {
+        gl.useProgram(this.program);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.texBuffer);
+        gl.vertexAttribPointer(this.texPositionLoc, 2, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.texcoordBuffer);
         gl.vertexAttribPointer(this.texTexcoordLoc, 2, gl.FLOAT, false, 0, 0);
     }
 
@@ -1173,12 +1201,16 @@ class GradientRectShader {
         gl.deleteTexture(text);
     }
 
-    Use(gl) {
+    Setup(gl) {
         gl.useProgram(this.program);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         gl.enableVertexAttribArray(this.positionLoc);
         gl.vertexAttribPointer(this.positionLoc, 2, gl.FLOAT, false, 0, 0);
+    }
+
+    Use(gl) {
+        gl.useProgram(this.program);
     }
 }
 
