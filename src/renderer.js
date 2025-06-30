@@ -335,7 +335,7 @@ class WebGLRenderer extends Renderer {
 
         // enable blending for pngs transparency
         this.gl.enable(this.gl.BLEND);
-        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+        this.gl.blendFunc(this.gl.ONE, this.gl.ONE_MINUS_SRC_ALPHA);
         
         // Shaders
         this.basicRectShader = new BasicRectShader(this.gl);
@@ -367,7 +367,9 @@ class WebGLRenderer extends Renderer {
             const tex = gl.createTexture();
 
             gl.bindTexture(gl.TEXTURE_2D, tex);
-            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true); // bowsers may use premultiplied alpha when uploading pngs
+            //gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true); // bowsers may use premultiplied alpha when uploading pngs
+            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false); // Do not assume the source is premultiplied
+            gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE); // Use the image's colorspace as is
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
 
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -863,7 +865,10 @@ class BasicRectShader {
             precision mediump float;
             uniform vec4 u_color;
             void main() {
-                gl_FragColor = u_color;
+                //gl_FragColor = u_color;
+                // Premultiply the RGB components by the alpha value
+                // to match the gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+                gl_FragColor = vec4(u_color.rgb * u_color.a, u_color.a);
             }
         `;
 
@@ -994,10 +999,15 @@ class SpriteShader {
             uniform float u_alpha;
             void main() {
                 vec4 texColor = texture2D(u_texture, v_texcoord);
-                gl_FragColor = vec4(texColor.rgb, texColor.a * u_alpha);
+                //gl_FragColor = vec4(texColor.rgb, texColor.a * u_alpha);
                 // If alpha is very low, force RGB to black
                 //if (c.a < 0.9) c.rgb = vec3(0.0);
                 //gl_FragColor = vec4(c.rgb * c.a, 1.0 - c.a);
+                // Apply the uniform alpha to the texture's alpha.
+                texColor.a *= u_alpha;
+                // Premultiply the RGB components by the final alpha.
+                texColor.rgb *= texColor.a;
+                gl_FragColor = texColor;
             }
         `;
 
