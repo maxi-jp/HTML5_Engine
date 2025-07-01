@@ -268,7 +268,7 @@ class Sprite {
         renderer.DrawImageSection(this.img, this.position.x, this.position.y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y, this.rotation, this.pivot, this.alpha);
     }
 
-    DrawSectionBasic(sx, sy, sw, sh) {
+    DrawSectionBasic(renderer, sx, sy, sw, sh) {
         renderer.DrawImageSectionBasic(this.img, this.position.x + this.pivot.x, this.position.y + this.pivot.y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y, this.alpha);
     }
 

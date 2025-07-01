@@ -61,6 +61,8 @@ class Renderer {
     RestoreCameraTransform() {}
 }
 
+// #region Canvas2DRenderer class
+
 class Canvas2DRenderer extends Renderer {
     constructor(canvas, config) {
         super(canvas, config);
@@ -284,6 +286,10 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.restore();
     }
 }
+
+// #endregion
+
+// #region WebGLRenderer class
 
 class WebGLRenderer extends Renderer {
     constructor(canvas, gl, config) {
@@ -806,6 +812,8 @@ class WebGLRenderer extends Renderer {
         }
     }
 }
+
+// #endregion
 
 // #region WebGL shader objects
 

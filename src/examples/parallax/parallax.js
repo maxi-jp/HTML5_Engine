@@ -55,9 +55,9 @@ class Parallax extends Game {
         );
         // layer 4: a set of tiles
         // TODO 
-        // const bgLayerTiles = new TilesetBackgroundLayer();
+        // const bgLayerTiles = new TilesetBackgroundLayer(Vector2.Zero(), 0);
         // finally componse all the layers in the background
-        this.background = new BackgroundLayers(this.camera, [bgLayer0, bgLayer1]);//, bgLayerMountain, bgLayerTrees]);
+        this.background = new BackgroundLayers(this.camera, [bgLayer0, bgLayer1, bgLayerMountain, bgLayerTrees]);//, bgLayerTiles]);
         this.background.Start();
     }
 
