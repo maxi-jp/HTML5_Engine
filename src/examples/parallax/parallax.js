@@ -41,10 +41,10 @@ class Parallax extends Game {
         // layer 1: a "night sky" gradient (transparent to dark blue "#365B93")  (0.2, 1)
         const bgLayer1 = new StaticGradientLayer(this.renderer, new Vector2(this.screenWidth, this.screenHeight), [[0, Color.white], [1, Color.black]]);
         // layer 2: mountains in a full-size-sprite
-        const bgLayerMountain = new SpriteBackgroundLayer(this.graphicAssets.mountain.img, new Vector2(-100, canvas.height - this.graphicAssets.mountain.img.height - 30), 0, 1, new Vector2(0.05, 0.01));
+        const bgLayerMountain = new SpriteBackgroundLayer(this.graphicAssets.mountain.img, new Vector2(-100, this.screenHeight - this.graphicAssets.mountain.img.height - 70), 0, 1, new Vector2(0.05, 0.01));
         // layer 3: a set of individual sprite trees
         const bgLayerTrees = new MultispritesBackgroundLayer(
-            new Vector2(0, 216),
+            new Vector2(0, 176),
             [
                 new SpriteSection(this.graphicAssets.trees.img, new Vector2(0, -4), 0, 1, new Rect(0, 0, 193, 240)), // tree 1
                 new SpriteSection(this.graphicAssets.trees.img, new Vector2(300, 0), 0, 1, new Rect(193, 0, 194, 240)), // tree 2
@@ -54,10 +54,31 @@ class Parallax extends Game {
             new Vector2(0.8, 0.8)
         );
         // layer 4: a set of tiles
-        // TODO 
-        // const bgLayerTiles = new TilesetBackgroundLayer(Vector2.Zero(), 0);
+        const TILE_WIDTH = 24;
+        const TILE_HEIGHT = 24;
+        const bgLayerTiles = new TilesetBackgroundLayer(
+            this.graphicAssets.tileset.img,
+            new Vector2(0, this.screenHeight - TILE_HEIGHT * 6), // position
+            1, // scale
+            new Vector2(1.0, 1.0), { // velocity
+                1: { rect: new Rect(313,  85, TILE_WIDTH, TILE_HEIGHT) }, // grass
+                2: { rect: new Rect(313, 109, TILE_WIDTH, TILE_HEIGHT) }, // dirt A
+                3: { rect: new Rect(313, 133, TILE_WIDTH, TILE_HEIGHT) }, // dirt B
+                4: { rect: new Rect(313, 157, TILE_WIDTH, TILE_HEIGHT) }, // dirt C
+                5: { rect: new Rect(313, 181, TILE_WIDTH, TILE_HEIGHT) }, // dirt D
+            }, [
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+                [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+            ],
+            TILE_WIDTH,
+            TILE_HEIGHT
+        );
         // finally componse all the layers in the background
-        this.background = new BackgroundLayers(this.camera, [bgLayer0, bgLayer1, bgLayerMountain, bgLayerTrees]);//, bgLayerTiles]);
+        this.background = new BackgroundLayers(this.camera, [bgLayer0, bgLayer1, bgLayerMountain, bgLayerTrees, bgLayerTiles]);
         this.background.Start();
     }
 
@@ -85,17 +106,16 @@ class Parallax extends Game {
         this.camera.PreDraw(this.renderer);
 
         // draw the background
-        this.background.Draw(this.renderer);
+        // this.background.Draw(this.renderer); // this will draw all the layers
+        this.background.DrawLayers(this.renderer, 3); // this will draw layers from 0 to 3
 
         // draw the gameObjects
         super.Draw();
 
+        this.background.DrawLayer(this.renderer, 4); // this will draw layer 4
+
         this.camera.PostDraw(this.renderer);
 
-        // var grad = this.renderer.ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-        // grad.addColorStop(0, "white");
-        // grad.addColorStop(1, "black");
-        // this.renderer.ctx.fillStyle = grad;
-        // this.renderer.ctx.fillRect(0, 0, canvas.width, canvas.height);
+        renderer.DrawFillText(`Camera: ${this.camera.x}, ${this.camera.y}`, 10, this.screenHeight - 20, '12px Arial', Color.white, "left");
     }
 }

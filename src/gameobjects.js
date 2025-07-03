@@ -607,23 +607,15 @@ class MultispritesBackgroundLayer extends BackgroundLayer {
 }
 
 class TilesetBackgroundLayer extends BackgroundLayer {
-    constructor(img, position, scale, speed=Vector2.Zero()) {
+    constructor(img, position, scale, speed, tilesetConfig, tilesetMap, tileWidth, tileHeight) {
         super(position, speed);
 
         this.sprite = new Sprite(img, position, 0, scale);
 
-        this.tilesetConfig = {
-            1: {
-                name: '',
-                rect: new Rect(0, 0, 16, 16)
-            }
-        }
-
-        this.tilesetMap = [
-            [0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 1],
-            [0, 0, 0, 1, 1, 0]
-        ];
+        this.tilesetMap = tilesetMap; // 2D array representing the map layout
+        this.tilesetConfig = tilesetConfig; // Mapping from tile ID to source Rect
+        this.tileWidth = tileWidth;
+        this.tileHeight = tileHeight;
     }
 
     Update(deltaTime) {
@@ -632,11 +624,35 @@ class TilesetBackgroundLayer extends BackgroundLayer {
     }
 
     Draw(renderer) {
-        this.tilesetMap.forEach(tileRow => {
-            tileRow.forEach(tile => {
-                const rect = this.tilesetConfig[tile].rect;
-                this.DrawSectionBasic(renderer, rect.x, rect.y, rect.w, rect.h);
-            })
+        // The base position of the layer is updated by the Update method for parallax
+        const basePosX = this.position.x;
+        const basePosY = this.position.y;
+        
+        // The sprite's scale is used for drawing
+        const scaleX = this.sprite.scale.x;
+        const scaleY = this.sprite.scale.y;
+
+        this.tilesetMap.forEach((row, rowIndex) => {
+            row.forEach((tileId, colIndex) => {
+                // A tileId of 0 (or any other falsy value) can represent an empty tile
+                if (!tileId) {
+                    return;
+                }
+
+                const tileConfig = this.tilesetConfig[tileId];
+                if (!tileConfig) {
+                    return; // Skip if no configuration for this tile ID
+                }
+
+                const sourceRect = tileConfig.rect;
+
+                // Calculate the position to draw this tile on the canvas (top-left corner).
+                const drawX = basePosX + (colIndex * this.tileWidth * scaleX);
+                const drawY = basePosY + (rowIndex * this.tileHeight * scaleY);
+
+                // Use the sprite's method to draw the specific tile section at the calculated position.
+                this.sprite.DrawSectionBasicAt(renderer, sourceRect.x, sourceRect.y, sourceRect.w, sourceRect.h, drawX, drawY);
+            });
         });
     }
 }
@@ -666,5 +682,15 @@ class BackgroundLayers {
 
     Draw(renderer) {
         this.layers.forEach(layer => layer.Draw(renderer));
+    }
+
+    DrawLayer(renderer, layerIndex) {
+        this.layers[layerIndex].Draw(renderer);
+    }
+
+    DrawLayers(renderer, lastLayerIndex) {
+        for (let i = 0; i <= lastLayerIndex; i++) {
+            this.layers[i].Draw(renderer);
+        }
     }
 }
