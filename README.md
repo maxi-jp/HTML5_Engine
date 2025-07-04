@@ -6,26 +6,27 @@ Engine and examples presents on this project are active on github pages: https:/
 
 ## Features
 
-- **Game Loop**: Built-in main loop with update and draw phases.
-- **GameObject System**: Easily create and manage game objects with position, rotation, scale, and custom logic.
-- **HTML5 Canvas**: Render the graphics using the canvas from HTML5.
+- **Modular Core**: A clean, object-oriented core that's easy to extend.
+- **Rendering Engine**: 2D rendering via HTML5 Canvas with an architecture that supports other renderers (like WebGL).
+- **Game Loop**: A classic, built-in main loop with fixed update and variable draw phases.
+- **Sprite & Animation**: Full support for static sprites, sprite sheets, and complex animations.
 - **Sprite & Animation Support**: Render static sprites, sprite sections, and both basic and complex sprite sheet animations.
 - **Physics Integration**: Box2D physics support with easy-to-use Box2DGameObject classes for rectangles, sprites, and animated objects.
-- **Input Handling**: Keyboard, mouse, and gamepad input support.
-- **Audio System**: Play, pause, stop, and control audio with optional analyzer support.
-- **UI & Menus**: HTML-based menu system for overlays and in-game menus.
-- **Background Layers**: Static color, gradient, parallax, and tilemap backgrounds.
-- **Pooling System**: Efficient object pooling for bullets, particles, etc.
-- **Utilities**: Vector math, collision detection, color utilities, and more.
+- **Input Handling**: Unified API for keyboard, mouse, and gamepad input.
+- **Audio Manager**: A simple yet powerful system to manage and play audio with optional analyzer support.
+- **UI & Menus**: Use standard HTML and CSS for creating game menus and overlays.
+- **Background Layers**: Create rich backgrounds with solid colors, gradients, parallax scrolling layers, and tilemaps.
+- **Object Pooling**: An efficient pooling system for reusing objects like bullets or particles to improve performance.
+- **Utilities**: A collection of helpers for vector math, collision detection, color manipulation, and more.
+- **Debugging Tools**: Optional debug drawing for physics bodies and an FPS/stats overlay.
 - **Mode 7 Renderer**: Simulate SNES-style pseudo-3D backgrounds (as in F-Zero or Mario Kart).
-- **Debug Tools**: Optional debug drawing and FPS/stats overlay.
 
 ## Directory Structure
 - src/
   - renderer.js           # Graphic renderers (support for 2d context and WebGL)
   - main.js               # Entry point and main loop
   - game.js               # Core Game class
-  - gameobjects.js        # GameObject, SpriteObject, AnimationObject, Camera, Pool, Background Layers
+  - gameobjects.js        # GameObject, SpriteObject, AnimationObject, Tileset, Camera, Pool, Background Layers
   - input.js              # Keyboard, mouse, and gamepad input
   - utils_classes.js      # Canvas drawing helpers
   - utils_math.js         # Math, vector, and collision utilities
@@ -42,9 +43,30 @@ Engine and examples presents on this project are active on github pages: https:/
 ## Getting Started
 
 1. **Clone or Download** this repository.
-2. Create a new `index.html` for your game, and add all the `src` scripts you need to your `engine/` folder (main files: `main.js`, `game.js`, `gameobjects.js`, `input.js`, `utils_classes.js`, `utils_math.js`, `audioplayer.js`, `htmlmenu.js`; and for Box2D physics objects: `box2d_game.js`, `box2d_gameobjects.js`, and `box2d_helper.js`):
+
+2. **Set up your project folder.** Create a new folder for your game. Inside it, create an `engine` folder and copy the contents of the `src` directory from this repository into it. Your game's own JavaScript files can go in a `js` or `src` folder.
+
+   Your project structure might look like this:
+   ```
+   my-game/
+   ├── engine/
+   │   ├── renderer.js
+   │   ├── main.js
+   │   ├── game.js
+   │   └── ... (all other engine files from src/)
+   ├── src/
+   │   └── my-game.js
+   ├── lib/
+   │   └── Box2D.js  (if using physics)
+   └── index.html
+   ```
+
+3. **Create your `index.html`** and include the engine scripts. The order is important. You can use the following template:
 ```html
+<!DOCTYPE html>
+<html>
 <head>
+    <title>My Awesome Game</title>
     <!-- ... -->
     <script src="engine/renderer.js"></script>
     <script src="engine/main.js"></script>
@@ -54,7 +76,6 @@ Engine and examples presents on this project are active on github pages: https:/
     <script src="engine/game.js"></script>
     <script src="engine/utils_classes.js"></script>
     <script src="engine/gameobjects.js"></script>
-    <script src="engine/lib/Box2D.js"></script>
     <!-- add these only if you want to use box2d physics -->
     <script src="lib/Box2D.js"></script>
     <script src="engine/box2d_helper.js"></script>
@@ -63,8 +84,12 @@ Engine and examples presents on this project are active on github pages: https:/
     <!-- add here your game scripts -->
     <script src="src/my-game.js"></script>
 </head>
+<body>
+    <canvas width="640" height="480" id="myCanvas"></canvas>    
+</body>
+</html>
 ```
-3. Create a new script with a new class that inherits from **Game**, add it to the `index.html`, and initialize the game (the constructor must receive the renderer object and should pass it to its parent):
+4. Create a new script with a new class that inherits from **Game**, add it to the `index.html`, and initialize the game (the constructor must receive the renderer object and should pass it to its parent):
 ```javascript
 class MyGame extends Game {
     constructor(renderer) {
@@ -98,7 +123,7 @@ window.onload = () => {
 }
 ```
 
-4. Create GameObjects by inheriting from the classes in `gameobjects.js`, add them to the `this.gameObjects` array of your game, and run! (See the examples in `src/examples/`.)
+5. Create GameObjects by inheriting from the classes in `gameobjects.js`, add them to the `this.gameObjects` array of your game's `Start` method, and run! (See the examples in `src/examples/`.)
 
 ## Example: Creating a GameObject
 

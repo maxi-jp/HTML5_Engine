@@ -753,7 +753,7 @@ class WebGLRenderer extends Renderer {
     }
 
     DrawImageSectionBasic(img, x, y, sx, sy, sw, sh, scaleX, scaleY, alpha=1.0) {
-        this.DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, 0, coord, alpha);
+        this.DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, 0, { x: -sw/2, y: -sh/2 }, alpha);
     }
     
     DrawGradientRectangle(x, y, w, h, gradient) {

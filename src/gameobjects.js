@@ -293,6 +293,54 @@ class SSAnimationObjectComplex extends SpriteObject {
     }
 }
 
+class Tileset extends GameObject {
+    constructor(img, position, scale, tilesetConfig, tilesetMap, tileWidth, tileHeight) {
+        super(position);
+
+        this.sprite = new Sprite(img, position, 0, scale);
+
+        this.tilesetMap = tilesetMap; // 2D array representing the map layout
+        this.tilesetConfig = tilesetConfig; // Mapping from tile ID to source Rect
+        this.tileWidth = tileWidth;
+        this.tileHeight = tileHeight;
+    }
+
+    Draw(renderer) {
+        // The base position of the layer is updated by the Update method for parallax
+        const basePosX = this.position.x;
+        const basePosY = this.position.y;
+        
+        // The sprite's scale is used for drawing
+        const scaleX = this.sprite.scale.x;
+        const scaleY = this.sprite.scale.y;
+
+        this.tilesetMap.forEach((row, rowIndex) => {
+            row.forEach((tileId, colIndex) => {
+                // A tileId of 0 (or any other falsy value) can represent an empty tile
+                if (!tileId) {
+                    return;
+                }
+
+                const tileConfig = this.tilesetConfig[tileId];
+                if (!tileConfig) {
+                    return; // Skip if no configuration for this tile ID
+                }
+
+                const sourceRect = tileConfig.rect;
+
+                // Calculate the position to draw this tile on the canvas (top-left corner).
+                const drawX = basePosX + (colIndex * this.tileWidth * scaleX);
+                const drawY = basePosY + (rowIndex * this.tileHeight * scaleY);
+
+                // Use the sprite's method to draw the specific tile section at the calculated position.
+                this.sprite.DrawSectionBasicAt(renderer, sourceRect.x, sourceRect.y, sourceRect.w, sourceRect.h, drawX, drawY);
+            });
+        });
+    }
+}
+
+//#region Cameras
+
 class Camera {
     _position;
     _rotation = 0;
@@ -442,6 +490,10 @@ class FollowCamera extends Camera {
     }
 }
 
+// #endregion
+
+// #region Object Pool
+
 class Pool {
     static semiTransparentRed = new Color(1, 0, 0, 0.5);
 
@@ -519,6 +571,10 @@ class Pool {
     }
 }
 
+// #endregion
+
+// #region BackgroundLayers
+
 class BackgroundLayer {
     constructor(position, speed) {
         this.position = position;
@@ -559,6 +615,38 @@ class StaticGradientLayer {
 
     Draw(renderer) {
         renderer.DrawGradientRectangle(this.camera.x, this.camera.y, canvas.width, canvas.height, this.gradient);
+    }
+}
+
+class ColorRectangleLayer extends BackgroundLayer {
+    constructor(color, position, width, height, speed=Vector2.Zero()) {
+        super(position, speed);
+        
+        this.color = color;
+        this.width = width;
+        this.height = height;
+
+        this.camera = null;
+    }
+
+    Draw(renderer) {
+        renderer.DrawFillBasicRectangle(this.camera.x, this.camera.y, this.width, this.height, this.color);
+    }
+}
+
+class GradientRectangleLayer extends BackgroundLayer {
+    constructor(renderer, direction, colorStops, position, width, height, speed=Vector2.Zero()) {
+        super(position, speed);
+
+        this.gradient = new LinearGradient(renderer, direction, colorStops);
+        this.width = width;
+        this.height = height;
+
+        this.camera = null;
+    }
+
+    Draw(renderer) {
+        renderer.DrawGradientRectangle(this.camera.x, this.camera.y, this.width, this.height, this.gradient);
     }
 }
 
@@ -609,51 +697,19 @@ class MultispritesBackgroundLayer extends BackgroundLayer {
 class TilesetBackgroundLayer extends BackgroundLayer {
     constructor(img, position, scale, speed, tilesetConfig, tilesetMap, tileWidth, tileHeight) {
         super(position, speed);
-
-        this.sprite = new Sprite(img, position, 0, scale);
-
-        this.tilesetMap = tilesetMap; // 2D array representing the map layout
-        this.tilesetConfig = tilesetConfig; // Mapping from tile ID to source Rect
-        this.tileWidth = tileWidth;
-        this.tileHeight = tileHeight;
+        
+        this.tileset = new Tileset(img, position, scale, tilesetConfig, tilesetMap, tileWidth, tileHeight);
     }
 
     Update(deltaTime) {
         this.position.x = this.initialPosition.x + (this.camera.position.x * (1 - this.speed.x));
         this.position.y = this.initialPosition.y + (this.camera.position.y * (1 - this.speed.y));
+
+        this.tileset.position.Set(this.position.x, this.position.y);
     }
 
     Draw(renderer) {
-        // The base position of the layer is updated by the Update method for parallax
-        const basePosX = this.position.x;
-        const basePosY = this.position.y;
-        
-        // The sprite's scale is used for drawing
-        const scaleX = this.sprite.scale.x;
-        const scaleY = this.sprite.scale.y;
-
-        this.tilesetMap.forEach((row, rowIndex) => {
-            row.forEach((tileId, colIndex) => {
-                // A tileId of 0 (or any other falsy value) can represent an empty tile
-                if (!tileId) {
-                    return;
-                }
-
-                const tileConfig = this.tilesetConfig[tileId];
-                if (!tileConfig) {
-                    return; // Skip if no configuration for this tile ID
-                }
-
-                const sourceRect = tileConfig.rect;
-
-                // Calculate the position to draw this tile on the canvas (top-left corner).
-                const drawX = basePosX + (colIndex * this.tileWidth * scaleX);
-                const drawY = basePosY + (rowIndex * this.tileHeight * scaleY);
-
-                // Use the sprite's method to draw the specific tile section at the calculated position.
-                this.sprite.DrawSectionBasicAt(renderer, sourceRect.x, sourceRect.y, sourceRect.w, sourceRect.h, drawX, drawY);
-            });
-        });
+        this.tileset.Draw(renderer);
     }
 }
 
@@ -694,3 +750,5 @@ class BackgroundLayers {
         }
     }
 }
+
+// #endregion

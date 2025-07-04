@@ -23,25 +23,26 @@ class Parallax extends Game {
         this.camera = null;
         this.background = null;
 
-        this.floorLevelY = 50;
+        this.floorLevelY = 382;
     }
 
     Start() {
         super.Start();
-        this.box = new RectangleGO(new Vector2(this.screenHalfWidth, this.screenHeight - 100), 60, 100);
+        this.box = new RectangleGO(new Vector2(this.screenHalfWidth, this.floorLevelY), 60, 100);
+        this.box.pivot.y = 50;
         this.gameObjects.push(this.box);
 
         // create the camera
-        this.camera = new FollowCameraBasic(Vector2.Zero(), this.box, new Vector2(100, -160));
+        this.camera = new FollowCameraBasic(Vector2.Zero(), this.box, new Vector2(100, -146));
         this.camera.Start();
 
         // create the parallax background -----------------------------------------------------
         // layer 0: static black
-        const bgLayer0 = new StaticColorLayer(Color.black);
+        const bgLayer0 = new StaticColorLayer(Color.FromHex("#284050"));
         // layer 1: a "night sky" gradient (transparent to dark blue "#365B93")  (0.2, 1)
-        const bgLayer1 = new StaticGradientLayer(this.renderer, new Vector2(this.screenWidth, this.screenHeight), [[0, Color.white], [1, Color.black]]);
+        const bgLayer1 = new GradientRectangleLayer(this.renderer, new Vector2(0.1, 1), [[0, Color.FromHex("#003b5e")], [0.3, Color.FromHex("#02142a")], [0.8, Color.FromHex("#511539")]], Vector2.Zero(), this.screenWidth, 400);
         // layer 2: mountains in a full-size-sprite
-        const bgLayerMountain = new SpriteBackgroundLayer(this.graphicAssets.mountain.img, new Vector2(-100, this.screenHeight - this.graphicAssets.mountain.img.height - 70), 0, 1, new Vector2(0.05, 0.01));
+        const bgLayerMountain = new SpriteBackgroundLayer(this.graphicAssets.mountain.img, new Vector2(-100, this.screenHeight - this.graphicAssets.mountain.img.height - 70), 0, 1, new Vector2(0.05, 0.025));
         // layer 3: a set of individual sprite trees
         const bgLayerTrees = new MultispritesBackgroundLayer(
             new Vector2(0, 176),
@@ -51,7 +52,7 @@ class Parallax extends Game {
                 new SpriteSection(this.graphicAssets.trees.img, new Vector2(600, 0), 0, 1, new Rect(386, 0, 142, 240)), // tree 3
                 new SpriteSection(this.graphicAssets.trees.img, new Vector2(900, 0), 0, 1, new Rect(528, 0, 216, 240)) // tree 4
             ],
-            new Vector2(0.8, 0.8)
+            new Vector2(0.8, 0.9)
         );
         // layer 4: a set of tiles
         const TILE_WIDTH = 24;
@@ -92,8 +93,12 @@ class Parallax extends Game {
             this.box.position.x += 100 * deltaTime;
         if (Input.IsKeyPressed(KEY_W))
             this.box.position.y -= 100 * deltaTime;
-        if (Input.IsKeyPressed(KEY_S) && (this.box.position.y <= this.floorLevelY))
+        if (Input.IsKeyPressed(KEY_S))
             this.box.position.y += 100 * deltaTime;
+
+        if (this.box.position.y > this.floorLevelY)
+            this.box.position.y = this.floorLevelY;
+
 
         // update the camera
         this.camera.Update(deltaTime);

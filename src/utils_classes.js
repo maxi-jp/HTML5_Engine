@@ -87,6 +87,9 @@ class Color {
     static Pink() {
         return new Color(1, 0, 1, 1);
     }
+    static Transparent() {
+        return new Color(0, 0, 0, 0);
+    }
 
     static black  = Color.Black();
     static white  = Color.White();
@@ -103,6 +106,7 @@ class Color {
     static grey   = new Color(0.5, 0.5, 0.5, 1);
     static darkGrey  = new Color(0.663, 0.663, 0.663, 1);
     static lightGrey = new Color(0.827, 0.827, 0.827, 1);
+    static transparent = Color.Transparent();
 
     static Copy(color) {
         return new Color(color.r, color.g, color.b, color.a);
