@@ -96,19 +96,10 @@ class Box2DRectangleGO extends Box2DGameObject {
         this.color = color;
     }
 
-    Draw(ctx) {
-        ctx.fillStyle = this.color;
-        ctx.save();
+    Draw(renderer) {
         // TODO get the scale
-        ctx.translate(this.position.x * 100, this.position.y * 100); // Scale to pixels
-        ctx.rotate(this.rotation);
-        ctx.fillRect(
-            -this.halfWidth * 100,
-            -this.halfHeight * 100,
-            this.width * 100,
-            this.height * 100
-        );
-        ctx.restore();
+        renderer.DrawFillRectangle(this.position.x * 100, this.position.y * 100, this.width * 100, this.height * 100, Color.black, this.rotation);
+        ctx.save();
     }
 }
 
@@ -134,12 +125,12 @@ class Box2DSpriteObject extends Box2DGameObject {
         this.sprite.rotation = this.rotation;
     }
 
-    Draw(ctx) {
-        this.sprite.Draw(ctx);
+    Draw(renderer) {
+        this.sprite.Draw(renderer);
     }
 
-    DrawSection(ctx, sx, sy, sw, sh) {
-        this.sprite.DrawSection(ctx, sx, sy, sw, sh);
+    DrawSection(renderer, sx, sy, sw, sh) {
+        this.sprite.DrawSection(renderer, sx, sy, sw, sh);
     }
 }
 
@@ -173,8 +164,8 @@ class Box2DSSAnimationObjectBasic extends Box2DGameObject {
         this.animation.Update(deltaTime);
     }
 
-    Draw(ctx) {
-        this.animation.Draw(ctx);
+    Draw(renderer) {
+        this.animation.Draw(renderer);
     }
 
     PlayAnimationLoop(animationId, resetToFrame0=true) {
@@ -210,8 +201,8 @@ class Box2DSSAnimationObjectComplex extends Box2DGameObject {
         this.animation.Update(deltaTime);
     }
 
-    Draw(ctx) {
-        this.animation.Draw(ctx);
+    Draw(renderer) {
+        this.animation.Draw(renderer);
     }
 
     PlayAnimationLoop(animationId, resetToFrame0=true) {

@@ -11,8 +11,8 @@ const blocks = [
 const blockSize = 42;
 
 class Box2DPlatformer extends Box2DGame {
-    constructor() {
-        super(100, { x: 0, y: -9.8 }, false); // 1 pixel = 1/100 meter, gravity in m/s^2, allow bodies to sleep
+    constructor(renderer) {
+        super(renderer, 100, { x: 0, y: -9.8 }, false); // 1 pixel = 1/100 meter, gravity in m/s^2, allow bodies to sleep
 
         debugMode = false;
 
@@ -144,20 +144,20 @@ class Box2DPlatformer extends Box2DGame {
         this.coinsCounterSprite.Update(deltaTime);
     }
 
-    Draw(ctx) {
-        this.camera.PreDraw(ctx);
+    Draw() {
+        this.camera.PreDraw(this.renderer);
 
         // draw the background
-        this.background.Draw(ctx);
+        this.background.Draw(this.renderer);
 
         // draw the gameObjects
-        super.Draw(ctx);
+        super.Draw();
 
-        this.camera.PostDraw(ctx);
+        this.camera.PostDraw(this.renderer);
 
         // UI
-        this.coinsCounterSprite.Draw(ctx);
-        this.coinsCounterLabel.Draw(ctx);
+        this.coinsCounterSprite.Draw(this.renderer);
+        this.coinsCounterLabel.Draw(this.renderer);
     }
 
     PlayerTookCoin(coin) {
@@ -271,8 +271,8 @@ class Player extends Box2DSSAnimationObjectComplex {
         this.animation.flipX = this.isGoingLeft;
     }
 
-    Draw(ctx) {
-        super.Draw(ctx);
+    Draw(renderer) {
+        super.Draw(renderer);
     }
 
     OnContactDetected(other) {
@@ -350,8 +350,8 @@ class Block extends Box2DSpriteObject {
         });
     }
 
-    Draw(ctx) {
-        this.DrawSection(ctx, 20, 113, 16, 16)
+    Draw(renderer) {
+        this.DrawSection(renderer, 20, 113, 16, 16)
     }
 }
 
@@ -360,11 +360,12 @@ class BlockSpecial extends Block {
         super(position, img, physicsWorld);
     }
 
-    Draw(ctx) {
-        this.DrawSection(ctx, 2, 96, 16, 16)
+    Draw(renderer) {
+        this.DrawSection(renderer, 2, 96, 16, 16)
     }
 }
 
 // initialize the game
-if (game === null)
-    game = new Box2DPlatformer();
+window.onload = () => {
+    Init(Box2DPlatformer);
+}

@@ -1,6 +1,6 @@
 class Box2DGame extends Game {
-    constructor(scale, gravity, doSleep) {
-        super();
+    constructor(renderer, scale, gravity, doSleep) {
+        super(renderer);
         
         this.physicsWorld = null;
         this.physicsScale = scale; // 1 pixel = 1/scale meter
@@ -12,7 +12,7 @@ class Box2DGame extends Game {
         super.Start();
 
         // create the physics simulated world
-        this.physicsWorld = CreateBox2DWorld(ctx, this.physicsGravity, this.physicsDoSleep, this.physicsScale);
+        this.physicsWorld = CreateBox2DWorld(this.renderer.ctx, this.physicsGravity, this.physicsDoSleep, this.physicsScale);
     }
 
     Update(deltaTime) {
@@ -25,11 +25,11 @@ class Box2DGame extends Game {
         super.Update(deltaTime);
     }
 
-    Draw(ctx) {
+    Draw() {
         // box2d world debug
-        DrawWorldDebug(ctx, this.physicsWorld);
+        DrawWorldDebug(this.renderer.ctx, this.physicsWorld);
 
         // draw gameObjects
-        super.Draw(ctx);
+        super.Draw();
     }
 }

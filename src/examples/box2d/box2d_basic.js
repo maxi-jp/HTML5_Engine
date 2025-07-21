@@ -1,6 +1,6 @@
 class Box2DBasic extends Box2DGame {
-    constructor() {
-        super(100, { x: 0, y: -9.8 }, true); // 1 pixel = 1/100 meter, gravity in m/s^2, allow bodies to sleep
+    constructor(renderer) {
+        super(renderer, 100, { x: 0, y: -9.8 }, true); // 1 pixel = 1/100 meter, gravity in m/s^2, allow bodies to sleep
     }
 
     Start() {
@@ -80,13 +80,14 @@ class Box2DBasic extends Box2DGame {
         }
     }
 
-    Draw(ctx) {
-        super.Draw(ctx);
+    Draw() {
+        super.Draw();
 
-        DrawFillText(ctx, "Click on the screen to spawn balls!", 10, this.screenHeight - 20, "20px Arial", "white", "start");
+        this.renderer.DrawFillText("Click on the screen to spawn balls!", 10, this.screenHeight - 20, "20px Arial", Color.black, "start");
     }
 }
 
 // initialize the game
-if (game === null)
-    game = new Box2DBasic();
+window.onload = () => {
+    Init(Box2DBasic);
+}

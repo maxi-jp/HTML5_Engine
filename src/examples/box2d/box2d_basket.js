@@ -1,6 +1,6 @@
 class Box2DBasket extends Box2DGame {
-    constructor() {
-        super(100, { x: 0, y: -9.8 }, false); // 1 pixel = 1/100 meter, gravity in m/s^2, allow bodies to sleep
+    constructor(renderer) {
+        super(renderer, 100, { x: 0, y: -9.8 }, false); // 1 pixel = 1/100 meter, gravity in m/s^2, allow bodies to sleep
 
         this.graphicAssets = {
             ball: {
@@ -72,10 +72,11 @@ class Box2DBasket extends Box2DGame {
         this.ball.Update(deltaTime);
     }
 
-    Draw(ctx) {
-        super.Draw(ctx);
+    Draw() {
+        this.renderer.DrawFillBasicRectangle(0, 0, this.screenWidth, this.screenHeight, Color.black)
+        super.Draw();
 
-        this.ball.Draw(ctx);
+        this.ball.Draw(this.renderer);
     }
 }
 
@@ -137,5 +138,6 @@ class Ball extends Box2DSpriteObject {
 }
 
 // initialize the game
-if (game === null)
-    game = new Box2DBasket();
+window.onload = () => {
+    Init(Box2DBasket);
+}
