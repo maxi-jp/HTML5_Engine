@@ -12,7 +12,7 @@ class Box2DGame extends Game {
         super.Start();
 
         // create the physics simulated world
-        this.physicsWorld = CreateBox2DWorld(this.renderer.ctx, this.physicsGravity, this.physicsDoSleep, this.physicsScale);
+        this.physicsWorld = CreateBox2DWorld(this.renderer, this.physicsGravity, this.physicsDoSleep, this.physicsScale);
     }
 
     Update(deltaTime) {
