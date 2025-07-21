@@ -165,13 +165,85 @@ function CreateBox2DWorld(ctx, gravity, doSleep, scale) {
     return world;
 }
 
-function DrawWorldDebug(ctx, world) {
-    // Transform the canvas coordinates to cartesian coordinates
-    ctx.save();
-    ctx.translate(0, canvas.height);
-    ctx.scale(1, -1);
-    world.DrawDebugData();
-    ctx.restore();
+// WebGLDebugDraw: Implements Box2D debug draw using WebGLRenderer
+class WebGLDebugDraw {
+    constructor(renderer, scale) {
+        this.renderer = renderer;
+        this.scale = scale;
+    }
+
+    // Box2D expects these methods:
+    DrawPolygon(vertices, vertexCount, color) {
+        // Convert Box2D color to CSS
+        const cssColor = `rgba(${Math.floor(color.r*255)},${Math.floor(color.g*255)},${Math.floor(color.b*255)},${color.a})`;
+        const points = [];
+        for (let i = 0; i < vertexCount; i++) {
+            points.push({
+                x: vertices[i].x * this.scale,
+                y: vertices[i].y * this.scale
+            });
+        }
+        this.renderer.DrawPolygon(points, cssColor, false);
+    }
+
+    DrawSolidPolygon(vertices, vertexCount, color) {
+        const cssColor = `rgba(${Math.floor(color.r*255)},${Math.floor(color.g*255)},${Math.floor(color.b*255)},${color.a})`;
+        const points = [];
+        for (let i = 0; i < vertexCount; i++) {
+            points.push({
+                x: vertices[i].x * this.scale,
+                y: vertices[i].y * this.scale
+            });
+        }
+        this.renderer.DrawPolygon(points, cssColor, true);
+    }
+
+    DrawCircle(center, radius, color) {
+        const cssColor = `rgba(${Math.floor(color.r*255)},${Math.floor(color.g*255)},${Math.floor(color.b*255)},${color.a})`;
+        this.renderer.DrawCircle(center.x * this.scale, center.y * this.scale, radius * this.scale, cssColor, false, 1);
+    }
+
+    DrawSolidCircle(center, radius, axis, color) {
+        const cssColor = `rgba(${Math.floor(color.r*255)},${Math.floor(color.g*255)},${Math.floor(color.b*255)},${color.a})`;
+        this.renderer.DrawCircle(center.x * this.scale, center.y * this.scale, radius * this.scale, cssColor, true, 1);
+        // Optionally draw axis
+        this.renderer.DrawLine(center.x * this.scale, center.y * this.scale,
+            (center.x + axis.x * radius) * this.scale, (center.y + axis.y * radius) * this.scale, cssColor, 1);
+    }
+
+    DrawSegment(p1, p2, color) {
+        const cssColor = `rgba(${Math.floor(color.r*255)},${Math.floor(color.g*255)},${Math.floor(color.b*255)},${color.a})`;
+        this.renderer.DrawLine(p1.x * this.scale, p1.y * this.scale, p2.x * this.scale, p2.y * this.scale, cssColor, 1);
+    }
+
+    DrawTransform(xf) {
+        // Draw transform axes (red for x, green for y)
+        const p = xf.position;
+        const scale = this.scale;
+        this.renderer.DrawLine(p.x * scale, p.y * scale,
+            (p.x + xf.R.col1.x * 0.5) * scale, (p.y + xf.R.col1.y * 0.5) * scale, 'red', 2);
+        this.renderer.DrawLine(p.x * scale, p.y * scale,
+            (p.x + xf.R.col2.x * 0.5) * scale, (p.y + xf.R.col2.y * 0.5) * scale, 'green', 2);
+    }
+}
+
+function DrawWorldDebug(renderer, world) {
+    if (renderer.ctx) {
+        const ctx = renderer.ctx;
+        ctx.save();
+        ctx.translate(0, canvas.height);
+        ctx.scale(1, -1);
+        world.DrawDebugData();
+        ctx.restore();
+    }
+    else if (renderer instanceof WebGLRenderer) {
+        // Use WebGLDebugDraw
+        if (!world.webglDebugDraw) {
+            world.webglDebugDraw = new WebGLDebugDraw(renderer, world.scale || 1);
+            world.SetDebugDraw(world.webglDebugDraw);
+        }
+        world.DrawDebugData();
+    }
 }
 
 function OnContactDetected(contact) {

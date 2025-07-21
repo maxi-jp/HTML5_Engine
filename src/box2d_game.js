@@ -27,7 +27,7 @@ class Box2DGame extends Game {
 
     Draw() {
         // box2d world debug
-        DrawWorldDebug(this.renderer.ctx, this.physicsWorld);
+        DrawWorldDebug(this.renderer, this.physicsWorld);
 
         // draw gameObjects
         super.Draw();
