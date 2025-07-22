@@ -1,6 +1,6 @@
 class Box2DBasket extends Box2DGame {
     constructor(renderer) {
-        super(renderer, 100, { x: 0, y: -9.8 }, false); // 1 pixel = 1/100 meter, gravity in m/s^2, allow bodies to sleep
+        super(renderer, 100, { x: 0, y: -9.8 }, true); // 1 pixel = 1/100 meter, gravity in m/s^2, allow bodies to sleep
 
         this.graphicAssets = {
             ball: {
@@ -63,20 +63,18 @@ class Box2DBasket extends Box2DGame {
         // create the ball
         this.ball = new Ball(new Vector2(100, 200), this.graphicAssets.ball.img, this.physicsWorld, new Vector2(0.33, 0.33));
         this.ball.Start();
+        this.gameObjects.push(this.ball);
     }
 
     Update(deltaTime) {
         // update physics and gameObjects
         super.Update(deltaTime);
-        
-        this.ball.Update(deltaTime);
     }
 
     Draw() {
         this.renderer.DrawFillBasicRectangle(0, 0, this.screenWidth, this.screenHeight, Color.black)
+        
         super.Draw();
-
-        this.ball.Draw(this.renderer);
     }
 }
 
