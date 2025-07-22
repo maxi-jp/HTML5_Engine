@@ -90,10 +90,10 @@ function CreateBox(world, x, y, options) {
 
     // set the box shape
     fixtDef.shape = new b2PolygonShape();
-    if (options.offset){
-        fixtDef.shape.SetAsOrientedBox (options.width / 2, options.height / 2, new b2Vec2(options.offset.x, options.offset.y));
+    if (options.offset) {
+        fixtDef.shape.SetAsOrientedBox(options.width / 2, options.height / 2, new b2Vec2(options.offset.x, options.offset.y));
     }        
-    else{
+    else {
         fixtDef.shape.SetAsBox(options.width / 2, options.height / 2);
     }        
         
@@ -142,7 +142,11 @@ function CreatePolygon(world, x, y, options) {
 
     // Shape: 2d geometry
     fixtDef.shape = new b2PolygonShape();
-    fixtDef.shape.SetAsEdge(new b2Vec2(options.vertices[0].x, options.vertices[0].y), new b2Vec2(options.vertices[1].x, options.vertices[1].y));
+
+    // The vertices should be counterclockwise to work
+    const verts = options.vertices.map(v => new b2Vec2(v.x, v.y));
+
+    fixtDef.shape.SetAsArray(verts, verts.length);
 
     const body = CreateBody(world, options, x, y, fixtDef);
 
@@ -173,7 +177,6 @@ function CreateBox2DWorld(renderer, gravity, doSleep, scale) {
     const world = new b2World(grav, doSleep);
     world.scale = scale;
 
-    // DebugDraw is used to create the drawing with physics
     if (renderer.ctx) {
         let debugDraw = new b2DebugDraw();
         debugDraw.SetSprite(renderer.ctx);
