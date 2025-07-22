@@ -90,7 +90,13 @@ function CreateBox(world, x, y, options) {
 
     // set the box shape
     fixtDef.shape = new b2PolygonShape();
-    fixtDef.shape.SetAsBox(options.width / 2, options.height / 2);
+    if (options.offset){
+        fixtDef.shape.SetAsOrientedBox (options.width / 2, options.height / 2, new b2Vec2(options.offset.x, options.offset.y));
+    }        
+    else{
+        fixtDef.shape.SetAsBox(options.width / 2, options.height / 2);
+    }        
+        
 
     const body = CreateBody(world, options, x, y, fixtDef);
 
