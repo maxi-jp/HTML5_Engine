@@ -486,7 +486,7 @@ class FollowCamera extends Camera {
         this.shakingTime = time;
         this.shakingSpeed = speed;
         this.shakingSize = size;
-        this.shakeInitRandom.Random();
+        this.shakeInitRandom.Randomize();
     }
 }
 
@@ -511,6 +511,7 @@ class Pool {
         for (let i = maxSize; i > 0; i--) {
             const object = new this.objectConstructor(...constructorParams);
             object.owner = this.owner;
+            object.active = false;
 
             this.objects.push(object);
         }
@@ -559,7 +560,7 @@ class Pool {
         if (object == null) {
             // theres is no object non-active in the pool
             // lets create a new one
-            object = this.objectConstructor(...this.constructorParams);
+            object = new this.objectConstructor(...this.constructorParams);
             object.owner = this.owner;
 
             this.objects.push(object);

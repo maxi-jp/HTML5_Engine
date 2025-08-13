@@ -365,6 +365,10 @@ class Vector2 {
         return new Vector2(vector.x, vector.y);
     }
 
+    static Random() {
+        return new Vector2((Math.random() * 2) - 1, (Math.random() * 2) - 1);
+    }
+
     get x() {
         return this._x;
     }
@@ -466,13 +470,13 @@ class Vector2 {
         return Math.acos(dotProduct);
     }
 
-    Random() {
+    Randomize() {
         this._x = (Math.random() * 2) - 1;
         this._y = (Math.random() * 2) - 1;
     }
 
     RandomNormalized() {
-        this.Random();
+        this.Randomize();
         this.Normalize();
     }
 

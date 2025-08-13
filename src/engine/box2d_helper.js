@@ -150,7 +150,6 @@ function CreateBox2DWorld(renderer, gravity, doSleep, scale) {
     const world = new b2World(grav, doSleep);
     world.scale = scale;
 
-    // DebugDraw is used to create the drawing with physics
     if (renderer.ctx) {
         let debugDraw = new b2DebugDraw();
         debugDraw.SetSprite(renderer.ctx);
@@ -290,7 +289,6 @@ class WebGLDebugDraw {
         }
     }
 
-    // Box2D expects these methods:
     DrawPolygon(vertices, vertexCount, color) {
         // Convert vertices to scaled points
         const points = [];
@@ -300,7 +298,6 @@ class WebGLDebugDraw {
                 y: vertices[i].y * this.scale
             });
         }
-        // WebGLRenderer: DrawPolygon(points, strokeColor, lineWidth, fill, fillColor)
         this.renderer.DrawPolygon(points, color, 1, false, color);
     }
 
@@ -317,12 +314,10 @@ class WebGLDebugDraw {
     }
 
     DrawCircle(center, radius, color) {
-        // WebGLRenderer: DrawCircle(x, y, radius, color, stroke, lineWidth)
         this.renderer.DrawCircle(center.x * this.scale, center.y * this.scale, radius * this.scale, color, true, 1);
     }
 
     DrawSolidCircle(center, radius, axis, color) {
-        // WebGLRenderer: DrawCircle(x, y, radius, color, stroke, lineWidth)
         this.renderer.DrawCircle(center.x * this.scale, center.y * this.scale, radius * this.scale, color, false, 1);
         // Optionally draw axis
         this.renderer.DrawLine(center.x * this.scale, center.y * this.scale,
@@ -330,7 +325,6 @@ class WebGLDebugDraw {
     }
 
     DrawSegment(p1, p2, color) {
-        // WebGLRenderer: DrawLine(x1, y1, x2, y2, color, lineWidth)
         this.renderer.DrawLine(p1.x * this.scale, p1.y * this.scale, p2.x * this.scale, p2.y * this.scale, color, 1);
     }
 
