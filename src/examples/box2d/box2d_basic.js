@@ -59,6 +59,26 @@ class Box2DBasic extends Box2DGame {
                 type: b2Body.b2_dynamicBody
             } // physic options
         );
+
+        // a polygon
+        CreatePolygon(
+            this.physicsWorld,
+            4, // x coordinate
+            2.5, // y coordinate
+            {
+                type: b2Body.b2_staticBody,
+                vertices: [
+                    { x: 0, y: 0.3 },
+                    { x: -0.6, y: -0.3 },
+                    { x: 0.6, y: -0.3 }
+                ]
+            }
+        )
+
+        CreateEdge(this.physicsWorld, 1.2, 1.7, {
+            p1x: -0.33, p1y: 0, p2x: 0.33, p2y: 0.66,
+            type: b2Body.b2_staticBody
+        });
     }
 
     Update(deltaTime) {

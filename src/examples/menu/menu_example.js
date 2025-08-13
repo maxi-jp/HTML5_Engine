@@ -1,6 +1,6 @@
 class MenuExample extends Game {
-    constructor() {
-        super();
+    constructor(renderer) {
+        super(renderer);
 
         this.mainMenu = null;
 
@@ -29,13 +29,13 @@ class MenuExample extends Game {
         }
     }
 
-    Draw(ctx) {
-        super.Draw(ctx);
+    Draw() {
+        super.Draw();
 
-        DrawFillRectangle(ctx, 0, 0, this.screenWidth, this.screenHeight, "black");
+        this.renderer.DrawFillBasicRectangle(0, 0, this.screenWidth, this.screenHeight, Color.black);
 
         if (!this.onMenu)
-            this.openMenuLabel.Draw(ctx);
+            this.openMenuLabel.Draw(this.renderer);
     }
 
     OnMenuStartButton() {
@@ -91,5 +91,6 @@ class MainMenu extends HTMLMenu {
 }
 
 // initialize the game
-if (game === null)
-    game = new MenuExample();
+window.onload = () => {
+    Init(MenuExample);
+}

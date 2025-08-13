@@ -146,6 +146,24 @@ class MyRotationBox extends RectangleGO {
 
 ## Example: Using Box2D Physics
 
+### Game that uses Box2D
+
+```javascript
+class MyBox2DGame extends Box2DGame {
+    constructor(renderer) {
+        super(renderer, 100, { x: 0, y: -9.8 }, false); // 1 pixel = 1/100 meter, gravity in m/s^2, allow bodies to sleep
+    }
+
+    Start() {
+        super.Start(); // create the physics simulated this.physicsWorld
+
+        // create game objects with physics
+    }
+}
+```
+
+### GameObjects with Box2D body for this game
+
 ```javascript
 class MyPhysicsBox extends Box2DRectangleGO {
     constructor(position, physicsWorld) {
@@ -161,6 +179,14 @@ class MyPhysicsBox extends Box2DRectangleGO {
 ## License
 
 MIT License
+
+## TODO list
+- Example for a Tileset.
+- Create an action system for the input (i.e. `Input.Action("move_left")` instead of `Input.IsKeyDown(KEY_LEFT) || Input.IsKeyDown(KEY_A) || Input.IsGamepadButtonDown(0, "DPAD_LEFT") || Input.IsGamepadButtonDown(0, "LS_LEFT")`).
+- Improve the webgl renderer (draw batching).
+- Implement other physic engines.
+- Create a documentation page/wiki.
+- Multiplayer with nodejs.
 
 ## Contributing
 

@@ -90,7 +90,13 @@ function CreateBox(world, x, y, options) {
 
     // set the box shape
     fixtDef.shape = new b2PolygonShape();
-    fixtDef.shape.SetAsBox(options.width / 2, options.height / 2);
+    if (options.offset) {
+        fixtDef.shape.SetAsOrientedBox(options.width / 2, options.height / 2, new b2Vec2(options.offset.x, options.offset.y));
+    }        
+    else {
+        fixtDef.shape.SetAsBox(options.width / 2, options.height / 2);
+    }        
+        
 
     const body = CreateBody(world, options, x, y, fixtDef);
 
@@ -118,8 +124,29 @@ function CreateEdge(world, x, y, options) {
     const fixtDef = CreateFixtureDefinition(options);
 
     // Shape: 2d geometry
+    // fixtDef.shape = new b2EdgeShape(new b2Vec2(options.p1x, options.p1y), new b2Vec2(options.p2x, options.p2y));
+    // b2EdgeShape is not fully implemented in the current state of the box2d library, use b2PolygonShape instead
     fixtDef.shape = new b2PolygonShape();
     fixtDef.shape.SetAsEdge(new b2Vec2(options.p1x, options.p1y), new b2Vec2(options.p2x, options.p2y));
+
+    const body = CreateBody(world, options, x, y, fixtDef);
+
+    return body;
+}
+
+function CreatePolygon(world, x, y, options) {
+    options = AsignDefaultValues(options);
+
+    // fixture
+    const fixtDef = CreateFixtureDefinition(options);
+
+    // Shape: 2d geometry
+    fixtDef.shape = new b2PolygonShape();
+
+    // The vertices should be counterclockwise to work
+    const verts = options.vertices.map(v => new b2Vec2(v.x, v.y));
+
+    fixtDef.shape.SetAsArray(verts, verts.length);
 
     const body = CreateBody(world, options, x, y, fixtDef);
 
@@ -228,7 +255,7 @@ class WebGLDebugDraw {
         this.scale = world.scale;
 
         this.color = new Color(0.5, 0.9, 0.5, 0.5); // Default debug color
-        this.sensorColor = new Color(1, 0.5, 0.5, 0.5); // Sensor color
+        this.sensorColor = new Color(1, 1, 0, 1); // Sensor color
 
         this.inactiveColor = new Color(0.6, 0.6, 0.6, 0.5);
 
@@ -236,7 +263,7 @@ class WebGLDebugDraw {
         this.kinematicColor = new Color(0.5, 0.5, 0.9, 0.5);
         this.dynamicColor = new Color(0.9, 0.7, 0.7, 0.5);
 
-        this.otherColor = new Color(0.9, 0.7, 0.7, 0.5);
+        this.otherColor = new Color(0.2, 0.2, 0.2, 0.75);
 
         this.colors = [this.staticColor, this.kinematicColor, this.dynamicColor]
     }
@@ -248,93 +275,72 @@ class WebGLDebugDraw {
                 const shape = fixture.GetShape();
                 const type = body.GetType();
 
-                const color = this.colors[type];
-                const sensorColor = this.colors[type];
+                let color = this.colors[type];
+                if (type == b2Body.b2_dynamicBody && !body.IsAwake())
+                    color = this.inactiveColor;
 
                 if (shape instanceof b2PolygonShape) {
                     const vertexCount = shape.GetVertexCount();
                     const vertices = [];
+
                     for (let i = 0; i < vertexCount; i++) {
                         const v = shape.GetVertices()[i];
                         // Transform to world coordinates
                         const worldV = body.GetWorldPoint(v);
-                        vertices.push({ x: worldV.x, y: worldV.y });
+                        vertices.push({ x: worldV.x * this.scale, y: canvas.height - worldV.y * this.scale });
                     }
+
                     if (fixture.IsSensor()) {
-                        this.DrawPolygon(vertices, vertexCount, sensorColor);
+                        this.renderer.DrawPolygon(vertices, this.sensorColor, 1, false, this.sensorColor);
                     }
                     else {
-                        this.DrawSolidPolygon(vertices, vertexCount, color);
+                        this.renderer.DrawPolygon(vertices, color, 1, true, color);
                     }
                 }
                 else if (shape instanceof b2CircleShape) {
                     const center = body.GetWorldPoint(shape.GetLocalPosition());
                     const radius = shape.GetRadius();
                     if (fixture.IsSensor()) {
-                        this.DrawCircle(center, radius, sensorColor);
+                        this.renderer.DrawCircle(center.x * this.scale, center.y * this.scale, radius * this.scale, color, true, 1);
                     }
                     else {
-                        this.DrawSolidCircle(center, radius, { x: transform.R.col1.x, y: transform.R.col1.y }, color);
+                        this.renderer.DrawCircle(center.x * this.scale, canvas.height - center.y * this.scale, radius * this.scale, color, false, 1);
+                        
+                        const axis = { x: transform.R.col1.x, y: transform.R.col1.y };
+                        this.renderer.DrawLine(
+                            center.x * this.scale,
+                            canvas.height - center.y * this.scale,
+                            (center.x + axis.x * radius) * this.scale,
+                            canvas.height - (center.y + axis.y * radius) * this.scale,
+                            color, 1
+                        );
                     }
                 }
                 else if (shape instanceof b2EdgeShape) {
-                    // EdgeShape: draw as a segment
                     const v1 = body.GetWorldPoint(shape.GetVertex1());
                     const v2 = body.GetWorldPoint(shape.GetVertex2());
-                    this.DrawSegment(v1, v2, color);
+
+                    this.renderer.DrawLine(v1.x * this.scale, canvas.height - v1.y * this.scale, v2.x * this.scale, canvas.height - v2.y * this.scale, color, 1);
                 }
             }
-            // Optionally draw transform for each body
+            // Draw transform for each body
             //this.DrawTransform(transform);
         }
-    }
-
-    DrawPolygon(vertices, vertexCount, color) {
-        // Convert vertices to scaled points
-        const points = [];
-        for (let i = 0; i < vertexCount; i++) {
-            points.push({
-                x: vertices[i].x * this.scale,
-                y: vertices[i].y * this.scale
-            });
-        }
-        this.renderer.DrawPolygon(points, color, 1, false, color);
-    }
-
-    DrawSolidPolygon(vertices, vertexCount, color) {
-        const points = [];
-        for (let i = 0; i < vertexCount; i++) {
-            points.push({
-                x: vertices[i].x * this.scale,
-                y: vertices[i].y * this.scale
-            });
-        }
-        // Fill polygon
-        this.renderer.DrawPolygon(points, color, 1, true, color);
-    }
-
-    DrawCircle(center, radius, color) {
-        this.renderer.DrawCircle(center.x * this.scale, center.y * this.scale, radius * this.scale, color, true, 1);
-    }
-
-    DrawSolidCircle(center, radius, axis, color) {
-        this.renderer.DrawCircle(center.x * this.scale, center.y * this.scale, radius * this.scale, color, false, 1);
-        // Optionally draw axis
-        this.renderer.DrawLine(center.x * this.scale, center.y * this.scale,
-            (center.x + axis.x * radius) * this.scale, (center.y + axis.y * radius) * this.scale, color, 1);
-    }
-
-    DrawSegment(p1, p2, color) {
-        this.renderer.DrawLine(p1.x * this.scale, p1.y * this.scale, p2.x * this.scale, p2.y * this.scale, color, 1);
     }
 
     DrawTransform(xf) {
         // Draw transform axes (red for x, green for y)
         const p = xf.position;
         const scale = this.scale;
-        this.renderer.DrawLine(p.x * scale, p.y * scale,
-            (p.x + xf.R.col1.x * 0.5) * scale, (p.y + xf.R.col1.y * 0.5) * scale, Color.red, 2);
-        this.renderer.DrawLine(p.x * scale, p.y * scale,
-            (p.x + xf.R.col2.x * 0.5) * scale, (p.y + xf.R.col2.y * 0.5) * scale, Color.green, 2);
+        this.renderer.DrawLine(p.x * scale, canvas.height - p.y * scale,
+            (p.x + xf.R.col1.x * 0.5) * scale, canvas.height - (p.y + xf.R.col1.y * 0.5) * scale,
+            Color.red,
+            2
+        );
+        this.renderer.DrawLine(p.x * scale, canvas.height - p.y * scale,
+            (p.x + xf.R.col2.x * 0.5) * scale, canvas.height - (p.y + xf.R.col2.y * 0.5) * scale,
+            Color.green,
+            2
+        );
     }
 }

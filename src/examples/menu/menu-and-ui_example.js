@@ -1,6 +1,6 @@
 class MenuAndUIExample extends Game {
-    constructor() {
-        super();
+    constructor(renderer) {
+        super(renderer);
 
         this.mainMenu = null;
         this.uiMenu = null;
@@ -38,11 +38,14 @@ class MenuAndUIExample extends Game {
         super.Update(deltaTime);
 
         if (Input.IsKeyUp(KEY_ESCAPE)) {
+            if (this.onUpgradeMenu)
+                this.uiMenu.Hide();
+
             this.mainMenu.ShowMenu();
             this.onMainMenu = true;
         }
 
-        if (Input.IsKeyDown(KEY_SPACE)) {
+        if (Input.IsKeyDown(KEY_SPACE) && !this.onMainMenu) {
             if (this.onUpgradeMenu)
                 this.uiMenu.Hide();
             else
@@ -62,16 +65,16 @@ class MenuAndUIExample extends Game {
         }
     }
 
-    Draw(ctx) {
-        super.Draw(ctx);
+    Draw() {
+        super.Draw();
 
-        DrawFillRectangle(ctx, 0, 0, this.screenWidth, this.screenHeight, "black");
+        this.renderer.DrawFillBasicRectangle(0, 0, this.screenWidth, this.screenHeight, Color.black);
 
         if (!this.onMainMenu) {
-            this.openMenuLabel.Draw(ctx);
-            this.openUpgradesLabel.Draw(ctx);
-            this.upgradeInstructionsLabel.Draw(ctx);
-            this.upgradeCostsLabel.Draw(ctx);
+            this.openMenuLabel.Draw(this.renderer);
+            this.openUpgradesLabel.Draw(this.renderer);
+            this.upgradeInstructionsLabel.Draw(this.renderer);
+            this.upgradeCostsLabel.Draw(this.renderer);
         }
     }
 
@@ -179,5 +182,6 @@ class UIMenu extends HTMLMenu {
 }
 
 // initialize the game
-if (game === null)
-    game = new MenuAndUIExample();
+window.onload = () => {
+    Init(MenuAndUIExample);
+}
