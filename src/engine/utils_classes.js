@@ -466,7 +466,7 @@ class Circle {
 }
 
 class TextLabel {
-    constructor(text, position, font, color="black", align="center", baseline="bottom", stroke=false, lineWidth=1) {
+    constructor(text, position, font, color=Color.black, align="center", baseline="bottom", stroke=false, lineWidth=1) {
         this._text = text;
         this._font = font;
         this._color = color;

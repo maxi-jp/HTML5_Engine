@@ -2,10 +2,14 @@ class ObjectPooling extends Game {
     constructor(renderer) {
         super(renderer);
 
+        this.activeObjectsLabel = new TextLabel("Active objects in the pool: 0", new Vector2(10, this.screenHeight - 20), "16px Comic Sans MS", Color.white, "left", "bottom");
+
         // create an object pool of CircleGO objects
         // class Pool(owner, maxSize, objectConstructor, constructorParams=[])
         this.circles = new Pool(this, 10, MovingCircle, [10]);
         this.circles.drawDebug = true;
+
+        this.activeObjects = 0;
     }
 
     Start() {
@@ -22,13 +26,18 @@ class ObjectPooling extends Game {
 
         this.circles.Update(deltaTime);
 
-        // deactivate circles outside the canvas
+        // deactivate circles outside the canvas and count the active objects
+        this.activeObjects = 0;
         this.circles.objects.forEach(circle => {
             if (circle.position.x < 0 || circle.position.x > this.screenWidth ||
                 circle.position.y < 0 || circle.position.y > this.screenHeight) {
                 circle.active = false;
             }
+            
+            if (circle.active)
+                this.activeObjects++;
         });
+        this.activeObjectsLabel.text = `Active objects in the pool: ${this.activeObjects}`;
     }
 
     Draw() {
@@ -37,6 +46,8 @@ class ObjectPooling extends Game {
         super.Draw();
 
         this.circles.Draw(this.renderer);
+
+        this.activeObjectsLabel.Draw(this.renderer);
     }
 }
 
