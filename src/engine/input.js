@@ -148,6 +148,8 @@ const gamepadMapping = {
 }
 // #endregion
 
+const stickDeadzone = 0.1;
+
 var Input = {
     mouse: {
         x: 0,
@@ -174,6 +176,10 @@ var Input = {
         //     mapping: {} // reference to the gamepadMapping object
         // }
     ],
+
+    // Abstract input mapping
+    actionMaps: {},
+    axisMaps: {},
 
 // #region Setup Functions
     SetupKeyboardEvents: function() {
@@ -251,6 +257,204 @@ var Input = {
 
         // update connected gamepads and update button states
         this.UpdateGamepads();
+    },
+// #endregion
+
+// #region Input Mapping API
+
+    /**
+     * Clears all registered action and axis mappings.
+     * Should be called when starting a new game or scene.
+     */
+    ClearMappings: function() {
+        this.actionMaps = {};
+        this.axisMaps = {};
+    },
+
+    /**
+     * Registers a named action and its physical input bindings.
+     * @param {string} name The name of the action (e.g., "Jump", "Fire").
+     * @param {Array<Object>} bindings An array of binding objects.
+     * e.g., [{ type: 'key', code: KEY_SPACE }, { type: 'gamepad', code: 'FACE_DOWN' }]
+     */
+    RegisterAction: function(name, bindings) {
+        this.actionMaps[name] = bindings;
+    },
+
+    /**
+     * Registers a named axis and its physical input bindings.
+     * @param {string} name The name of the axis (e.g., "MoveHorizontal").
+     * @param {Array<Object>} bindings An array of binding objects.
+     * e.g., [{ type: 'key', positive: KEY_D, negative: KEY_A }, { type: 'gamepadaxis', stick: 'LS', axis: 0 }]
+     */
+    RegisterAxis: function(name, bindings) {
+        this.axisMaps[name] = bindings;
+    },
+
+    /**
+     * Checks if an action was triggered in the current frame.
+     * @param {string} name The name of the action.
+     * @returns {boolean} True if the action was triggered this frame.
+     */
+    GetActionDown: function(name) {
+        const bindings = this.actionMaps[name];
+        if (!bindings)
+            return false;
+
+        for (const binding of bindings) {
+            switch (binding.type) {
+                case 'key':
+                    if (this.IsKeyDown(binding.code))
+                        return true;
+                    break;
+                case 'mouse':
+                    if (this.IsMouseDown())
+                        return true;
+                    break;
+                case 'gamepad':
+                    for (let i = 0; i < this.gamepads.length; i++) {
+                        if (this.gamepads[i] && this.IsGamepadButtonDown(i, binding.code))
+                            return true;
+                    }
+                    break;
+            }
+        }
+        return false;
+    },
+
+    /**
+     * Checks if an action is currently being held down.
+     * @param {string} name The name of the action.
+     * @returns {boolean} True if the action is being held.
+     */
+    GetAction: function(name) {
+        const bindings = this.actionMaps[name];
+        if (!bindings)
+            return false;
+
+        for (const binding of bindings) {
+            switch (binding.type) {
+                case 'key':
+                    if (this.IsKeyPressed(binding.code))
+                        return true;
+                    break;
+                case 'mouse':
+                    if (this.IsMousePressed())
+                        return true;
+                    break;
+                case 'gamepad':
+                    for (let i = 0; i < this.gamepads.length; i++) {
+                        if (this.gamepads[i] && this.IsGamepadButtonPressed(i, binding.code))
+                            return true;
+                    }
+                    break;
+            }
+        }
+        return false;
+    },
+
+    /**
+     * Checks if an action was released in the current frame.
+     * @param {string} name The name of the action.
+     * @returns {boolean} True if the action was released this frame.
+     */
+    GetActionUp: function(name) {
+        const bindings = this.actionMaps[name];
+        if (!bindings)
+            return false;
+
+        for (const binding of bindings) {
+            switch (binding.type) {
+                case 'key':
+                    if (this.IsKeyUp(binding.code))
+                        return true;
+                    break;
+                case 'mouse':
+                    if (this.mouse.up)
+                        return true;
+                    break;
+                case 'gamepad':
+                    for (let i = 0; i < this.gamepads.length; i++) {
+                        if (this.gamepads[i] && this.IsGamepadButtonUp(i, binding.code))
+                            return true;
+                    }
+                    break;
+            }
+        }
+        return false;
+    },
+
+    /**
+     * Gets the value of a registered axis, from -1.0 to 1.0.
+     * @param {string} name The name of the axis.
+     * @returns {number} The axis value.
+     */
+    GetAxis: function(name) {
+        const bindings = this.axisMaps[name];
+        if (!bindings)
+            return 0;
+
+        let finalAxisValue = 0.0;
+
+        for (const binding of bindings) {
+            let currentValue = 0.0;
+            switch (binding.type) {
+                case 'key':
+                    if (this.IsKeyPressed(binding.positive))
+                        currentValue = 1.0;
+                    else if (this.IsKeyPressed(binding.negative))
+                        currentValue = -1.0;
+                    break;
+                case 'gamepadaxis':
+                    for (let i = 0; i < this.gamepads.length; i++) {
+                        if (!this.gamepads[i])
+                            continue;
+
+                        const stick = this.GetGamepadStickValue(i, binding.stick);
+                        const axisVal = binding.axis === 0 ? stick.x : stick.y;
+                        if (Math.abs(axisVal) > Math.abs(currentValue)) {
+                            currentValue = axisVal;
+                        }
+                    }
+                    break;
+                case 'gamepadtrigger':
+                    for (let i = 0; i < this.gamepads.length; i++) {
+                        if (!this.gamepads[i])
+                            continue;
+                        
+                        const triggerValue = this.GetGamepadTriggerValue(i, binding.trigger);
+                        if (Math.abs(triggerValue) > Math.abs(currentValue)) {
+                            currentValue = triggerValue;
+                        }
+                    }
+                    break;
+                case 'gamepadbutton':
+                     for (let i = 0; i < this.gamepads.length; i++) {
+                        if (!this.gamepads[i])
+                            continue;
+
+                        if (this.IsGamepadButtonPressed(i, binding.positive)) {
+                            currentValue = 1.0;
+                            break;
+                        }
+                        if (this.IsGamepadButtonPressed(i, binding.negative)) {
+                            currentValue = -1.0;
+                            break;
+                        }
+                     }
+                    break;
+            }
+            if (Math.abs(currentValue) > Math.abs(finalAxisValue)) {
+                finalAxisValue = currentValue;
+            }
+        }
+        
+        // Apply deadzone
+        if (Math.abs(finalAxisValue) < stickDeadzone)
+            return 0;
+
+        // Clamp to [-1, 1]
+        return Math.max(-1.0, Math.min(1.0, finalAxisValue));
     },
 // #endregion
 

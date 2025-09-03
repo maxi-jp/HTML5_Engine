@@ -71,6 +71,7 @@ function Init(GameClass) {
     Input.SetupKeyboardEvents();
     Input.SetupMouseEvents(canvas);
     Input.SetupGamepadEvents();
+    Input.ClearMappings();
 
     if (!game) {
         game = new GameClass(renderer);

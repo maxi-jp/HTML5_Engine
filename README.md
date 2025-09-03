@@ -12,7 +12,7 @@ Engine and examples presents on this project are active on github pages: https:/
 - **Sprite & Animation**: Full support for static sprites, sprite sheets, and complex animations.
 - **Sprite & Animation Support**: Render static sprites, sprite sections, and both basic and complex sprite sheet animations.
 - **Physics Integration**: Box2D physics support with easy-to-use Box2DGameObject classes for rectangles, sprites, and animated objects.
-- **Input Handling**: Unified API for keyboard, mouse, and gamepad input.
+- **Input Handling**: A powerful, abstract input system that maps actions (e.g., "Jump") and axes (e.g., "MoveHorizontal") to keyboard, mouse, and gamepad controls (with unified API for keyboard, mouse, and gamepad input).
 - **Audio Manager**: A simple yet powerful system to manage and play audio with optional analyzer support.
 - **UI & Menus**: Use standard HTML and CSS for creating game menus and overlays.
 - **Background Layers**: Create rich backgrounds with solid colors, gradients, parallax scrolling layers, and tilemaps.
@@ -22,7 +22,7 @@ Engine and examples presents on this project are active on github pages: https:/
 - **Mode 7 Renderer**: Simulate SNES-style pseudo-3D backgrounds (as in F-Zero or Mario Kart).
 
 ## Directory Structure
-- src/
+- engine/
   - renderer.js           # Graphic renderers (support for 2d context and WebGL)
   - main.js               # Entry point and main loop
   - game.js               # Core Game class
@@ -39,12 +39,14 @@ Engine and examples presents on this project are active on github pages: https:/
   - floppyderp/           # Flappy Bird-like example
   - menu/                 # Menu example
   - mode7/                # Mode 7 pseudo-3D example
+  - input_actions_test.js # Abstract input system example
+  - many more to add
 
 ## Getting Started
 
 1. **Clone or Download** this repository.
 
-2. **Set up your project folder.** Create a new folder for your game. Inside it, create an `engine` folder and copy the contents of the `src` directory from this repository into it. Your game's own JavaScript files can go in a `js` or `src` folder.
+2. **Set up your project folder.** Create a new folder for your game. Inside it, create an `engine` folder and copy the contents of the `engine` directory from this repository into it. Your game's own JavaScript files can go in a `js` or `src` folder.
 
    Your project structure might look like this:
    ```
@@ -53,7 +55,7 @@ Engine and examples presents on this project are active on github pages: https:/
    │   ├── renderer.js
    │   ├── main.js
    │   ├── game.js
-   │   └── ... (all other engine files from src/)
+   │   └── ... (all other engine files from engine/)
    ├── src/
    │   └── my-game.js
    ├── lib/
@@ -181,12 +183,13 @@ class MyPhysicsBox extends Box2DRectangleGO {
 MIT License
 
 ## TODO list
-- Example for a Tileset.
-- Create an action system for the input (i.e. `Input.Action("move_left")` instead of `Input.IsKeyDown(KEY_LEFT) || Input.IsKeyDown(KEY_A) || Input.IsGamepadButtonDown(0, "DPAD_LEFT") || Input.IsGamepadButtonDown(0, "LS_LEFT")`).
-- Improve the webgl renderer (draw batching).
-- Implement other physic engines.
-- Create a documentation page/wiki.
-- Multiplayer with nodejs.
+- [ ] Example for a Tileset.
+- [x] ~~Create an action system for the input (i.e. `Input.Action("move_left")` instead of `Input.IsKeyDown(KEY_LEFT) || Input.IsKeyDown(KEY_A) || Input.IsGamepadButtonDown(0, "DPAD_LEFT") || Input.IsGamepadButtonDown(0, "LS_LEFT")`).~~ ✅DONE
+- [ ] Improve the webgl renderer (draw batching).
+- [ ] Implement other physic engines.
+- [ ] Create a documentation page/wiki.
+- [ ] Multiplayer with nodejs.
+- [ ] Think on a great name for the engine (like **`wat.js`** or something like that).
 
 ## Contributing
 
@@ -208,5 +211,3 @@ Thank you for helping make HTML5_Engine better!
 ---
 
 **Enjoy building games with HTML5_Engine!**
-
-

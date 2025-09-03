@@ -208,7 +208,7 @@ class Tetris extends Game {
         this.ghostPiece = null; // preview of where the current piece is going to fall
         
         this.currentDropTime = 0; // time passed since the last drop
-        this.dropTime = 0.5; // time to drop a piece in seconds
+        this.dropTime = 1; // time to drop a piece in seconds
 
         this.minTimeToMove = 0.033; // minimum time to move a piece in milliseconds
         this.minTimeToMoveSinceLastMove = 0.25; // minimum time to repeat movement since the first key down
@@ -283,6 +283,8 @@ class Tetris extends Game {
 
         // center the grid in the canvas
         this.gridPosition.x = Math.floor((canvas.width - this.gridSize.cols * this.squareSize) / 2);
+
+        this.SetupInput();
     }
 
     Update(deltaTime) {
@@ -290,7 +292,7 @@ class Tetris extends Game {
         
         switch (this.currentState) {
             case TetrisGameState.Playing:
-                if (Input.IsKeyDown(KEY_PAUSE) || Input.IsKeyDown(KEY_ESCAPE) || Input.IsGamepadButtonDown(0, "START"))
+                if (Input.GetActionDown("Pause"))
                     this.currentState = TetrisGameState.Pause;
                 else {
                     this.HandleInput(deltaTime);
@@ -326,11 +328,11 @@ class Tetris extends Game {
                 }
                 break;
             case TetrisGameState.Pause:
-                if (Input.IsKeyDown(KEY_PAUSE) || Input.IsKeyDown(KEY_ESCAPE) || Input.IsGamepadButtonDown(0, "START"))
+                if (Input.GetActionDown("Pause"))
                     this.currentState = TetrisGameState.Playing;
                 break;
             case TetrisGameState.GameOver:
-                if (Input.IsKeyDown(KEY_SPACE) || Input.IsGamepadButtonDown(0, "START") || Input.IsGamepadButtonDown(0, "FACE_DOWN")) {
+                if (Input.GetActionDown("Confirm")) {
                     this.Start();
                 }
                 break;
@@ -405,7 +407,7 @@ class Tetris extends Game {
         while (rows--) {
             this.grid.push(new Array(cols).fill(0));
         }
-        
+
         if (this.debug)
             this.grid = tripleTSpinTest1;
     }
@@ -554,34 +556,94 @@ class Tetris extends Game {
         }
     }
 
+    SetupInput() {
+        Input.RegisterAction("RotateCW", [
+            { type: 'key', code: KEY_SPACE },
+            { type: 'mouse' },
+            { type: 'gamepad', code: 'FACE_DOWN' }
+        ]);
+
+        Input.RegisterAction("RotateCCW", [
+            { type: 'key', code: KEY_Z },
+            { type: 'gamepad', code: 'FACE_RIGHT' }
+        ]);
+
+        Input.RegisterAction("HardDrop", [
+            { type: 'key', code: KEY_W },
+            { type: 'gamepad', code: 'DPAD_UP' },
+            { type: 'gamepad', code: 'LS_UP' }
+        ]);
+
+        Input.RegisterAction("SavePiece", [
+            { type: 'key', code: KEY_Q },
+            { type: 'gamepad', code: 'LB' },
+            { type: 'gamepad', code: 'RT' }
+        ]);
+
+        Input.RegisterAction("Pause", [
+            { type: 'key', code: KEY_PAUSE },
+            { type: 'key', code: KEY_ESCAPE },
+            { type: 'key', code: KEY_P },
+            { type: 'gamepad', code: 'START' }
+        ]);
+
+        Input.RegisterAction("Confirm", [
+            { type: 'key', code: KEY_SPACE },
+            { type: 'gamepad', code: 'START' },
+            { type: 'gamepad', code: 'FACE_DOWN' }
+        ]);
+
+        Input.RegisterAction("MoveLeft", [
+            { type: 'key', code: KEY_A },
+            { type: 'key', code: KEY_LEFT },
+            { type: 'gamepad', code: 'DPAD_LEFT' },
+            { type: 'gamepad', code: 'LS_LEFT' }
+        ]);
+
+        Input.RegisterAction("MoveRight", [
+            { type: 'key', code: KEY_D },
+            { type: 'key', code: KEY_RIGHT },
+            { type: 'gamepad', code: 'DPAD_RIGHT' },
+            { type: 'gamepad', code: 'LS_RIGHT' }
+        ]);
+
+        Input.RegisterAction("SoftDrop", [
+            { type: 'key', code: KEY_S },
+            { type: 'key', code: KEY_DOWN },
+            { type: 'gamepad', code: 'DPAD_DOWN' },
+            { type: 'gamepad', code: 'LS_DOWN' }
+        ]);
+    }
+
     HandleInput(deltaTime) {
         this.lastTimeMoved += deltaTime;
+
         // left-right movement
-        if (Input.IsKeyDown(KEY_LEFT) || Input.IsKeyDown(KEY_A) || Input.IsGamepadButtonDown(0, "DPAD_LEFT") || Input.IsGamepadButtonDown(0, "LS_LEFT")) {
+        if (Input.GetActionDown("MoveLeft")) {
             this.MoveCurrentPiece(-1);
             this.lastTimeMoved = 0;
             this.repeatedMovement = true;
         }
-        if (Input.IsKeyDown(KEY_RIGHT) || Input.IsKeyDown(KEY_D) || Input.IsGamepadButtonDown(0, "DPAD_RIGHT") || Input.IsGamepadButtonDown(0, "LS_RIGHT")) {
+        if (Input.GetActionDown("MoveRight")) {
             this.MoveCurrentPiece(1);
             this.lastTimeMoved = 0;
             this.repeatedMovement = true;
         }
-        
-        if (this.debug) {
-            if (Input.IsKeyDown(KEY_UP) || Input.IsKeyDown(KEY_W))
-                this.UnDrop();
-        }
 
         // continuous press movement
-        if (Input.IsKeyPressed(KEY_LEFT) || Input.IsKeyPressed(KEY_A) || Input.IsGamepadButtonPressed(0, "DPAD_LEFT") || Input.IsGamepadButtonPressed(0, "LS_LEFT")) {
+        if (Input.GetAction("MoveLeft")) {
             if ((this.repeatedMovement && this.lastTimeMoved > this.minTimeToMoveSinceLastMove) || (!this.repeatedMovement && this.lastTimeMoved > this.minTimeToMove)) {
                 this.MoveCurrentPiece(-1);
                 this.lastTimeMoved = 0;
                 this.repeatedMovement = false;
             }
         }
-        if (Input.IsKeyPressed(KEY_RIGHT) || Input.IsKeyPressed(KEY_D) || Input.IsGamepadButtonPressed(0, "DPAD_RIGHT") || Input.IsGamepadButtonPressed(0, "LS_RIGHT")) {
+        if (Input.GetAction("MoveRight")) {
+        
+        if (this.debug) {
+            if (Input.IsKeyDown(KEY_UP) || Input.IsKeyDown(KEY_W))
+                this.UnDrop();
+        }
             if ((this.repeatedMovement && this.lastTimeMoved > this.minTimeToMoveSinceLastMove) || (!this.repeatedMovement && this.lastTimeMoved > this.minTimeToMove)) {
                 this.MoveCurrentPiece(1);
                 this.lastTimeMoved = 0;
@@ -589,22 +651,22 @@ class Tetris extends Game {
             }
         }
 
-        // drop movement
-        if ((Input.IsKeyPressed(KEY_DOWN) || Input.IsKeyPressed(KEY_S) || Input.IsGamepadButtonPressed(0, "DPAD_DOWN") || Input.IsGamepadButtonPressed(0, "LS_DOWN")) && this.lastTimeMoved > this.minTimeToMove && !this.isTouchingGround) {
+        // soft drop movement
+        if (Input.GetAction("SoftDrop") && this.lastTimeMoved > this.minTimeToMove && !this.isTouchingGround) {
             this.SoftDrop();
             this.lastTimeMoved = 0;
         }
 
         // rotate
-        if (Input.IsKeyDown(KEY_SPACE) || Input.IsMouseDown() || Input.IsGamepadButtonDown(0, "FACE_DOWN")) {
+        if (Input.GetActionDown("RotateCW")) {
             this.RotateCurrentPiece(1); // Clockwise
         }
-        if (Input.IsKeyDown(KEY_Z) || Input.IsGamepadButtonDown(0, "FACE_RIGHT")) {
+        if (Input.GetActionDown("RotateCCW")) {
             this.RotateCurrentPiece(-1); // Counter-clockwise
         }
 
         // Save the current piece
-        if ((Input.IsKeyPressed(KEY_Q) || Input.IsGamepadButtonPressed(0, "LB") || Input.IsGamepadButtonPressed(0, "RT")) && !this.lastPieceSaved) {
+        if (Input.GetActionDown("SavePiece") && !this.lastPieceSaved) {
             if (this.savedPiece === null) {
                 this.savedPiece = this.currentPiece;
                 this.currentPiece = this.nextPieces.shift();
@@ -629,11 +691,15 @@ class Tetris extends Game {
         }
 
         // Full fall
-        if (Input.IsKeyDown(KEY_W) || Input.IsGamepadButtonDown(0, "DPAD_UP") || Input.IsGamepadButtonDown(0, "LS_UP")) {
+        if (Input.GetActionDown("HardDrop")) {
             this.FullFall();
         }
-    }
 
+        if (this.debug && (Input.IsKeyDown(KEY_UP) || Input.IsKeyDown(KEY_W))) {
+            this.UnDrop();
+        }
+    }
+    
     Drop() {
         // unused function, drop is now performed in the SoftDrop method using lock delay
         this.currentPiece.position.y++;
