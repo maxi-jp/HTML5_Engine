@@ -1,0 +1,205 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background: #f8f9fa;
+    color: #343a40;
+}
+
+header {
+    background: #007bff;
+    color: #fff;
+    padding: 1.5rem 0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    color: #fff;
+    text-shadow: 0 2px 3px #00000078;
+}
+
+header p {
+    margin: 0.5rem 0 0;
+    font-size: 1.1rem;
+}
+
+header a {
+    color: #e9ecef;
+}
+
+.docs-container {
+    display: flex;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+aside.sidebar {
+    width: 180px;
+    flex-shrink: 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    height: calc(100vh - 125px); /* Adjust based on header height */
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+}
+
+aside.sidebar h2 {
+    font-size: 1.2em;
+    margin-top: 0;
+    margin-bottom: 1em;
+    color: #495057;
+}
+
+aside.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+aside.sidebar ul li a {
+    display: block;
+    padding: 8px 10px;
+    text-decoration: none;
+    color: #343a40;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+aside.sidebar ul li a:hover {
+    background-color: #e9ecef;
+    color: #0056b3;
+}
+
+aside.sidebar ul li a.active {
+    background-color: #007bff;
+    color: #fff;
+    font-weight: bold;
+}
+
+main {
+    flex-grow: 1;
+    padding: 30px 40px;
+    margin: 0;
+    background: #fff;
+    min-width: 0; /* Allow flex item to shrink below its content's intrinsic width */
+}
+
+section {
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+section:last-child {
+    border-bottom: none;
+}
+
+p {
+    margin: 16px 0;
+}
+
+h3 {
+    margin-bottom: 0;
+}
+
+h1, h2, h3, h4 {
+    color: #007bff;
+    margin-top: 0;
+}
+
+pre {
+    background: #f0f0f0;
+    border: 1px solid #ced4da;
+    border-left: 5px solid #007bff;
+    color: #495057;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.95em;
+    line-height: 1.5;
+    margin-bottom: 1.6em;
+    max-width: 100%;
+    overflow: auto;
+    padding: 1em 1.5em;
+    display: block;
+    word-wrap: break-word;
+    border-radius: 4px;
+    position: relative;
+}
+
+code {
+    font-family: 'Consolas', 'Monaco', monospace;
+    background: #e2e6ea;
+    padding: 2px 4px;
+    border-radius: 3px;
+    color: #c82333; /* A distinct color for inline code */
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+    font-size: 0.9em;
+    margin-top: 30px;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.copy-to-clipboard-button {
+    color: #272822;
+    background-color: #cbcbcb;
+    width: 80px;
+    height: 30px;
+    line-height: 30px;
+    padding: 0;
+    border-radius: .3em;
+    cursor: pointer;
+}
+
+div.code-toolbar>.toolbar {
+    top: .5em;
+    right: .5em;
+}
+
+/* API Reference List Styles */
+dl {
+    margin-left: 20px;
+    margin-bottom: 1.5em;
+}
+
+dt {
+    font-weight: bold;
+    margin-top: 1em;
+}
+
+dt > code {
+    font-size: 1.05em;
+    background-color: #e9ecef;
+    color: #0056b3;
+    padding: 3px 6px;
+}
+
+@media (max-width: 992px) {
+    .docs-container {
+        flex-direction: column;
+    }
+
+    aside.sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        border-right: none;
+        border-bottom: 1px solid #dee2e6;
+        text-align: center;
+    }
+}

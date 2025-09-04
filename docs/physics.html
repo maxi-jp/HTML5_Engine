@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5_Engine Documentation - Physics Engine</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" integrity="sha512-mIs9kKbaw6JZFfSuo+MovjU+Ntggfoj8RwAmJbVXQ5mkAX5LlgETQEweFPI18humSPHymTb5iikEOKWF7I8ncQ==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css" integrity="sha512-Dqf5696xtofgH089BgZJo2lSWTvev4GFo+gA2o4GullFY65rzQVQLQVlzLvYwTo0Bb2Gpb6IqwxYWtoMonfdhQ==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="./docs.css">
+</head>
+<body>
+    <header>
+        <h1>HTML5_Engine Documentation</h1>
+        <p>A modular, object-oriented HTML5 game engine for web browsers, built with vanilla JavaScript, WebGL and the HTML5 Canvas API.</p>
+        <p>Engine and examples are actively hosted on GitHub Pages: <a href="https://maxi-jp.github.io/HTML5_Engine/" target="_blank">https://maxi-jp.github.io/HTML5_Engine/</a></p>
+    </header>
+
+    <div class="docs-container">
+        <aside class="sidebar">
+            <h2>Navigation</h2>
+            <ul>
+                <li><a href="docs.html">Overview & Features</a></li>
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="input-system.html">Input System</a></li>
+                <li><a href="physics.html" class="active">Physics (Box2D)</a></li>
+                <li><a href="audio.html">Audio Manager</a></li>
+                <li><a href="ui.html">UI & Menus</a></li>
+                <li><a href="utilities.html">Utilities</a></li>
+                <li><a href="debugging.html">Debugging Tools</a></li>
+                <li><a href="examples.html">Examples</a></li>
+            </ul>
+        </aside>
+
+        <main>
+            <section id="physics">
+                <h2>Physics Integration (Box2D)</h2>
+                <p>The engine integrates with Box2D for robust 2D physics simulations. You can create a game that uses Box2D by extending <code>Box2DGame</code> and creating physics-enabled game objects using <code>Box2DRectangleGO</code> or <code>Box2DCircleGO</code>.</p>
+                
+                <h3>Initial configuration</h3>
+                <p>In your <code>index.html</code> you need to include some specific box2d scripts in addition to the engine ones:</p>
+                <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;My Awesome Game&lt;/title&gt;
+    &lt;!-- engine/ scripts --&gt;
+    &lt;!-- add above the engine/ scripts like "engine/renderer.js", "engine/main.js", etc --&gt;
+    &lt;script src="lib/Box2D.js"&gt;&lt;/script&gt;
+    &lt;script src="engine/box2d_helper.js"&gt;&lt;/script&gt;
+    &lt;script src="engine/box2d_game.js"&gt;&lt;/script&gt;
+    &lt;script src="engine/box2d_gameobjects.js"&gt;&lt;/script&gt;
+    &lt;!-- add here your game scripts --&gt;
+    &lt;script src="src/my-game.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;canvas width="640" height="480" id="myCanvas"&gt;&lt;/canvas&gt;    
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+                <p>These are the Box2D library itself (<code>lib/Box2D.js</code>), some helper functions for the engine to interact with Box2D (<code>engine/box2d_helper.js</code>), the specific <code>Game</code> class for games that uses Box2D physics (<code>engine/box2d_game.js</code>), and some <code>GameObject</code> classes with physics bodys (<code>engine/box2d_gameobjects.js</code>).</p>
+
+                <h3>Game that uses Box2D</h3>
+                <pre><code class="language-javascript">class MyBox2DGame extends Box2DGame {
+    constructor(renderer) {
+        // super(renderer, pixelsPerMeter, gravityVector, allowSleep)
+        super(renderer, 100, { x: 0, y: -9.8 }, false); // 1 pixel = 1/100 meter, gravity in m/s^2, allow bodies to sleep
+    }
+
+    Start() {
+        super.Start(); // This creates the physics world (this.physicsWorld)
+
+        // Create game objects with physics bodies
+        // this.gameObjects.push(new MyPhysicsBox(new Vector2(100, 100), this.physicsWorld));
+    }
+}</code></pre>
+            
+                <h3>GameObjects with Box2D body</h3>
+                <pre><code class="language-javascript">class MyPhysicsBox extends Box2DRectangleGO {
+    constructor(position, physicsWorld) {
+        // super(position, physicsWorld, PhysicsObjectType, { width, height, density }, friction, restitution, color)
+        super(position, physicsWorld, PhysicsObjectType.Box, { width: 1, height: 1, density: 1 }, 1, 0.5, Color.green);
+    }
+
+    // Implement collision handling
+    OnContactDetected(other) {
+        console.log("Collision detected with:", other.name);
+        // Handle collision logic here
+    }
+    // ... other methods like SetLinearVelocity, ApplyForce, etc.
+}</code></pre>
+
+                <hr style="margin: 40px 0;">
+
+                <h3>API Reference</h3>
+                <p>Here is a comprehensive list of the public classes, methods, and properties available for the Box2D integration.</p>
+
+                <h4><code>Box2DGame</code> Class</h4>
+                <p>Extends the base <code>Game</code> class to manage the Box2D physics world.</p>
+                <dl>
+                    <dt><code>constructor(renderer, pixelsPerMeter, gravityVector, allowSleep)</code></dt>
+                    <dd>Initializes the Box2D game.
+                        <ul>
+                            <li><code>renderer</code>: The engine's renderer instance.</li>
+                            <li><code>pixelsPerMeter</code>: Conversion factor from pixels to meters (e.g., 100 means 100 pixels = 1 meter).</li>
+                            <li><code>gravityVector</code>: An object <code>{x, y}</code> defining the gravity (e.g., <code>{x: 0, y: -9.8}</code>).</li>
+                            <li><code>allowSleep</code>: Boolean, whether bodies can go to sleep to save CPU.</li>
+                        </ul>
+                    </dd>
+
+                    <dt><code>physicsWorld</code></dt>
+                    <dd>A public property holding the Box2D <code>b2World</code> instance. You can interact directly with it for advanced physics operations.</dd>
+
+                    <dt><code>SetDebugDraw(enabled)</code></dt>
+                    <dd>Enables or disables debug drawing for the physics world. When enabled, it draws outlines of physics bodies and joints.</dd>
+
+                    <dt><code>AddBody(bodyDef)</code></dt>
+                    <dd>Adds a Box2D body to the physics world using a <code>b2BodyDef</code>. Typically used internally by <code>Box2DGameObject</code>s.</dd>
+
+                    <dt><code>RemoveBody(body)</code></dt>
+                    <dd>Removes a Box2D body from the physics world. Typically used internally by <code>Box2DGameObject</code>s.</dd>
+
+                    <dt><code>SetGravity(gravityVector)</code></dt>
+                    <dd>Changes the gravity vector of the physics world during runtime.</dd>
+                </dl>
+
+                <h4><code>Box2DGameObject</code> Classes</h4>
+                <p>Base class for all game objects that have a Box2D physics body. Subclasses include <code>Box2DRectangleGO</code>, <code>Box2DCircleGO</code>, <code>Box2DSpriteGO</code>, and <code>Box2DAnimatedSpriteGO</code>. All share common physics-related methods.</p>
+                <dl>
+                    <dt><code>constructor(position, physicsWorld, objectType, sizeOrRadius, density, friction, restitution, ...)</code></dt>
+                    <dd>The constructor for Box2D game objects. Parameters vary slightly by shape (e.g., <code>size</code> for rectangles, <code>radius</code> for circles).
+                        <ul>
+                            <li><code>position</code>: A <code>Vector2</code> for the initial position.</li>
+                            <li><code>physicsWorld</code>: The <code>b2World</code> instance from your <code>Box2DGame</code>.</li>
+                            <li><code>objectType</code>: Use <code>PhysicsObjectType.Box</code> or <code>PhysicsObjectType.Circle</code>.</li>
+                            <li><code>sizeOrRadius</code>: An object <code>{width, height}</code> for boxes, or a number for circles.</li>
+                            <li><code>density</code>: Mass per unit area/volume.</li>
+                            <li><code>friction</code>: Coefficient of friction.</li>
+                            <li><code>restitution</code>: Coefficient of restitution (bounciness).</li>
+                            <li>Additional parameters for rendering (e.g., <code>color</code>, <code>image</code>, <code>animationData</code>).</li>
+                        </ul>
+                    </dd>
+
+                    <dt><code>body</code></dt>
+                    <dd>A public property holding the Box2D <code>b2Body</code> instance associated with this game object.</dd>
+
+                    <dt><code>OnContactDetected(otherGameObject)</code></dt>
+                    <dd>A callback method that is invoked when this object's physics body begins contact with another <code>Box2DGameObject</code>. Override this in your custom classes to handle collisions.</dd>
+
+                    <dt><code>OnContactEnded(otherGameObject)</code></dt>
+                    <dd>A callback method that is invoked when this object's physics body ends contact with another <code>Box2DGameObject</code>. Override this in your custom classes.</dd>
+
+                    <dt><code>SetLinearVelocity(x, y)</code></dt>
+                    <dd>Sets the linear velocity of the body in meters per second.</dd>
+
+                    <dt><code>GetLinearVelocity()</code></dt>
+                    <dd>Returns the current linear velocity as a <code>Vector2</code>.</dd>
+
+                    <dt><code>SetAngularVelocity(radiansPerSecond)</code></dt>
+                    <dd>Sets the angular velocity of the body in radians per second.</dd>
+
+                    <dt><code>GetAngularVelocity()</code></dt>
+                    <dd>Returns the current angular velocity in radians per second.</dd>
+
+                    <dt><code>ApplyForce(forceX, forceY, pointX, pointY)</code></dt>
+                    <dd>Applies a force to a world point. Forces are continuous and affect acceleration.</dd>
+
+                    <dt><code>ApplyImpulse(impulseX, impulseY, pointX, pointY)</code></dt>
+                    <dd>Applies an impulse to a world point. Impulses are instantaneous and affect velocity directly.</dd>
+
+                    <dt><code>SetFixedRotation(fixed)</code></dt>
+                    <dd>Sets whether the body can rotate (<code>true</code> to prevent rotation, <code>false</code> to allow).</dd>
+
+                    <dt><code>SetSensor(isSensor)</code></dt>
+                    <dd>Sets the body's fixture as a sensor. Sensors detect collisions but do not apply physics responses.</dd>
+
+                    <dt><code>SetCategoryBits(bits)</code></dt>
+                    <dd>Sets the collision category bits for the body's fixture.</dd>
+
+                    <dt><code>SetMaskBits(bits)</code></dt>
+                    <dd>Sets the collision mask bits for the body's fixture (which categories it collides with).</dd>
+                </dl>
+
+                <h4>Helper Functions (from <code>box2d_helper.js</code>)</h4>
+                <dl>
+                    <dt><code>PixelsToMeters(pixels)</code></dt>
+                    <dd>Converts a pixel value to meters, using the <code>pixelsPerMeter</code> ratio defined in <code>Box2DGame</code>.</dd>
+
+                    <dt><code>MetersToPixels(meters)</code></dt>
+                    <dd>Converts a meter value to pixels.</dd>
+
+                    <dt><code>Vector2ToB2Vec2(vector2)</code></dt>
+                    <dd>Converts the engine's <code>Vector2</code> object to a Box2D <code>b2Vec2</code> object.</dd>
+
+                    <dt><code>B2Vec2ToVector2(b2vec2)</code></dt>
+                    <dd>Converts a Box2D <code>b2Vec2</code> object to the engine's <code>Vector2</code> object.</dd>
+                </dl>
+            </section>
+        </main>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 HTML5_Engine. Licensed under <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>.
+        <br>Created by Maximiliano Miranda | <a href="https://github.com/maxi-jp" target="_blank">GitHub</a> | <a href="https://www.linkedin.com/in/maximiliano-miranda/" target="_blank">LinkedIn</a> | <a href="https://x.com/maxi_ke" target="_blank">X</a>
+        </p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js" integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js" integrity="sha512-st608h+ZqzliahyzEpETxzU0f7z7a9acN6AFvYmHvpFhmcFuKT8a22TT5TpKpjDa3pt3Wv7Z3SdQBCBdDPhyWA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js" integrity="sha512-/kVH1uXuObC0iYgxxCKY41JdWOkKOxorFVmip+YVifKsJ4Au/87EisD1wty7vxN2kAhnWh6Yc8o/dSAXj6Oz7A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</body>
+</html>

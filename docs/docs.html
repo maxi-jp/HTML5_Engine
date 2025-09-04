@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5_Engine Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" integrity="sha512-mIs9kKbaw6JZFfSuo+MovjU+Ntggfoj8RwAmJbVXQ5mkAX5LlgETQEweFPI18humSPHymTb5iikEOKWF7I8ncQ==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css" integrity="sha512-Dqf5696xtofgH089BgZJo2lSWTvev4GFo+gA2o4GullFY65rzQVQLQVlzLvYwTo0Bb2Gpb6IqwxYWtoMonfdhQ==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="./docs.css">
+</head>
+<body>
+    <header>
+        <h1>HTML5_Engine Documentation</h1>
+        <p>A modular, object-oriented HTML5 game engine for web browsers, built with vanilla JavaScript, WebGL and the HTML5 Canvas API.</p>
+        <p>Engine and examples are actively hosted on GitHub Pages: <a href="https://maxi-jp.github.io/HTML5_Engine/" target="_blank">https://maxi-jp.github.io/HTML5_Engine/</a></p>
+    </header>
+
+    <div class="docs-container">
+        <aside class="sidebar">
+            <h2>Navigation</h2>
+            <ul>
+                <li><a href="docs.html" class="active">Overview & Features</a></li>
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="input-system.html">Input System</a></li>
+                <li><a href="physics.html">Physics (Box2D)</a></li>
+                <li><a href="audio.html">Audio Manager</a></li>
+                <li><a href="ui.html">UI & Menus</a></li>
+                <li><a href="utilities.html">Utilities</a></li>
+                <li><a href="debugging.html">Debugging Tools</a></li>
+                <li><a href="examples.html">Examples</a></li>
+            </ul>
+        </aside>
+
+        <main>
+            <section id="overview">
+                <h2>Overview</h2>
+                <p>HTML5_Engine is a lightweight, modular, and object-oriented game engine designed for web browsers. It leverages vanilla JavaScript, WebGL and the HTML5 Canvas API to provide a robust foundation for 2D game development. Originally developed for a university course, it emphasizes clarity, extensibility, and ease of use.</p>
+            </section>
+
+            <section id="features">
+                <h2>Features</h2>
+                <p>The engine comes packed with a variety of features to streamline your game development process:</p>
+                
+                <h3>Modular Core</h3>
+                <p>A clean, object-oriented architecture ensures that the engine is easy to understand, extend, and maintain. Components are designed to be independent yet work seamlessly together.</p>
+                
+                <h3>Rendering Engine</h3>
+                <p>The architecture is designed to support 2D rendering capabilities via the HTML5 Canvas API and WebGL, offering flexibility for more advanced graphics.</p>
+                
+                <h3>Game Loop</h3>
+                <p>A classic, built-in main loop manages game updates and drawing. It features a fixed update phase for consistent physics and logic, and a variable draw phase to utilize available frame rates.</p>
+                
+                <h3>Sprite & Animation Support</h3>
+                <p>Full support for rendering static sprites, sections of sprite sheets, and complex animations. Easily create animated characters and objects using sprite sheet definitions.</p>
+                
+                <h3>Physics Integration</h3>
+                <p>Seamless integration with the Box2D physics engine. The engine provides easy-to-use <code>Box2DGameObject</code> classes for creating physics-enabled rectangles, sprites, and animated objects, simplifying collision detection and realistic movement.</p>
+                
+                <h3>Input Handling</h3>
+                <p>A powerful, abstract input system that maps high-level "Actions" (e.g., "Jump", "Fire") and continuous "Axes" (e.g., "MoveHorizontal", "Rotate") to various physical inputs. This includes keyboard keys, mouse clicks, and gamepad buttons/axes/triggers. This system promotes clean game logic and simplifies control remapping.</p>
+                
+                <h3>Audio Manager</h3>
+                <p>A simple yet powerful system to manage and play audio files. It supports basic playback controls and can be extended for more advanced audio features.</p>
+                
+                <h3>UI & Menus</h3>
+                <p>Leverages standard HTML and CSS for creating flexible and visually rich game menus and user interfaces. This allows developers to use familiar web technologies for UI design.</p>
+                
+                <h3>Background Layers</h3>
+                <p>Create immersive backgrounds using solid colors, gradients, parallax scrolling layers, and tilemaps. This enables the creation of deep and dynamic game environments.</p>
+                
+                <h3>Object Pooling</h3>
+                <p>An efficient object pooling system is included for reusing frequently created and destroyed objects (like bullets or particles). This significantly improves performance by reducing garbage collection overhead.</p>
+                
+                <h3>Utilities</h3>
+                <p>A collection of helper functions and classes for common game development tasks, including vector math, collision detection, color manipulation, and more.</p>
+                
+                <h3>Debugging Tools</h3>
+                <p>Optional debug drawing for physics bodies and an FPS/stats overlay are available to assist developers during the debugging process.</p>
+                
+                <h3>Mode 7 Renderer (sort of... experimental for the moment)</h3>
+                <p>A specialized renderer to simulate SNES-style pseudo-3D backgrounds, reminiscent of classic games like F-Zero or Mario Kart.</p>
+            </section>
+        </main>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 HTML5_Engine. Licensed under <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>.
+        <br>Created by Maximiliano Miranda | <a href="https://github.com/maxi-jp" target="_blank">GitHub</a> | <a href="https://www.linkedin.com/in/maximiliano-miranda/" target="_blank">LinkedIn</a> | <a href="https://x.com/maxi_ke" target="_blank">X</a>
+        </p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js" integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js" integrity="sha512-st608h+ZqzliahyzEpETxzU0f7z7a9acN6AFvYmHvpFhmcFuKT8a22TT5TpKpjDa3pt3Wv7Z3SdQBCBdDPhyWA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js" integrity="sha512-/kVH1uXuObC0iYgxxCKY41JdWOkKOxorFVmip+YVifKsJ4Au/87EisD1wty7vxN2kAhnWh6Yc8o/dSAXj6Oz7A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</body>
+</html>

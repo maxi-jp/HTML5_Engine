@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5_Engine Documentation - Examples</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" integrity="sha512-mIs9kKbaw6JZFfSuo+MovjU+Ntggfoj8RwAmJbVXQ5mkAX5LlgETQEweFPI18humSPHymTb5iikEOKWF7I8ncQ==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css" integrity="sha512-Dqf5696xtofgH089BgZJo2lSWTvev4GFo+gA2o4GullFY65rzQVQLQVlzLvYwTo0Bb2Gpb6IqwxYWtoMonfdhQ==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="./docs.css">
+</head>
+<body>
+    <header>
+        <h1>HTML5_Engine Documentation</h1>
+        <p>A modular, object-oriented HTML5 game engine for web browsers, built with vanilla JavaScript, WebGL and the HTML5 Canvas API.</p>
+        <p>Engine and examples are actively hosted on GitHub Pages: <a href="https://maxi-jp.github.io/HTML5_Engine/" target="_blank">https://maxi-jp.github.io/HTML5_Engine/</a></p>
+    </header>
+
+    <div class="docs-container">
+        <aside class="sidebar">
+            <h2>Navigation</h2>
+            <ul>
+                <li><a href="docs.html">Overview & Features</a></li>
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="input-system.html">Input System</a></li>
+                <li><a href="physics.html">Physics (Box2D)</a></li>
+                <li><a href="audio.html">Audio Manager</a></li>
+                <li><a href="ui.html">UI & Menus</a></li>
+                <li><a href="utilities.html">Utilities</a></li>
+                <li><a href="debugging.html">Debugging Tools</a></li>
+                <li><a href="examples.html" class="active">Examples</a></li>
+            </ul>
+        </aside>
+
+        <main>
+            <section id="examples">
+                <h2>Examples</h2>
+                <p>Explore the <code>src/examples/</code> directory for practical demonstrations of the engine's capabilities:</p>
+                <ul>
+                    <li>Engine systems:</li>
+                    <ul>
+                        <li>Renderers:</li>
+                        <ul>
+                            <li><a href="../render_test.html" target="_blank">Canvas 2D API render test</a>: Implements different renderer methods for primitives, sprites, animations...</li>
+                            <li><a href="../render_test.html?webgl" target="_blank">WebGL render test</a>: Same project but using the WebGL renderer.</li>
+                        </ul>
+                        <li><a href="../inputtest.html" target="_blank">Basic input system test</a></li>
+                        <li><a href="../input_actions_test.html" target="_blank">Input Actions Test</a>: A dedicated example for the abstract input system (with Actions and Axis events).</li>
+                        <li><a href="../audiotest.html" target="_blank">Audio system test</a></li>
+                        <li><a href="../colliders.html" target="_blank">Colliders test</a></li>
+                        <li><a href="../object_pooling.html" target="_blank">Object pooling</a></li>
+                        <li><a href="../tileset.html" target="_blank">Tileset (WIP)</a></li>
+                        <li><a href="../parallax.html" target="_blank">Parallax (WIP)</a></li>
+                    </ul>
+                    <li>Example games:</li>
+                        <ul>
+                            <li><a href="../brokeout.html" target="_blank">BrokeOut</a>: Very basic breakout clone.</li>
+                            <li><a href="../floppyderp.html" target="_blank">Floppy Derp</a>: A Flappy Bird-like game.</li>
+                            <li><a href="../twin-stick-shooter.html" target="_blank">Twin Stick Shooter</a></li>
+                            <li><a href="../tts-complex.html" target="_blank">Twin Stick Shooter 2 (more complex)</a></li>
+                            <li><a href="../tetrisbasic.html" target="_blank">Basic Tetris</a>: Basic Tetris implementation.</li>
+                            <li><a href="../tetriscomplex.html" target="_blank">Complex Tetris</a>: Far more complex Tetris implementation with modern gameplay details.</li>
+                            <li><a href="../snake.html" target="_blank">Snake</a></li>
+                            <li><a href="../columns.html" target="_blank">Columns</a>: Basic Columns like game (AI generated).</li>
+                            <li><a href="../puzzlebobble.html" target="_blank">Puzzle Bobble</a>: Basic Puzzle Bobble like game (almost full AI generated).</li>
+                            <li><a href="../pacmon.html" target="_blank">Pacmon (WIP)</a>: Implementation of the classic Pac-Man game.</li>
+                        </ul>
+                    <li>UI and menus:</li>
+                        <ul>
+                            <li><a href="../menu.html" target="_blank">HTML + CSS main menu</a>: Demonstrates basic menu implementation.</li>
+                            <li><a href="../menu-and-ui.html" target="_blank">HTML + CSS main menu and game UI</a>: A more elaborated example with UIs with interactions between the HTML menus and the game layers.</li>
+                        </ul>
+                    <li>Box2D:</li>
+                        <ul>
+                            <li><a href="../box2d-basic.html" target="_blank">Box2D basic</a></li>
+                            <li><a href="../box2d-basket.html" target="_blank">Box2D basket</a></li>
+                            <li><a href="../box2d-platformer.html" target="_blank">Box2D platformer (WIP)</a></li>
+                        </ul>
+                    <li>Other example projects:</li>
+                        <ul>
+                            <li><a href="../mode7.html" target="_blank">Mode7 (like SNES, sort of)</a>: Showcases the pseudo-3D Mode 7 effect (very WIP).</li>
+                            <li><a href="../linesintersection.html" target="_blank">Lines intersection</a></li>
+                        </ul>
+                </ul>
+    
+                <p>Many more examples are available within the <code>src/examples/</code> directory of the <a href="https://github.com/maxi-jp/HTML5_Engine" target="_blank"> repository.</p>
+            </section>
+        </main>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 HTML5_Engine. Licensed under <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>.
+        <br>Created by Maximiliano Miranda | <a href="https://github.com/maxi-jp" target="_blank">GitHub</a> | <a href="https://www.linkedin.com/in/maximiliano-miranda/" target="_blank">LinkedIn</a> | <a href="https://x.com/maxi_ke" target="_blank">X</a>
+        </p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js" integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js" integrity="sha512-st608h+ZqzliahyzEpETxzU0f7z7a9acN6AFvYmHvpFhmcFuKT8a22TT5TpKpjDa3pt3Wv7Z3SdQBCBdDPhyWA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js" integrity="sha512-/kVH1uXuObC0iYgxxCKY41JdWOkKOxorFVmip+YVifKsJ4Au/87EisD1wty7vxN2kAhnWh6Yc8o/dSAXj6Oz7A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</body>
+</html>

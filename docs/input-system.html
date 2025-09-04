@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5_Engine Documentation - Input System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" integrity="sha512-mIs9kKbaw6JZFfSuo+MovjU+Ntggfoj8RwAmJbVXQ5mkAX5LlgETQEweFPI18humSPHymTb5iikEOKWF7I8ncQ==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css" integrity="sha512-Dqf5696xtofgH089BgZJo2lSWTvev4GFo+gA2o4GullFY65rzQVQLQVlzLvYwTo0Bb2Gpb6IqwxYWtoMonfdhQ==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="./docs.css">
+</head>
+<body>
+    <header>
+        <h1>HTML5_Engine Documentation</h1>
+        <p>A modular, object-oriented HTML5 game engine for web browsers, built with vanilla JavaScript, WebGL and the HTML5 Canvas API.</p>
+        <p>Engine and examples are actively hosted on GitHub Pages: <a href="https://maxi-jp.github.io/HTML5_Engine/" target="_blank">https://maxi-jp.github.io/HTML5_Engine/</a></p>
+    </header>
+
+    <div class="docs-container">
+        <aside class="sidebar">
+            <h2>Navigation</h2>
+            <ul>
+                <li><a href="docs.html">Overview & Features</a></li>
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="input-system.html" class="active">Input System</a></li>
+                <li><a href="physics.html">Physics (Box2D)</a></li>
+                <li><a href="audio.html">Audio Manager</a></li>
+                <li><a href="ui.html">UI & Menus</a></li>
+                <li><a href="utilities.html">Utilities</a></li>
+                <li><a href="debugging.html">Debugging Tools</a></li>
+                <li><a href="examples.html">Examples</a></li>
+            </ul>
+        </aside>
+
+        <main>
+            <section id="input-system">
+                <h2>Input System</h2>
+                <p>The engine's abstract input system allows you to define high-level "Actions" (for discrete events like jumping) and "Axes" (for continuous input like movement) and map them to various physical input devices (keyboard, mouse, gamepad). This decouples your game logic from specific hardware inputs, making controls flexible and remappable.</p>
+                
+                <h3>1. Registering Actions and Axes</h3>
+                <p>In your game's <code>Start</code> method or a dedicated input setup function, register your desired actions and axes. It's good practice to call <code>Input.ClearMappings()</code> first to ensure a clean slate.</p>
+                <pre><code class="language-javascript">class MyGame extends Game {
+    // ...
+    SetupInputActions() {
+        Input.ClearMappings(); // Clear any previous mappings
+
+        // Register a button-like action for a single press event (e.g., Jump)
+        Input.RegisterAction("Jump", [
+            { type: 'key', code: KEY_SPACE },         // Keyboard Spacebar
+            { type: 'gamepad', code: 'FACE_DOWN' }    // Gamepad 'A' button (Xbox layout)
+        ]);
+
+        // Register another action for a held event (e.g., Fire)
+        Input.RegisterAction("Fire", [
+            { type: 'mouse' },                        // Any mouse click
+            { type: 'gamepad', code: 'FACE_RIGHT' }   // Gamepad 'B' button (Xbox layout)
+        ]);
+
+        // Register a continuous axis for horizontal movement from multiple sources
+        Input.RegisterAxis("MoveHorizontal", [
+            { type: 'key', positive: KEY_D, negative: KEY_A }, // 'D' for positive, 'A' for negative
+            { type: 'key', positive: KEY_RIGHT, negative: KEY_LEFT }, // Arrow keys
+            { type: 'gamepadaxis', stick: 'LS', axis: 0 },     // Gamepad Left Stick X-axis (0)
+            { type: 'gamepadbutton', positive: 'DPAD_RIGHT', negative: 'DPAD_LEFT' } // Gamepad D-Pad
+        ]);
+
+        // Register an axis for vertical movement, including gamepad stick Y-axis
+        Input.RegisterAxis("MoveVertical", [
+            { type: 'key', positive: KEY_S, negative: KEY_W },
+            { type: 'key', positive: KEY_DOWN, negative: KEY_UP },
+            { type: 'gamepadaxis', stick: 'LS', axis: 1 }      // Gamepad Left Stick Y-axis (1)
+        ]);
+
+        // Register an axis from a gamepad trigger (value from 0.0 to 1.0)
+        Input.RegisterAxis("Accelerate", [
+            { type: 'gamepadtrigger', trigger: 'RT' } // Gamepad Right Trigger
+        ]);
+    }
+    // ...
+}</code></pre>
+            
+                <h3>2. Querying Input in <code>Update</code></h3>
+                <p>In your game's <code>Update</code> method, you can query the state of these abstract inputs using <code>Input.GetActionDown</code> (for single press events), <code>Input.GetAction</code> (for continuous hold events), and <code>Input.GetAxis</code> (for analog values).</p>
+                <pre><code class="language-javascript">    Update(deltaTime) {
+        super.Update(deltaTime);
+
+        // Check for a single press event (e.g., player jumps once)
+        if (Input.GetActionDown("Jump")) {
+            console.log("Jump action triggered!");
+            // myPlayer.jump();
+        }
+
+        // Check if the action is currently being held down (e.g., continuous firing)
+        if (Input.GetAction("Fire")) {
+            console.log("Fire action held!");
+            // myPlayer.fireWeapon();
+        }
+
+        // Get the value of an axis (-1.0 to 1.0) for movement
+        const moveX = Input.GetAxis("MoveHorizontal");
+        const moveY = Input.GetAxis("MoveVertical");
+        const moveSpeed = 200; // pixels per second
+        this.player.x += moveX * moveSpeed * deltaTime;
+        this.player.y += moveY * moveSpeed * deltaTime;
+
+        // Get the value of a trigger axis (0.0 to 1.0)
+        const acceleration = Input.GetAxis("Accelerate");
+        if (acceleration > 0) {
+            console.log(`Accelerating: ${acceleration.toFixed(2)}`);
+            // myVehicle.speed += acceleration * this.maxAcceleration * deltaTime;
+        }
+    }</code></pre>
+
+                <h3>3. Direct Input Access</h3>
+                <p>While the abstract action system is recommended for flexibility, you can also query the state of input devices directly. This is useful for quick prototyping or for situations where you need to check a specific key without defining an action.</p>
+                <p>The <code>Input</code> object provides methods like <code>IsKeyDown(KEY_CODE)</code>, <code>IsMousePressed()</code>, and various functions for gamepads.</p>
+                <pre><code class="language-javascript">Update(deltaTime) {
+    super.Update(deltaTime);
+
+    // --- Keyboard ---
+    // Move player left with the 'L' key. IsKeyPressed checks for continuous press.
+    if (Input.IsKeyPressed(KEY_L)) {
+        this.player.x -= 200 * deltaTime;
+    }
+
+    // IsKeyDown checks for a single press event.
+    if (Input.IsKeyDown(KEY_ENTER)) {
+        console.log("Enter was pressed this frame!");
+    }
+
+    // --- Mouse ---
+    // Show mouse coordinates when pressed
+    if (Input.IsMousePressed()) {
+        console.log(`Mouse Position: x=${Input.mouse.x}, y=${Input.mouse.y}`);
+    }
+
+    // --- Gamepad ---
+    // Check for connected gamepads
+    if (Input.gamepads.length > 0) {
+        // Get left stick values for the first gamepad
+        const stick = Input.GetGamepadStickValue(0, 'LS'); // 'LS' for Left Stick
+        
+        if (Math.abs(stick.x) > 0.1 || Math.abs(stick.y) > 0.1) {
+            console.log(`Gamepad 0 Left Stick: x=${stick.x.toFixed(2)}, y=${stick.y.toFixed(2)}`);
+        }
+
+        // Check if the 'B' button (FACE_RIGHT) is pressed
+        if (Input.IsGamepadButtonPressed(0, 'FACE_RIGHT')) {
+            console.log("Gamepad 0 'B' button pressed!");
+        }
+    }
+}</code></pre>
+
+                <hr style="margin: 40px 0;">
+
+                <h3>API Reference</h3>
+                <p>Here is a comprehensive list of the public methods and properties available on the global <code>Input</code> object.</p>
+
+                <h4>Abstract Input System</h4>
+                <dl>
+                    <dt><code>RegisterAction(name, mappings)</code></dt>
+                    <dd>Registers a new action with a given name and maps it to one or more physical inputs (e.g., key press, mouse click).</dd>
+
+                    <dt><code>RegisterAxis(name, mappings)</code></dt>
+                    <dd>Registers a new axis with a given name and maps it to one or more physical inputs (e.g., WASD keys, gamepad stick).</dd>
+
+                    <dt><code>GetAction(name)</code></dt>
+                    <dd>Returns <code>true</code> as long as any mapped input for the action is being held down.</dd>
+
+                    <dt><code>GetActionDown(name)</code></dt>
+                    <dd>Returns <code>true</code> only during the single frame that a mapped input for the action is first pressed.</dd>
+
+                    <dt><code>GetActionUp(name)</code></dt>
+                    <dd>Returns <code>true</code> only during the single frame that a mapped input for the action is released.</dd>
+
+                    <dt><code>GetAxis(name)</code></dt>
+                    <dd>Returns a float value between -1.0 and 1.0 representing the current state of a registered axis.</dd>
+
+                    <dt><code>ClearMappings()</code></dt>
+                    <dd>Removes all previously registered actions and axes. Useful for clearing inputs when changing scenes.</dd>
+                </dl>
+
+                <h4>Direct Keyboard Input</h4>
+                <dl>
+                    <dt><code>IsKeyPressed(keyCode)</code></dt>
+                    <dd>Returns <code>true</code> as long as the specified key is held down.</dd>
+
+                    <dt><code>IsKeyDown(keyCode)</code></dt>
+                    <dd>Returns <code>true</code> only during the single frame that the specified key is first pressed.</dd>
+
+                    <dt><code>IsKeyUp(keyCode)</code></dt>
+                    <dd>Returns <code>true</code> only during the single frame that the specified key is released.</dd>
+                </dl>
+
+                <h4>Direct Mouse Input</h4>
+                <dl>
+                    <dt><code>IsMousePressed(button)</code></dt>
+                    <dd>Returns <code>true</code> as long as the specified mouse button is held down. (0: Left, 1: Middle, 2: Right).</dd>
+
+                    <dt><code>IsMouseDown(button)</code></dt>
+                    <dd>Returns <code>true</code> only during the single frame that the specified mouse button is first pressed.</dd>
+
+                    <dt><code>IsMouseUp(button)</code></dt>
+                    <dd>Returns <code>true</code> only during the single frame that the specified mouse button is released.</dd>
+
+                    <dt><code>mouse</code></dt>
+                    <dd>A property containing the mouse's current coordinates (<code>Input.mouse.x</code>, <code>Input.mouse.y</code>).</dd>
+                </dl>
+
+                <h4>Direct Gamepad Input</h4>
+                <dl>
+                    <dt><code>gamepads</code></dt>
+                    <dd>An array of connected gamepad objects. Check <code>Input.gamepads.length</code> to see how many are connected.</dd>
+
+                    <dt><code>IsGamepadButtonPressed(gamepadIndex, buttonCode)</code></dt>
+                    <dd>Returns <code>true</code> as long as the specified button on the gamepad is held down.</dd>
+
+                    <dt><code>IsGamepadButtonDown(gamepadIndex, buttonCode)</code></dt>
+                    <dd>Returns <code>true</code> only during the single frame that the specified gamepad button is first pressed.</dd>
+
+                    <dt><code>IsGamepadButtonUp(gamepadIndex, buttonCode)</code></dt>
+                    <dd>Returns <code>true</code> only during the single frame that the specified gamepad button is released.</dd>
+
+                    <dt><code>GetGamepadStickValue(gamepadIndex, stick)</code></dt>
+                    <dd>Returns an object <code>{x, y}</code> with the current values of the specified stick ('LS' or 'RS').</dd>
+
+                    <dt><code>GetGamepadTriggerValue(gamepadIndex, trigger)</code></dt>
+                    <dd>Returns a float value between 0.0 and 1.0 for the specified trigger ('LT' or 'RT').</dd>
+
+                    <dt><code>GetGamepadStickDirection(gamepadIndex, stick, direction)</code></dt>
+                    <dd>Returns <code>true</code> if the specified stick ('LS' or 'RS') is pushed past a deadzone in a given direction ('UP', 'DOWN', 'LEFT', 'RIGHT').</dd>
+                </dl>
+            </section>
+        </main>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 HTML5_Engine. Licensed under <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>.
+        <br>Created by Maximiliano Miranda | <a href="https://github.com/maxi-jp" target="_blank">GitHub</a> | <a href="https://www.linkedin.com/in/maximiliano-miranda/" target="_blank">LinkedIn</a> | <a href="https://x.com/maxi_ke" target="_blank">X</a>
+        </p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js" integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js" integrity="sha512-st608h+ZqzliahyzEpETxzU0f7z7a9acN6AFvYmHvpFhmcFuKT8a22TT5TpKpjDa3pt3Wv7Z3SdQBCBdDPhyWA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js" integrity="sha512-/kVH1uXuObC0iYgxxCKY41JdWOkKOxorFVmip+YVifKsJ4Au/87EisD1wty7vxN2kAhnWh6Yc8o/dSAXj6Oz7A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</body>
+</html>

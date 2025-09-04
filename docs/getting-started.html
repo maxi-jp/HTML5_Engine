@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5_Engine Documentation - Getting Started</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" integrity="sha512-mIs9kKbaw6JZFfSuo+MovjU+Ntggfoj8RwAmJbVXQ5mkAX5LlgETQEweFPI18humSPHymTb5iikEOKWF7I8ncQ==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css" integrity="sha512-Dqf5696xtofgH089BgZJo2lSWTvev4GFo+gA2o4GullFY65rzQVQLQVlzLvYwTo0Bb2Gpb6IqwxYWtoMonfdhQ==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="./docs.css">
+</head>
+<body>
+    <header>
+        <h1>HTML5_Engine Documentation</h1>
+        <p>A modular, object-oriented HTML5 game engine for web browsers, built with vanilla JavaScript, WebGL and the HTML5 Canvas API.</p>
+        <p>Engine and examples are actively hosted on GitHub Pages: <a href="https://maxi-jp.github.io/HTML5_Engine/" target="_blank">https://maxi-jp.github.io/HTML5_Engine/</a></p>
+    </header>
+
+    <div class="docs-container">
+        <aside class="sidebar">
+            <h2>Navigation</h2>
+            <ul>
+                <li><a href="docs.html">Overview & Features</a></li>
+                <li><a href="getting-started.html" class="active">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="input-system.html">Input System</a></li>
+                <li><a href="physics.html">Physics (Box2D)</a></li>
+                <li><a href="audio.html">Audio Manager</a></li>
+                <li><a href="ui.html">UI & Menus</a></li>
+                <li><a href="utilities.html">Utilities</a></li>
+                <li><a href="debugging.html">Debugging Tools</a></li>
+                <li><a href="examples.html">Examples</a></li>
+            </ul>
+        </aside>
+
+        <main>
+            <section id="getting-started">
+                <h2>Getting Started</h2>
+                <p>Follow these steps to set up your first game with HTML5_Engine:</p>
+                
+                <h3>1. Get the engine scripts</h3>
+                <p>Start by cloning or downloading the HTML5_Engine repository from <a href="https://github.com/maxi-jp/HTML5_Engine" target="_blank">GitHub</a>.</p>
+                
+                <h3>2. Set up your project folder</h3>
+                <p>Create a new folder for your game. Inside it, create an <code>engine</code> folder and copy the contents of the <code>engine</code> directory from this repository into it. Your game's own JavaScript files can go in a <code>js</code> or <code>src</code> folder.</p>
+                <p>Your project structure might look like this:</p>
+                <pre><code>my-game/
+├── engine/
+│   ├── renderer.js
+│   ├── main.js
+│   ├── game.js
+│   └── ... (all other engine files from engine/)
+├── src/
+│   └── my-game.js
+├── lib/
+│   └── Box2D.js  (if using physics)
+└── index.html</code></pre>
+            
+                <h3>3. Create your <code>index.html</code></h3>
+                <p>Include the engine scripts in your <code>index.html</code> file. The order of script inclusion is important. You can use the following template:</p>
+                <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;My Awesome Game&lt;/title&gt;
+    &lt;!-- ... --&gt;
+    &lt;script src="engine/renderer.js"&gt;&lt;/script&gt;
+    &lt;script src="engine/main.js"&gt;&lt;/script&gt;
+    &lt;script src="engine/utils_math.js"&gt;&lt;/script&gt;
+    &lt;script src="engine/input.js"&gt;&lt;/script&gt;
+    &lt;script src="engine/audioplayer.js"&gt;&lt;/script&gt;
+    &lt;script src="engine/game.js"&gt;&lt;/script&gt;
+    &lt;script src="engine/utils_classes.js"&gt;&lt;/script&gt;
+    &lt;script src="engine/gameobjects.js"&gt;&lt;/script&gt;
+    &lt;!-- add these only if you want to use box2d physics --&gt;
+    &lt;script src="lib/Box2D.js"&gt;&lt;/script&gt;
+    &lt;script src="engine/box2d_helper.js"&gt;&lt;/script&gt;
+    &lt;script src="engine/box2d_game.js"&gt;&lt;/script&gt;
+    &lt;script src="engine/box2d_gameobjects.js"&gt;&lt;/script&gt;
+    &lt;!-- add here your game scripts --&gt;
+    &lt;script src="src/my-game.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;canvas width="640" height="480" id="myCanvas"&gt;&lt;/canvas&gt;    
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            
+                <h3>4. Create your Game Class</h3>
+                <p>Create a new JavaScript file (e.g., <code>src/my-game.js</code>) with a class that inherits from <code>Game</code>. This will be your main game logic class. Remember to pass the renderer object to its parent constructor.</p>
+                <pre><code class="language-javascript">class MyGame extends Game {
+    constructor(renderer) {
+        super(renderer);
+        // Declare game objects or other game-specific properties here
+    }
+
+    Start() {
+        // Always call super.Start() first
+        super.Start();
+
+        // Set the screen size (canvas width and height)
+        this.screenWidth = 640;
+        this.screenHeight = 480;
+
+        // Initialize your game objects, load assets, etc.
+        // Example: this.gameObjects.push(new MyPlayer());
+    }
+
+    Update(deltaTime) {
+        // Always call super.Update(deltaTime) to update objects in this.gameObjects
+        super.Update(deltaTime);
+
+        // Add your game's update logic here (e.g., enemy AI, score updates)
+    }
+
+    Draw() {
+        // Draw a background that fills the canvas
+        this.renderer.DrawFillRectangle(0, 0, this.screenWidth, this.screenHeight, Color.black);
+
+        // Always call super.Draw() to draw objects in this.gameObjects
+        super.Draw();
+
+        // Add your game's custom drawing logic here (e.g., UI elements)
+    }
+}
+
+// Initialize the game once the document has been loaded
+window.onload = () => {
+    Init(MyGame); // Init is a global function defined in main.js
+}</code></pre>
+            
+                <h3>5. Create GameObjects and Run!</h3>
+                <p>Create your game entities by inheriting from the base classes in <code>gameobjects.js</code> (e.g., <code>RectangleGO</code>, <code>SpriteGO</code>, <code>AnimationGO</code>). Add instances of these objects to your game's <code>this.gameObjects</code> array in the <code>Start</code> method, and you're ready to run your game!</p>
+            </section>
+        </main>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 HTML5_Engine. Licensed under <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>.
+        <br>Created by Maximiliano Miranda | <a href="https://github.com/maxi-jp" target="_blank">GitHub</a> | <a href="https://www.linkedin.com/in/maximiliano-miranda/" target="_blank">LinkedIn</a> | <a href="https://x.com/maxi_ke" target="_blank">X</a>
+        </p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js" integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js" integrity="sha512-st608h+ZqzliahyzEpETxzU0f7z7a9acN6AFvYmHvpFhmcFuKT8a22TT5TpKpjDa3pt3Wv7Z3SdQBCBdDPhyWA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js" integrity="sha512-/kVH1uXuObC0iYgxxCKY41JdWOkKOxorFVmip+YVifKsJ4Au/87EisD1wty7vxN2kAhnWh6Yc8o/dSAXj6Oz7A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</body>
+</html>
