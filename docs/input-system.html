@@ -134,6 +134,9 @@
         console.log(`Mouse Position: x=${Input.mouse.x}, y=${Input.mouse.y}`);
     }
 
+    // Note: Mouse coordinates are automatically normalized to match your game resolution
+    // They work correctly regardless of canvas scaling, CSS transforms, or fullscreen modes
+
     // --- Gamepad ---
     // Check for connected gamepads
     if (Input.gamepads.length > 0) {

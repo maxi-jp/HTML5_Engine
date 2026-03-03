@@ -294,7 +294,7 @@ class FloppyDerp extends Game {
     Draw() {
         const ctx = this.renderer.ctx;
         // background
-        this.renderer.DrawFillRectangle(0, 0, canvas.width, canvas.height, Color.black);
+        this.renderer.DrawFillRectangle(0, 0, this.screenWidth, this.screenHeight, Color.black);
         this.DrawBg();
         
         switch(this.gameState) {

@@ -51,7 +51,7 @@ class TTS extends Game {
 
         this.mouseCircle = new Circle(new Vector2(0, 0), 5, Color.red, 1);
 
-        this.player = new PlayerShip(new Vector2(canvas.width / 2, canvas.height / 2), 0, 1, this.graphicAssets.ships.img, this.sceneLimits);
+        this.player = new PlayerShip(new Vector2(this.screenWidth / 2, this.screenHeight / 2), 0, 1, this.graphicAssets.ships.img, this.sceneLimits);
         this.gameObjects.push(this.player);
 
         this.camera = new FollowCameraBasic(Vector2.Zero(), this.player);
@@ -121,7 +121,7 @@ class TTS extends Game {
 
     Draw() {
         // background
-        this.renderer.DrawGradientRectangle(0, 0, canvas.width, canvas.height, this.bgGrad);
+        this.renderer.DrawGradientRectangle(0, 0, this.screenWidth, this.screenHeight, this.bgGrad);
 
         this.camera.PreDraw(this.renderer);
 

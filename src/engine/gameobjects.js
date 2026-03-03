@@ -532,13 +532,11 @@ class Pool {
 
         if (this.drawDebug) {
             // draw the state of the object pool
-            renderer.ctx.fillStyle = Pool.semiTransparentRed;
-            renderer.ctx.strokeStyle = Color.white;
             for (let i = 0; i < this.objects.length; i++) {
                 if (this.objects[i].active) {
-                    renderer.ctx.fillRect(10 + 20 * i, 10, 20, 20);
+                    renderer.DrawFillBasicRectangle(10 + 20 * i, 10, 20, 20, Pool.semiTransparentRed);
                 }
-                renderer.ctx.strokeRect(10 + 20 * i, 10, 20, 20);
+                renderer.DrawStrokeBasicRectangle(10 + 20 * i, 10, 20, 20, Color.white);
             }
         }
     }

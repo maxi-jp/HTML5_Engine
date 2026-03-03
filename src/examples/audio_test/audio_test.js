@@ -3,6 +3,8 @@ class AudioTest extends Game {
         super(renderer);
 
         this.config = {
+            screenWidth: 480,
+            screenHeight: 480,
             audioAnalyzer: true,
             analyzerfftSize: 64,
             analyzerSmoothing: 0.9,
@@ -41,9 +43,6 @@ class AudioTest extends Game {
 
     Start() {
         super.Start();
-
-        this.screenWidth = 480;
-        this.screenHeight = 480;
 
         drawStats = false;
 

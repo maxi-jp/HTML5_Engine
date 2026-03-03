@@ -180,8 +180,44 @@ var Input = {
     // Abstract input mapping
     actionMaps: {},
     axisMaps: {},
+    
+    // Canvas and coordinate transformation cache
+    _canvas: null,
+    _canvasTransform: {
+        offsetX: 0,
+        offsetY: 0,
+        scaleX: 1,
+        scaleY: 1,
+        canvasWidth: 640,
+        canvasHeight: 480
+    },
 
 // #region Setup Functions
+
+    SetCanvas: function(canvas, canvasWidth, canvasHeight) {
+        this._canvas = canvas;
+        this._canvasTransform.canvasWidth = canvasWidth || canvas.width;
+        this._canvasTransform.canvasHeight = canvasHeight || canvas.height;
+    },
+    
+    UpdateCanvasTransform: function() {
+        if (!this._canvas)
+            return;
+        
+        const rect = this._canvas.getBoundingClientRect();
+        this._canvasTransform.offsetX = rect.left;
+        this._canvasTransform.offsetY = rect.top;
+        this._canvasTransform.scaleX = this._canvasTransform.canvasWidth / rect.width;
+        this._canvasTransform.scaleY = this._canvasTransform.canvasHeight / rect.height;
+    },
+    
+    SetCanvasResolution: function(width, height) {
+        this._canvasTransform.canvasWidth = width;
+        this._canvasTransform.canvasHeight = height;
+        // Update transforms when resolution changes
+        this.UpdateCanvasTransform();
+    },
+    
     SetupKeyboardEvents: function() {
         AddEvent(document, "keydown", function(e) {
             //console.log(e.keyCode);
@@ -207,6 +243,9 @@ var Input = {
     },
 
     SetupMouseEvents: function(canvas) {
+        // Set canvas reference for coordinate transformation
+        this.SetCanvas(canvas);
+        
         // mouse click event
         canvas.addEventListener("mousedown", MouseDown, false);
         // mouse move event
@@ -400,10 +439,11 @@ var Input = {
             let currentValue = 0.0;
             switch (binding.type) {
                 case 'key':
+                    currentValue = 0.0;
                     if (this.IsKeyPressed(binding.positive))
-                        currentValue = 1.0;
-                    else if (this.IsKeyPressed(binding.negative))
-                        currentValue = -1.0;
+                        currentValue += 1.0;
+                    if (this.IsKeyPressed(binding.negative))
+                        currentValue -= 1.0;
                     break;
                 case 'gamepadaxis':
                     for (let i = 0; i < this.gamepads.length; i++) {
@@ -433,12 +473,13 @@ var Input = {
                         if (!this.gamepads[i])
                             continue;
 
+                        currentValue = 0.0;
                         if (this.IsGamepadButtonPressed(i, binding.positive)) {
-                            currentValue = 1.0;
+                            currentValue += 1.0;
                             break;
                         }
                         if (this.IsGamepadButtonPressed(i, binding.negative)) {
-                            currentValue = -1.0;
+                            currentValue -= 1.0;
                             break;
                         }
                      }
@@ -671,9 +712,21 @@ function MouseUp(event) {
 }
 
 function MouseMove(event) {
-    let rect = canvas.getBoundingClientRect();
-    Input.mouse.x = event.clientX - rect.left;
-    Input.mouse.y = event.clientY - rect.top;
+    // Use normalized coordinate approach (robust with all CSS transforms)
+    if (!Input._canvas)
+        return;
+    
+    const rect = Input._canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    // Convert to normalized coordinates (0 to 1)
+    const normalizedX = x / rect.width;
+    const normalizedY = y / rect.height;
+    
+    // Map to internal canvas resolution
+    Input.mouse.x = normalizedX * Input._canvasTransform.canvasWidth;
+    Input.mouse.y = normalizedY * Input._canvasTransform.canvasHeight;
     Input.mouse.moved = true;
     //console.log(Input.mouse);
 }

@@ -776,8 +776,8 @@ class RectangleCollider extends Collider {
 }
 
 class CircleCollider extends Collider {
-    constructor(position, radius) {
-        super(position, radius);
+    constructor(position, radius, gameObject=null) {
+        super(position, radius, gameObject);
         this.radius = radius;
     }
 

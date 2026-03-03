@@ -79,6 +79,111 @@ class Box2DGameObject extends GameObject {
     OnContactDetected(other) { }
     OnContactDetectEnded(other) { }
 
+    /**
+     * Sets the linear velocity of the body.
+     * @param {number} x The x component of the velocity in meters/sec.
+     * @param {number} y The y component of the velocity in meters/sec.
+     */
+    SetLinearVelocity(x, y) {
+        this.body.SetLinearVelocity(new b2Vec2(x, y));
+    }
+
+    /**
+     * Gets the linear velocity of the body.
+     * @returns {b2Vec2} The linear velocity as a b2Vec2.
+     */
+    GetLinearVelocity() {
+        return this.body.GetLinearVelocity();
+    }
+
+    /**
+     * Sets the angular velocity of the body.
+     * @param {number} omega The angular velocity in radians/sec.
+     */
+    SetAngularVelocity(omega) {
+        this.body.SetAngularVelocity(omega);
+    }
+
+    /**
+     * Gets the angular velocity of the body.
+     * @returns {number} The angular velocity in radians/sec.
+     */
+    GetAngularVelocity() {
+        return this.body ? this.body.GetAngularVelocity() : 0;
+    }
+
+    /**
+     * Applies a force to a point on the body.
+     * @param {number} forceX The x component of the world force vector.
+     * @param {number} forceY The y component of the world force vector.
+     * @param {number} [pointX] The x component of the world position to apply the force. Defaults to body's center.
+     * @param {number} [pointY] The y component of the world position to apply the force. Defaults to body's center.
+     */
+    ApplyForce(forceX, forceY, pointX, pointY) {
+        const force = new b2Vec2(forceX, forceY);
+        const point = (pointX !== undefined && pointY !== undefined)
+            ? new b2Vec2(pointX, pointY)
+            : this.body.GetWorldCenter();
+        this.body.ApplyForce(force, point);
+    }
+
+    /**
+     * Applies an impulse to a point on the body.
+     * @param {number} impulseX The x component of the world impulse vector.
+     * @param {number} impulseY The y component of the world impulse vector.
+     * @param {number} [pointX] The x component of the world position to apply the impulse. Defaults to body's center.
+     * @param {number} [pointY] The y component of the world position to apply the impulse. Defaults to body's center.
+     */
+    ApplyImpulse(impulseX, impulseY, pointX, pointY) {
+        const impulse = new b2Vec2(impulseX, impulseY);
+        const point = (pointX !== undefined && pointY !== undefined)
+            ? new b2Vec2(pointX, pointY)
+            : this.body.GetWorldCenter();
+        this.body.ApplyImpulse(impulse, point);
+    }
+
+    /**
+     * Sets whether the body should have a fixed rotation.
+     * @param {boolean} fixed True to prevent rotation.
+     */
+    SetFixedRotation(fixed) {
+        this.body.SetFixedRotation(fixed);
+    }
+
+    /**
+     * Sets the body's fixture(s) as a sensor.
+     * @param {boolean} isSensor True to make the fixture a sensor.
+     */
+    SetSensor(isSensor) {
+        for (let f = this.body.GetFixtureList(); f; f = f.GetNext()) {
+            f.SetSensor(isSensor);
+        }
+    }
+
+    /**
+     * Sets the collision category bits for the body's fixture(s).
+     * @param {number} bits The category bits.
+     */
+    SetCategoryBits(bits) {
+        for (let f = this.body.GetFixtureList(); f; f = f.GetNext()) {
+            const filter = f.GetFilterData();
+            filter.categoryBits = bits;
+            f.SetFilterData(filter);
+        }
+    }
+
+    /**
+     * Sets the collision mask bits for the body's fixture(s).
+     * @param {number} bits The mask bits.
+     */
+    SetMaskBits(bits) {
+        for (let f = this.body.GetFixtureList(); f; f = f.GetNext()) {
+            const filter = f.GetFilterData();
+            filter.maskBits = bits;
+            f.SetFilterData(filter);
+        }
+    }
+
     Destroy() {
         this.world.DestroyBody(this.body);
         this.body = null;

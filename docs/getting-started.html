@@ -125,9 +125,31 @@
 window.onload = () => {
     Init(MyGame); // Init is a global function defined in main.js
 }</code></pre>
+
+                <h3>5. Fullscreen and Display Configuration (Optional)</h3>
+                <p>The engine supports flexible display options including fullscreen modes with aspect ratio preservation:</p>
+                <pre><code class="language-javascript">class MyGame extends Game {
+    constructor(renderer) {
+        super(renderer);
+        
+        // Configure display options
+        this.config = {
+            ...this.config, // Keep existing config
+            fillWindow: true,              // Make canvas fill entire window
+            preserveAspectRatio: true,     // Keep aspect ratio when scaling
+            matchNativeResolution: false,  // Use window size as resolution
+            useDevicePixelRatio: false     // Handle high-DPI displays
+        };
+    }
+}</code></pre>
+                
+                <div class="note">
+                    <strong>Important:</strong> Always use <code>this.screenWidth</code> and <code>this.screenHeight</code> instead of <code>canvas.width</code> and <code>canvas.height</code> for proper fullscreen compatibility.
+                </div>
             
-                <h3>5. Create GameObjects and Run!</h3>
+                <h3>6. Create GameObjects and Run!</h3>
                 <p>Create your game entities by inheriting from the base classes in <code>gameobjects.js</code> (e.g., <code>RectangleGO</code>, <code>SpriteGO</code>, <code>AnimationGO</code>). Add instances of these objects to your game's <code>this.gameObjects</code> array in the <code>Start</code> method, and you're ready to run your game!</p>
+                
             </section>
         </main>
     </div>

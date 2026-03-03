@@ -2,7 +2,15 @@ class ObjectPooling extends Game {
     constructor(renderer) {
         super(renderer);
 
-        this.activeObjectsLabel = new TextLabel("Active objects in the pool: 0", new Vector2(10, this.screenHeight - 20), "16px Comic Sans MS", Color.white, "left", "bottom");
+        this.config = {
+            screenWidth: 800,
+            screenHeight: 800,
+            fillWindow: true,
+            matchNativeResolution: false,
+            preserveAspectRatio: true
+        };
+
+        this.activeObjectsLabel = null;
 
         // create an object pool of CircleGO objects
         // class Pool(owner, maxSize, objectConstructor, constructorParams=[])
@@ -14,6 +22,8 @@ class ObjectPooling extends Game {
 
     Start() {
         super.Start();
+
+        this.activeObjectsLabel = new TextLabel("Active objects in the pool: 0", new Vector2(10, this.screenHeight - 20), "16px Comic Sans MS", Color.white, "left", "bottom");
     }
 
     Update(deltaTime) {
@@ -41,7 +51,7 @@ class ObjectPooling extends Game {
     }
 
     Draw() {
-        renderer.DrawFillBasicRectangle(0, 0, canvas.width, canvas.height, Color.black);
+        this.renderer.DrawFillBasicRectangle(0, 0, this.screenWidth, this.screenHeight, Color.black);
 
         super.Draw();
 

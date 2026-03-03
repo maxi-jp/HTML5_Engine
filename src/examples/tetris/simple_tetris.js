@@ -59,7 +59,7 @@ class SimpleTetris extends Game {
         this.keysLabel = new TextLabel("Keys: A (left) | D (right) | Space (rotate) | W (instant fall)", new Vector2(20, 460), "16px Comic Sans MS", Color.grey, "left", "middle", false);
 
         // center the grid in the canvas
-        this.gridPosition.x = Math.floor((canvas.width - this.gridSize.cols * this.squareSize) / 2);
+        this.gridPosition.x = Math.floor((this.screenWidth - this.gridSize.cols * this.squareSize) / 2);
     }
 
     Update(deltaTime) {

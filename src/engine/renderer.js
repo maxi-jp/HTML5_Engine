@@ -1,10 +1,14 @@
 class Renderer {
     _width = 640;
     _height = 480;
+    _halfWidth = 0;
+    _halfHeight = 0;
     _imageSmoothingEnabled = true;
 
     constructor(canvas) {
         this.canvas = canvas;
+        this._width = canvas.width;
+        this._height = canvas.height;
     }
 
     get width() {
@@ -13,15 +17,33 @@ class Renderer {
     get height() {
         return this._height;
     }
+    get halfWidth() {
+        return this._halfWidth;
+    }
+    get halfHeight() {
+        return this._halfHeight;
+    }
     get imageSmoothingEnabled() {
         return this._imageSmoothingEnabled;
     }
 
     set width(value) {
+        this._width = value;
+        this._halfWidth = value / 2;
         this.canvas.width = value;
+        // Notify Input system about canvas resolution change
+        if (typeof Input !== 'undefined' && Input.SetCanvasResolution) {
+            Input.SetCanvasResolution(this._width, this._height);
+        }
     }
     set height(value) {
+        this._height = value;
+        this._halfHeight = value / 2;
         this.canvas.height = value;
+        // Notify Input system about canvas resolution change
+        if (typeof Input !== 'undefined' && Input.SetCanvasResolution) {
+            Input.SetCanvasResolution(this._width, this._height);
+        }
     }
     set imageSmoothingEnabled(value) {
         this._imageSmoothingEnabled = value;
@@ -59,6 +81,109 @@ class Renderer {
     // Camera transform methods
     ApplyCameraTransform(camera) {}
     RestoreCameraTransform() {}
+
+    // Other methods
+    SetScreenSize(width, height) {
+        this.width = width;
+        this.height = height;
+        // Notify Input system about canvas resolution change
+        if (typeof Input !== 'undefined' && Input.SetCanvasResolution) {
+            Input.SetCanvasResolution(width, height);
+        }
+    }
+
+    SetCanvasFillWindow(matchNativeResolution = true, useDevicePixelRatio = false, preserveAspectRatio = true) {
+        // Set canvas style to fill window
+        this.canvas.style.position = 'fixed';
+        this.canvas.style.top = '0';
+        this.canvas.style.left = '0';
+        this.canvas.style.margin = '0';
+        this.canvas.style.padding = '0';
+        this.canvas.style.zIndex = '1000';
+        
+        // Calculate canvas resolution
+        const updateCanvasSize = () => {
+            let canvasWidth = window.innerWidth;
+            let canvasHeight = window.innerHeight;
+            
+            if (useDevicePixelRatio) {
+                // Use device pixel ratio for high DPI displays
+                const dpr = window.devicePixelRatio || 1;
+                canvasWidth *= dpr;
+                canvasHeight *= dpr;
+            }
+            
+            if (matchNativeResolution) {
+                // Set canvas native resolution (actual pixels) and update renderer dimensions
+                this.width = canvasWidth;
+                this.height = canvasHeight;
+                this.canvas.style.width = '100vw';
+                this.canvas.style.height = '100vh';
+                this.canvas.style.transform = 'none';
+            }
+            else if (preserveAspectRatio) {
+                // Maintain aspect ratio while fitting within window bounds
+                const canvasAspectRatio = this._width / this._height;
+                const windowAspectRatio = window.innerWidth / window.innerHeight;
+                
+                let scale;
+                
+                if (canvasAspectRatio > windowAspectRatio) {
+                    // Canvas is wider: fit to window width
+                    scale = window.innerWidth / this._width;
+                }
+                else {
+                    // Canvas is taller: fit to window height  
+                    scale = window.innerHeight / this._height;
+                }
+                
+                // Set canvas display size to original dimensions
+                this.canvas.style.width = this._width + 'px';
+                this.canvas.style.height = this._height + 'px';
+                
+                // Center the canvas and apply scaling
+                this.canvas.style.left = '50%';
+                this.canvas.style.top = '50%';
+                this.canvas.style.transformOrigin = 'center';
+                this.canvas.style.transform = `translate(-50%, -50%) scale(${scale})`;
+            }
+            else {
+                // Stretch to fit entire window (may distort aspect ratio)
+                this.canvas.style.width = '100vw';
+                this.canvas.style.height = '100vh';
+                this.canvas.style.transform = 'none';
+            }
+            // When matchNativeResolution is false, keep existing canvas resolution
+            // The CSS styling will handle stretching to fill the window
+        };
+        
+        // Initial size setup
+        updateCanvasSize();
+        
+        // Notify Input system about canvas transform changes
+        if (typeof Input !== 'undefined' && Input.UpdateCanvasTransform) {
+            Input.UpdateCanvasTransform();
+        }
+        
+        // Store reference for cleanup
+        if (!this._resizeHandler) {
+            this._resizeHandler = () => {
+                updateCanvasSize();
+                // Notify Input system about canvas transform changes
+                if (typeof Input !== 'undefined' && Input.UpdateCanvasTransform) {
+                    Input.UpdateCanvasTransform();
+                }
+            };
+        }
+        
+        // Add resize event listener
+        window.addEventListener('resize', this._resizeHandler);
+        
+        // Set body style to remove margins/padding
+        document.body.style.margin = '0';
+        document.body.style.padding = '0';
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 // #region Canvas2DRenderer class
@@ -69,12 +194,19 @@ class Canvas2DRenderer extends Renderer {
         this.ctx = canvas.getContext("2d");
     }
 
+    get width() {
+        return this._width;
+    }
+    get height() {
+        return this._height;
+    }
+
     set width(value) {
-        this.canvas.width = value;
+        super.width = value;
         this.ctx.imageSmoothingEnabled = this._imageSmoothingEnabled;
     }
     set height(value) {
-        this.canvas.height = value;
+        super.height = value;
         this.ctx.imageSmoothingEnabled = this._imageSmoothingEnabled;
     }
 
@@ -357,12 +489,19 @@ class WebGLRenderer extends Renderer {
         this.gl.clearColor(0, 0, 0, 0); // TODO delete this after testing different pngs
     }
 
+    get width() {
+        return this._width;
+    }
+    get height() {
+        return this._height;
+    }
+
     set width(value) {
-        this.canvas.width = value;
+        super.width = value;
         this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     }
     set height(value) {
-        this.canvas.height = value;
+        super.height = value;
         this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     }
 

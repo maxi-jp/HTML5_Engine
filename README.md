@@ -178,6 +178,30 @@ class MyPhysicsBox extends Box2DRectangleGO {
 }
 ```
 
+## Best Practices & Tips
+
+### Coordinate System and Display
+- **Always use `this.screenWidth` and `this.screenHeight`** instead of `canvas.width` and `canvas.height` for cross-compatibility with fullscreen modes
+- **Mouse coordinates** via `Input.mouse.x` and `Input.mouse.y` are automatically normalized to your game resolution
+- **Configure fullscreen behavior** using the game config object:
+
+```javascript
+class MyGame extends Game {
+    constructor(renderer) {
+        super(renderer);
+        
+        this.config = {
+            screenWidth: 640,              // Game resolution
+            screenHeight: 480,
+            fillWindow: true,              // Fill entire browser window
+            preserveAspectRatio: true,     // Maintain aspect ratio
+            matchNativeResolution: false,  // Use window size as resolution
+            useDevicePixelRatio: false     // Handle high-DPI displays
+        };
+    }
+}
+```
+
 ## License
 
 MIT License

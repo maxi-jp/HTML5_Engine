@@ -11,16 +11,14 @@ class InputAsset {
         this.keyUpCount = 0;
         this.pressed = false;
         this.value = value;
-
-        this.pivot = { x: -width / 2, y: -height / 2 };
     }
 
     DawAsRectangle(renderer) {
         // rectangles fill
-        renderer.DrawFillRectangle(this.position.x, this.position.y, this.width, this.height, this.color, 0, this.pivot);
+        renderer.DrawFillBasicRectangle(this.position.x, this.position.y, this.width, this.height, this.color);
 
-        // rectangles stroke line   (x, y, w, h, color=Color.black, lineWidth=1, rot=0, pivot=coord)
-        renderer.DrawStrokeRectangle(this.position.x, this.position.y, this.width, this.height, Color.black, 1, 0, this.pivot);
+        // rectangles stroke line
+        renderer.DrawStrokeBasicRectangle(this.position.x, this.position.y, this.width, this.height, Color.black, 1);
 
         // rectangles text
         renderer.DrawFillText(this.key, this.position.x + this.width / 2, this.position.y + this.height - 12, "bold 32px Arial", Color.black, "center");
@@ -187,7 +185,7 @@ class InputTest extends Game {
         }, this)
         // gamepad triggers
         this.gamepadTriggers.forEach(trigger => {     
-            this.renderer.DrawFillRectangle(trigger.position.x, trigger.position.y, trigger.width, trigger.value * trigger.height, Color.blue);
+            this.renderer.DrawFillBasicRectangle(trigger.position.x, trigger.position.y, trigger.width, trigger.value * trigger.height, Color.blue);
 
             trigger.DawAsRectangle(this.renderer);
 

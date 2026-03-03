@@ -278,11 +278,11 @@ class Tetris extends Game {
         this.comboLabel = new TextLabel("", new Vector2(20, 360), "18px Comic Sans MS", Color.orange, "left", "middle", false);
         this.awardsLabel = new TextLabel("", new Vector2(20, 390), "20px Comic Sans MS", Color.pink, "left", "middle", false);
         this.keysLabel = new TextLabel("Keys: A/D (move) | Z (rot ccw) | Space (rot cw) | W (fall) | Q (save)", new Vector2(20, 460), "16px Comic Sans MS", Color.grey, "left", "middle", false);
-        this.gameOverLavel = new TextLabel("Game Over", new Vector2(canvas.width / 2, canvas.height / 2), "40px Comic Sans MS", Color.black, "center", "middle", false);
-        this.pauseLavel = new TextLabel("PAUSE", new Vector2(canvas.width / 2, canvas.height / 2), "40px Comic Sans MS", Color.black, "center", "middle", false);
+        this.gameOverLavel = new TextLabel("Game Over", new Vector2(this.screenWidth / 2, this.screenHeight / 2), "40px Comic Sans MS", Color.black, "center", "middle", false);
+        this.pauseLavel = new TextLabel("PAUSE", new Vector2(this.screenWidth / 2, this.screenHeight / 2), "40px Comic Sans MS", Color.black, "center", "middle", false);
 
         // center the grid in the canvas
-        this.gridPosition.x = Math.floor((canvas.width - this.gridSize.cols * this.squareSize) / 2);
+        this.gridPosition.x = Math.floor((this.screenWidth - this.gridSize.cols * this.squareSize) / 2);
 
         this.SetupInput();
     }

@@ -63,6 +63,32 @@
     this.renderer.DrawSprite(mySpriteImage, x, y, width, height);
     this.renderer.DrawText("Hello World", x, y, "20px Arial", Color.white);</code></pre>
                 
+                <h3>Screen and Coordinate System</h3>
+                <p>The engine uses a consistent coordinate system that works across different display modes:</p>
+                <ul>
+                    <li><strong>Always use <code>this.screenWidth</code> and <code>this.screenHeight</code></strong> instead of <code>canvas.width</code> and <code>canvas.height</code></li>
+                    <li><strong>Mouse coordinates</strong> via <code>Input.mouse.x</code> and <code>Input.mouse.y</code> are automatically normalized</li>
+                    <li><strong>Fullscreen modes</strong> preserve aspect ratios and coordinate consistency</li>
+                </ul>
+                <pre><code class="language-javascript">// ✅ Correct - Works with all display modes
+const centerX = this.screenWidth / 2;
+const centerY = this.screenHeight / 2;
+
+// ❌ Incorrect - Breaks with fullscreen modes  
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 2;</code></pre>
+                
+                <h3>Display Configuration</h3>
+                <p>Configure display behavior using the <code>config</code> object in your Game constructor:</p>
+                <pre><code class="language-javascript">this.config = {
+    screenWidth: 640,              // Game resolution width
+    screenHeight: 480,             // Game resolution height
+    fillWindow: false,             // Make canvas fill entire window
+    preserveAspectRatio: true,     // Keep aspect ratio when scaling
+    matchNativeResolution: false,  // Use window size as resolution
+    useDevicePixelRatio: false     // Handle high-DPI displays
+};</code></pre>
+                
                 <h3>The Game Loop</h3>
                 <p>The game loop, managed by <code>engine/main.js</code>, continuously calls your game's <code>Update</code> and <code>Draw</code> methods. <code>Update(deltaTime)</code> is called with a <code>deltaTime</code> parameter, representing the time elapsed since the last frame, enabling frame-rate independent logic.</p>
             </section>

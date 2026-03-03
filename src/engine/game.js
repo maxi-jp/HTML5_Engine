@@ -1,20 +1,32 @@
 class Game {
-    _screenWidth = 640;
-    _screenHeight = 480;
-    _screenHalfWidth = 0;
-    _screenHalfHeight = 0;
-
     _audioActive = true;
 
     constructor(renderer) {
-        this.config = {};
+        this.config = {
+            // Screen configuration
+            screenWidth: 640,
+            screenHeight: 480,
+            imageSmoothingEnabled: true,
+            
+            // Audio configuration
+            audioAnalyzer: false,
+            
+            // Debug configuration
+            drawColliders: false
+        };
         // config example:
         // {
+        //     screenWidth: 1280,          // initial canvas width
+        //     screenHeight: 720,          // initial canvas height
         //     imageSmoothingEnabled: true, // enable/disable image smoothing on the canvas context
+        //     fillWindow: false,      // make the game canvas to fill the entire window
+        //     matchNativeResolution: false, // if fillWindow=true this controls how the canvas behaves when filling window (true: updates the canvas internal resolution to match window size | false: keeps existing resolution and stretches to fit window)
+        //     preserveAspectRatio: true,    // if fillWindow=true and matchNativeResolution=false, maintains canvas aspect ratio when scaling to fit window
+        //     useDevicePixelRatio: false,   // Use device pixel ratio for crisp rendering on high DPI displays
         //     audioAnalyzer: true,    // if true it will create an audio analyzer when loading the audio assets
         //     analyzerfftSize: 128,   // size of the audio analyzer fft, default is 128
         //     analyzerSmoothing: 0.5, // smoothing of the audio analyzer, default is 0.5
-        //     drawColliders: false,   // smoothing of the audio analyzer, default is 0.5
+        //     drawColliders: false,   // draw collision shapes for debugging
         // };
 
         this.graphicAssets = null;
@@ -44,46 +56,51 @@ class Game {
         this.collidersById = new Map(); // Maps collider.id to Collider instance for quick lookups
         this.lastCollisions = new Set(); // ids of colliding pairs detected the last frame
         this.detectedCollisions = new Set(); // collisions detected on this frame
-
-        this._screenHalfWidth = this._screenWidth / 2;
-        this._screenHalfHeight = this._screenHeight / 2;
     }
 
     get screenWidth() {
-        return this._screenWidth;
+        return this.renderer.width;
     }
     get screenHeight() {
-        return this._screenHeight;
+        return this.renderer.height;
     }
     get screenHalfWidth() {
-        return this._screenHalfWidth;
+        return this.renderer.halfWidth;
     }
     get screenHalfHeight() {
-        return this._screenHalfHeight;
+        return this.renderer.halfHeight;
     }
     get audioActive() {
         return this._audioActive;
     }
 
     set screenWidth(value) {
-        this._screenWidth = value;
-        this._screenHalfWidth = this._screenWidth / 2;
-        this.renderer.width = this._screenWidth;
+        this.renderer.width = value;
     }
     set screenHeight(value) {
-        this._screenHeight = value;
-        this._screenHalfHeight = this._screenHeight / 2;
-        this.renderer.height = this._screenHeight;
+        this.renderer.height = value;
     }
     set audioActive(value) {
         this._audioActive = value;
     }
 
     Start() {
-        this.renderer.width = this._screenWidth;
-        this.renderer.height = this._screenHeight;
+        // Set initial screen size from config
+        this.renderer.width = this.config.screenWidth;
+        this.renderer.height = this.config.screenHeight;
+        
+        // Configure renderer settings
         if (typeof(this.config.imageSmoothingEnabled) !== 'undefined')
             this.renderer.imageSmoothingEnabled = this.config.imageSmoothingEnabled;
+        
+        // Fill window if configured
+        if (this.config.fillWindow) {
+            this.renderer.SetCanvasFillWindow(
+                this.config.matchNativeResolution || false, 
+                this.config.useDevicePixelRatio || false,
+                this.config.preserveAspectRatio !== false // default to true
+            );
+        }
         
         this.gameObjects = [];
         this.colliders = [];
@@ -223,6 +240,7 @@ class Game {
             this.collidersById.delete(collider.id);
 
             // check if the collider has collisions pending
+            const idToRemove = collider.id;
             const cleanCollisionSet = (collisionSet) => {
                 for (const pairId of collisionSet) {
                     // Pair ID is a string like "id1-id2".
@@ -236,5 +254,18 @@ class Game {
             cleanCollisionSet(this.lastCollisions);
             cleanCollisionSet(this.detectedCollisions);
         }
+    }
+
+    SetFillWindow(matchNativeResolution = true, useDevicePixelRatio = false, preserveAspectRatio = true) {
+        this.renderer.SetCanvasFillWindow(matchNativeResolution, useDevicePixelRatio, preserveAspectRatio);
+    }
+
+    SetScreenSize(width, height) {
+        this.renderer.SetScreenSize(width, height);
+    }
+
+    Configure(newConfig) {
+        // Merge new configuration with existing config
+        Object.assign(this.config, newConfig);
     }
 }

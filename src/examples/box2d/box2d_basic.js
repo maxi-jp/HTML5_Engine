@@ -40,7 +40,7 @@ class Box2DBasic extends Box2DGame {
         // a box
         CreateBox(
             this.physicsWorld,
-            (canvas.width / 2) / this.physicsScale, // x coordinate
+            (this.screenWidth / 2) / this.physicsScale, // x coordinate
             3, // y coordinate
             {
                 width: 1,
@@ -90,7 +90,7 @@ class Box2DBasic extends Box2DGame {
             CreateCircle(
                 this.physicsWorld,
                 Input.mouse.x / this.physicsScale, // x coordinate
-                (canvas.height - Input.mouse.y) / this.physicsScale, // y coordinate
+                (this.screenHeight - Input.mouse.y) / this.physicsScale, // y coordinate
                 {
                     radius: RandomBetweenFloat(0.05, 0.2), // radius in meters
                     restitution: 0.8, // high bouncing rate
