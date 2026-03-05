@@ -192,7 +192,7 @@ class Sprite {
     _flipY = false;
     _computedScale = new Vector2(1, 1);
 
-    constructor(img, position, rotation, scale, alpha=1.0) {
+    constructor(img, position, rotation=0, scale=1, alpha=1.0) {
         this.img = img;
         // this.img.halfWidth = img.width / 2;
         // this.img.halfHeight = img.height / 2;
@@ -230,6 +230,13 @@ class Sprite {
         return this._flipY;
     }
 
+    set x(value) {
+        this.position.x = value;
+    }
+    set y(value) {
+        this.position.y = value;
+    }
+
     set flipX(value) {
         if (this._flipX !== value) {
             this._flipX = value;
@@ -265,7 +272,7 @@ class Sprite {
     }
 
     DrawBasic(renderer) {
-        renderer.DrawImageBasic(this.img, this.position.x + this.pivot.x, this.position.y + this.pivot.y, this.img.width * this.scale.x, this.img.height * this.scale.y, this.alpha);
+        renderer.DrawImageBasic(this.img, this.position.x + (this.pivot.x * this.scale.x), this.position.y + (this.pivot.y * this.scale.y), this.img.width * this.scale.x, this.img.height * this.scale.y, this.alpha);
     }
     
     DrawSection(renderer, sx, sy, sw, sh) {
@@ -273,7 +280,7 @@ class Sprite {
     }
 
     DrawSectionBasic(renderer, sx, sy, sw, sh) {
-        renderer.DrawImageSectionBasic(this.img, this.position.x + this.pivot.x, this.position.y + this.pivot.y, sx, sy, sw, sh, this._computedScale.x, this._computedScale.y, this.alpha);
+        renderer.DrawImageSectionBasic(this.img, this.position.x + (this.pivot.x * this.scale.x), this.position.y + (this.pivot.y * this.scale.y), sx, sy, sw, sh, this._computedScale.x, this._computedScale.y, this.alpha);
     }
 
     DrawAt(renderer, x, y) {
@@ -498,6 +505,13 @@ class TextLabel {
     }
     get color() {
         return this._color;
+    }
+
+    set x(value) {
+        this.position.x = value;
+    }
+    set y(value) {
+        this.position.y = value;
     }
 
     set text(value) {

@@ -204,7 +204,6 @@ class Box2DRectangleGO extends Box2DGameObject {
     Draw(renderer) {
         // TODO get the scale
         renderer.DrawFillRectangle(this.position.x * 100, this.position.y * 100, this.width * 100, this.height * 100, Color.black, this.rotation);
-        ctx.save();
     }
 }
 

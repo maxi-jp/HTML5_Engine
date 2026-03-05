@@ -36,11 +36,32 @@ Engine and examples presents on this project are active on github pages: https:/
   - box2d_gameobjects.js  # Box2D-enabled game objects
   - box2d_helper.js       # Box2D utility functions
 - examples/
+  - audio_test/           # Audio system testing and examples
+  - box2d/                # Box2D physics examples
+    - box2d_basic.js      # Basic Box2D physics demo
+    - box2d_basket.js     # Basketball-style physics game
+    - box2d_platormer.js  # Platformer with Box2D physics
+  - brokeout/             # Breakout clone
   - floppyderp/           # Flappy Bird-like example
-  - menu/                 # Menu example
+  - menu/                 # HTML + CSS menu examples
   - mode7/                # Mode 7 pseudo-3D example
+  - pacmon/               # Pac-Man clone (WIP)
+  - parallax/             # Parallax scrolling demo
+  - tetris/               # Tetris implementations
+    - simple_tetris.js    # Basic Tetris game
+    - tetris.js           # Complex Tetris with modern features
+  - tts/                  # Twin-stick shooter examples
+  - canvas_resizing.js    # Canvas fullscreen and display configuration demo
+  - coliders_test.js      # Collision detection testing
+  - columns.js            # Columns-style puzzle game
   - input_actions_test.js # Abstract input system example
-  - many more to add
+  - input_test.js         # Basic input system testing
+  - lines_intersection.js # Line intersection algorithms
+  - object_pooling.js     # Object pooling performance demo
+  - performance_test.js   # Performance benchmarking
+  - puzzlebobble.js       # Puzzle Bobble clone
+  - render_test.js        # Renderer feature testing
+  - snake.js              # Snake game implementation
 
 ## Getting Started
 

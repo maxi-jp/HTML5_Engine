@@ -268,4 +268,7 @@ class Game {
         // Merge new configuration with existing config
         Object.assign(this.config, newConfig);
     }
+
+    // Callback from the Renderer informing that the canvas has changed
+    WindowResized() {}
 }
