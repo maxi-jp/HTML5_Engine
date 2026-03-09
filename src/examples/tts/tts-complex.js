@@ -1,6 +1,14 @@
 class TTSC extends Game {
     constructor(renderer) {
         super(renderer);
+
+        this.config = {
+            ...this.config,
+            screenWidth: 1280,
+            screenHeight: 720,
+            fillWindow: true
+        };
+
         this.graphicAssets = {
             ships: {
                 path: "src/examples/tts/assets/simpleSpace_sheet.png",
@@ -20,7 +28,7 @@ class TTSC extends Game {
         this.enemies = [];
         this.camera = null;
 
-        this.sceneLimits = new Rectangle(Vector2.Zero(), 800, 640, Color.white, true, 2);
+        this.sceneLimits = new Rectangle(Vector2.Zero(), 1200, 640, Color.white, true, 2);
 
         this.timeToSpawnEnemy = 1;
         this.timeToSpawnEnemyAux = 0;
@@ -53,10 +61,10 @@ class TTSC extends Game {
 
         this.mouseCircle = new Circle(new Vector2(0, 0), 5, Color.red, 1);
 
-        this.player = new TTSCPlayer(new Vector2(this.screenWidth / 2, this.screenHeight / 2), 0, 1, this.graphicAssets.ships.img, this.sceneLimits);
+        this.player = new TTSCPlayer(new Vector2(this.sceneLimits.width / 2, this.sceneLimits.height / 2), 0, 1, this.graphicAssets.ships.img, this.sceneLimits);
         this.gameObjects.push(this.player);
 
-        this.camera = new FollowCameraBasic(Vector2.Zero(), this.player);
+        this.camera = new FollowCamera(Vector2.Zero(), this.player, -200, 140, -100, 40, 5);
         this.camera.Start();
         this.player.Start();
 
@@ -76,6 +84,7 @@ class TTSC extends Game {
         this.mouseCircle.position.Set(Input.mouse.x, Input.mouse.y);
 
         // check bullets-enemies collisions
+        // TODO! update collisions to use the ingame collisions system
         const bullets = this.player.bulletPool.objects;
         for (let i = 0; i < bullets.length; i++) {
             const bullet = bullets[i];
@@ -92,6 +101,9 @@ class TTSC extends Game {
                             this.RemoveEnemy(this.enemies[j], j);
 
                             bullet.active = false;
+
+                            this.camera.Shake(0.2, 100, 2);
+
                             break; // exit the bullets loop
                         }
                     }
@@ -100,6 +112,7 @@ class TTSC extends Game {
         }
 
         // check player enemies collisions
+        // TODO! update collisions to use the ingame collisions system
         for (let i = 0; i < this.enemies.length; i++) {
             const difX = this.enemies[i].position.x - this.player.position.x;
             const difY = this.enemies[i].position.y - this.player.position.y;
@@ -109,6 +122,8 @@ class TTSC extends Game {
                 this.playerScore -= this.enemies[i].score;
                 this.playerScoreLabel.text = this.playerScore;
                 this.RemoveEnemy(this.enemies[i], i);
+
+                this.camera.Shake(0.3, 100, 4);
             }
 
         }
@@ -192,4 +207,8 @@ class TTSC extends Game {
 
         this.AddEnemy(enemy);
     }
+}
+
+window.onload = () => {
+    Init(TTSC);
 }

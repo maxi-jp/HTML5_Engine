@@ -86,13 +86,14 @@ class Game {
 
     Start() {
         // Set initial screen size from config
-        this.renderer.width = this.config.screenWidth;
-        this.renderer.height = this.config.screenHeight;
+        this.renderer.width = this.config.screenWidth ?? canvas.width;
+        this.renderer.height = this.config.screenHeight ?? canvas.height;
         
         // Configure renderer settings
-        if (typeof(this.config.imageSmoothingEnabled) !== 'undefined')
+        if (this.config.imageSmoothingEnabled !== undefined) {
             this.renderer.imageSmoothingEnabled = this.config.imageSmoothingEnabled;
-        
+        }
+
         // Fill window if configured
         if (this.config.fillWindow) {
             this.renderer.SetCanvasFillWindow(

@@ -189,3 +189,7 @@ class TTS extends Game {
         this.AddEnemy(enemy);
     }
 }
+
+window.onload = () => {
+    Init(TTS);
+}

@@ -542,3 +542,7 @@ class FloppyDerpTube extends GameObject {
         this.position.x -= game.scrollVelocity * deltaTime;
     }
 }
+
+window.onload = () => {
+    Init(FloppyDerp);
+}

@@ -3,6 +3,7 @@ class CanvasResizing extends Game {
         super(renderer);
 
         this.config = {
+            ...this.config,
             screenWidth: 800,
             screenHeight: 800,
         };
@@ -14,6 +15,10 @@ class CanvasResizing extends Game {
             },
             sanic: {
                 path: "src/examples/assets/sanic_ppp.png",
+                img: null
+            },
+            aim: {
+                path: "src/examples/assets/aim.png",
                 img: null
             }
         };
@@ -27,6 +32,8 @@ class CanvasResizing extends Game {
 
         this.bgRectangle1 = null;
         this.bgRectangle2 = null;
+
+        this.aim = null;
     }
 
     Start() {
@@ -60,10 +67,15 @@ class CanvasResizing extends Game {
 
         this.bgRectangle1 = new Rectangle(new Vector2(5, 95), 470, 150, new Color(0, 0, 0, 0.66));
         this.bgRectangle2 = new Rectangle(new Vector2(5, this.screenHeight - 135), 310, 130, new Color(0, 0, 0, 0.66));
+
+        this.aim = new SpriteObject(Vector2.Zero(), 0, 1, this.graphicAssets.aim.img);
+        this.gameObjects.push(this.aim);
     }
 
     Update(deltaTime) {
         super.Update(deltaTime);
+
+        this.aim.position.Set(Input.mouse.x, Input.mouse.y);
 
         if (Input.IsKeyDown(KEY_1)) {
             this.renderer.fillScreen = !this.renderer.fillScreen;
@@ -91,6 +103,8 @@ class CanvasResizing extends Game {
 
         if (Input.IsKeyDown(KEY_4)) {
             this.renderer.imageSmoothingEnabled = !this.renderer.imageSmoothingEnabled;
+
+            this.canvasConfigurationLabels[5].text = "Image Smoothing Enabled: " + this.renderer.imageSmoothingEnabled;
         }
     }
 

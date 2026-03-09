@@ -107,6 +107,8 @@ class TTSCPlayer extends SpriteObject {
                 bullet.rotation = this.rotation - PIH;
 
                 this.fireRateAux = this.fireRate;
+
+                // game.camera.Shake(0.1, 100, 1);
             }
         }
 

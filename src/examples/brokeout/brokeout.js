@@ -309,3 +309,7 @@ class Brick extends RectangleGO {
         return this.strengh <= 0;
     }
 }
+
+window.onload = () => {
+    Init(BrokeOut);
+}

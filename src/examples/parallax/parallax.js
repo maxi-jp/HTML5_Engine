@@ -2,7 +2,7 @@ class Parallax extends Game {
     constructor(renderer) {
         super(renderer);
 
-        this.config = { imageSmoothingEnabled: false };
+        this.config = { ...this.config, imageSmoothingEnabled: false };
 
         this.graphicAssets = {
             mountain: {
@@ -123,4 +123,8 @@ class Parallax extends Game {
 
         renderer.DrawFillText(`Camera: ${this.camera.x}, ${this.camera.y}`, 10, this.screenHeight - 20, '12px Arial', Color.white, "left");
     }
+}
+
+window.onload = () => {
+    Init(Parallax);
 }
