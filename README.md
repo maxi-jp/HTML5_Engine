@@ -4,6 +4,8 @@ A modular, object-oriented HTML5 game engine for web browsers, built with vanill
 
 Engine and examples presents on this project are active on github pages: https://maxi-jp.github.io/HTML5_Engine/
 
+Documentation can be consulted [here](https://maxi-jp.github.io/HTML5_Engine/docs/).
+
 ## Features
 
 - **Modular Core**: A clean, object-oriented core that's easy to extend.
