@@ -17,6 +17,7 @@ Engine and examples presents on this project are active on github pages: https:/
 - **UI & Menus**: Use standard HTML and CSS for creating game menus and overlays.
 - **Background Layers**: Create rich backgrounds with solid colors, gradients, parallax scrolling layers, and tilemaps.
 - **Object Pooling**: An efficient pooling system for reusing objects like bullets or particles to improve performance.
+- **Particle System**: A configurable particle emitter supporting point and area sources, with per-particle control over velocity, direction, opacity, scale, and rotation. Based on [HTML5_ParticleSystem](https://github.com/maxi-jp/HTML5_ParticleSystem).
 - **Utilities**: A collection of helpers for vector math, collision detection, color manipulation, and more.
 - **Debugging Tools**: Optional debug drawing for physics bodies and an FPS/stats overlay.
 - **Mode 7 Renderer**: Simulate SNES-style pseudo-3D backgrounds (as in F-Zero or Mario Kart).
@@ -35,6 +36,7 @@ Engine and examples presents on this project are active on github pages: https:/
   - box2d_game.js         # Box2D game base class 
   - box2d_gameobjects.js  # Box2D-enabled game objects
   - box2d_helper.js       # Box2D utility functions
+  - particlesystem.js     # Particle system (Particle, ParticleEmitter, ParticleSystem classes)
 - examples/
   - audio_test/           # Audio system testing and examples
   - box2d/                # Box2D physics examples
@@ -47,6 +49,7 @@ Engine and examples presents on this project are active on github pages: https:/
   - mode7/                # Mode 7 pseudo-3D example
   - pacmon/               # Pac-Man clone (WIP)
   - parallax/             # Parallax scrolling demo
+  - particles/            # Particle system demo (smoke, rain, snow effects)
   - tetris/               # Tetris implementations
     - simple_tetris.js    # Basic Tetris game
     - tetris.js           # Complex Tetris with modern features
@@ -99,6 +102,8 @@ Engine and examples presents on this project are active on github pages: https:/
     <script src="engine/game.js"></script>
     <script src="engine/utils_classes.js"></script>
     <script src="engine/gameobjects.js"></script>
+    <!-- add this to use particle systems -->
+    <script src="engine/particlesystem.js"></script>
     <!-- add these only if you want to use box2d physics -->
     <script src="lib/Box2D.js"></script>
     <script src="engine/box2d_helper.js"></script>
@@ -166,6 +171,63 @@ class MyRotationBox extends RectangleGO {
     // The base class handles drawing
 }
 ```
+
+## Example: Using the Particle System
+
+First, include `particlesystem.js` in your HTML after the other engine scripts:
+```html
+<script src="engine/particlesystem.js"></script>
+```
+
+Then create a `ParticleSystem` with a configuration and an image, and call `Update` / `Draw` each frame:
+
+```javascript
+class MyGame extends Game {
+    constructor(renderer) {
+        super(renderer);
+
+        this.Configure({
+            screenWidth:  800,
+            screenHeight: 640
+        });
+
+        this.graphicAssets = {
+            smoke: { path: "assets/smoke.png", img: null }
+        };
+
+        this.particles = null;
+    }
+
+    Start() {
+        const config = {
+            emitterType: emitterType.point,
+            maxParticleCount: 200,
+            MIN_INITIAL_VELOCITY: 20,
+            MAX_INITIAL_VELOCITY: 80,
+            // ... any other overrides
+        };
+
+        this.particles = new ParticleSystem(smokeImg, config);
+        this.particles.SetPointPosition(400, 320);  // emit from canvas centre
+        this.particles.Start();
+    }
+
+    Update(deltaTime) {
+        super.Update(deltaTime);
+        this.particles.Update(deltaTime);
+    }
+
+    Draw() {
+        this.renderer.DrawFillBasicRectangle(0, 0, this.screenWidth, this.screenHeight, Color.black);
+        super.Draw();
+        this.particles.Draw(this.renderer.ctx);
+    }
+}
+```
+
+See `src/examples/particles/particles_example.js` for a full demo with smoke, rain, and snow presets.
+
+> The particle system is based on the standalone [HTML5_ParticleSystem](https://github.com/maxi-jp/HTML5_ParticleSystem) project.
 
 ## Example: Using Box2D Physics
 

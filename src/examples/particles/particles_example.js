@@ -15,6 +15,7 @@ const smokeAreaConfig = {
 
 const smokePointConfig = {
     maxParticleCount: 200,
+    globalCompositeOperation: "overlay",
     emitterType: emitterType.point,
 
     MIN_INITIAL_VELOCITY: 10,
@@ -25,6 +26,8 @@ const smokePointConfig = {
     MIN_DIRECTION_Y: -1,
     MAX_DIRECTION_Y:  1,
 
+    MIN_OPACITY_INCREMENT_VELOCITY: 1.0,
+    MAX_OPACITY_INCREMENT_VELOCITY: 4.0,
     MIN_OPACITY_DECREMENT_VELOCITY: 0.5,
     MAX_OPACITY_DECREMENT_VELOCITY: 2.0,
 
@@ -41,9 +44,7 @@ const smokePointConfig = {
     MAX_ROTATION_VELOCITY: 0.15,
 
     MIN_TIME_TO_SPAWN_PARTICLE: 0.01,
-    MAX_TIME_TO_SPAWN_PARTICLE: 0.1,
-
-    globalCompositeOperation: "overlay"
+    MAX_TIME_TO_SPAWN_PARTICLE: 0.1
 };
 
 const rainConfig = {
@@ -62,6 +63,8 @@ const rainConfig = {
     MIN_DIRECTION_Y: 1,
     MAX_DIRECTION_Y: 1,
 
+    MIN_OPACITY_INCREMENT_VELOCITY: 1.0,
+    MAX_OPACITY_INCREMENT_VELOCITY: 2.0,
     MIN_OPACITY_DECREMENT_VELOCITY: 0.1,
     MAX_OPACITY_DECREMENT_VELOCITY: 1.0,
 
@@ -97,6 +100,8 @@ const snowConfig = {
     MIN_DIRECTION_Y: 1,
     MAX_DIRECTION_Y: 1,
 
+    MIN_OPACITY_INCREMENT_VELOCITY: 0.1,
+    MAX_OPACITY_INCREMENT_VELOCITY: 0.30,
     MIN_OPACITY_DECREMENT_VELOCITY: 0.05,
     MAX_OPACITY_DECREMENT_VELOCITY: 0.15,
 
@@ -122,11 +127,11 @@ class ParticlesExample extends Game {
     constructor(renderer) {
         super(renderer);
 
-        this.config = {
+        this.Configure({
             screenWidth:  800,
             screenHeight: 640,
             imageSmoothingEnabled: true
-        };
+        });
 
         this.graphicAssets = {
             smoke:     { path: "./src/examples/particles/assets/smoke.png",     img: null },
@@ -139,6 +144,7 @@ class ParticlesExample extends Game {
         this._mode = 'area-smoke';
 
         this.bgColor = Color.FromHex("#1a1a2e");
+        this.semiTransparentBlack = new Color(0, 0, 0, 0.75);
     }
 
     Start() {
@@ -192,8 +198,8 @@ class ParticlesExample extends Game {
 
     Draw() {
         // Dark background
-        this.renderer.DrawFillRectangle(
-            this.screenHalfWidth, this.screenHalfHeight,
+        this.renderer.DrawFillBasicRectangle(
+            0, 0,
             this.screenWidth, this.screenHeight,
             this.bgColor
         );
@@ -203,20 +209,13 @@ class ParticlesExample extends Game {
     }
 
     _drawHUD(ctx) {
-        ctx.save();
-        ctx.globalAlpha = 0.75;
-        ctx.fillStyle   = "#000";
-        ctx.fillRect(8, 8, 320, 100);
-        ctx.globalAlpha = 1.0;
-        ctx.fillStyle   = "#fff";
-        ctx.font        = "13px monospace";
-        ctx.fillText("A - Area smoke (default)",    16, 28);
-        ctx.fillText("S - Smoke following mouse",   16, 46);
-        ctx.fillText("D - Rain",                    16, 64);
-        ctx.fillText("F - Snow",                    16, 82);
+        this.renderer.DrawFillBasicRectangle(8, 8, 320, 100, this.semiTransparentBlack);
+        this.renderer.DrawFillText("A - Area smoke (default)", 16, 28, "13px monospace", Color.white, "left");
+        this.renderer.DrawFillText("S - Smoke following mouse", 16, 46, "13px monospace", Color.white, "left");
+        this.renderer.DrawFillText("D - Rain", 16, 64, "13px monospace", Color.white, "left");
+        this.renderer.DrawFillText("F - Snow", 16, 82, "13px monospace", Color.white, "left");
         const ps = this._particleSystem;
-        ctx.fillText(`Particles alive: ${ps.activeCount} / ${ps.config.maxParticleCount}`, 16, 100);
-        ctx.restore();
+        this.renderer.DrawFillText(`Particles alive: ${ps.activeCount} / ${ps.config.maxParticleCount}`, 16, 100, "13px monospace", Color.white, "left");
     }
 }
 

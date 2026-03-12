@@ -2,6 +2,8 @@
 // Particle System
 // Particle, ParticleEmitter and ParticleSystem classes.
 // Requires: utils_math.js (Vector2, RandomBetweenFloat, PI2)
+//
+// Based on: https://github.com/maxi-jp/HTML5_ParticleSystem
 // ============================================================
 
 const emitterType = {
@@ -33,6 +35,8 @@ const defaultParticleConfig = {
     MAX_DIRECTION_Y:  1,
 
     // Opacity fade speed (units/sec)
+    MIN_OPACITY_INCREMENT_VELOCITY: 1.0,
+    MAX_OPACITY_INCREMENT_VELOCITY: 4.0,
     MIN_OPACITY_DECREMENT_VELOCITY: 0.5,
     MAX_OPACITY_DECREMENT_VELOCITY: 2.0,
 
@@ -61,16 +65,20 @@ const defaultParticleConfig = {
 // Particle
 // ─────────────────────────────────────────────────────────────────────────────
 class Particle {
+    
+    static pivot = { x: 0, y: 0 };
+
     constructor(img) {
         this.img = img;
 
         this.active    = false;
         this.appearing = false;
 
-        this.position         = new Vector2(0, 0);
-        this.direction        = new Vector2(0, 0);
+        this.position         = Vector2.Zero();
+        this.direction        = Vector2.Zero();
         this.opacity          = 0.0;
-        this.opacityVelocity  = 0.0;
+        this.opacityIncrementVelocity = 0.0;
+        this.opacityDecrementVelocity = 0.0;
         this.rotation         = 0.0;
         this.rotationVelocity = 0.0;
         this.scale            = 1.0;
@@ -80,18 +88,21 @@ class Particle {
     /**
      * Activate the particle with initial parameters.
      * @param {Vector2} initialPosition
-     * @param {number}  opacityVelocity
+     * @param {number}  opacityIncrementVelocity
+     * @param {number}  opacityDecrementVelocity
      * @param {number}  initialScale
      * @param {number}  scaleVelocity
      * @param {number}  initialRotation
      * @param {number}  rotationVelocity
      * @param {Vector2} direction        velocity vector (pixels/sec)
      */
-    Activate(initialPosition, opacityVelocity, initialScale, scaleVelocity,
-             initialRotation, rotationVelocity, direction) {
+    Activate(initialPosition, opacityIncrementVelocity, opacityDecrementVelocity,
+             initialScale, scaleVelocity, initialRotation, rotationVelocity,
+             direction) {
         this.position         = Vector2.Copy(initialPosition);
         this.opacity          = 0;
-        this.opacityVelocity  = opacityVelocity;
+        this.opacityIncrementVelocity = opacityIncrementVelocity;
+        this.opacityDecrementVelocity = opacityDecrementVelocity;
         this.scale            = initialScale;
         this.scaleVelocity    = scaleVelocity;
         this.rotation         = initialRotation;
@@ -108,7 +119,7 @@ class Particle {
     Update(deltaTime) {
         if (this.appearing) {
             // Fade in
-            this.opacity += this.opacityVelocity * 2.0 * deltaTime;
+            this.opacity += this.opacityIncrementVelocity * deltaTime;
             if (this.opacity >= 1.0) {
                 this.opacity   = 1.0;
                 this.appearing = false;
@@ -116,7 +127,7 @@ class Particle {
         }
         else {
             // Fade out
-            this.opacity -= this.opacityVelocity * deltaTime;
+            this.opacity -= this.opacityDecrementVelocity * deltaTime;
             if (this.opacity <= 0.0) {
                 this.Deactivate();
                 return;
@@ -136,7 +147,7 @@ class Particle {
             this.position.x, this.position.y,
             this.scale, this.scale,
             this.rotation,
-            { x: 0, y: 0 },
+            this.pivot,
             this.opacity
         );
     }
@@ -151,7 +162,7 @@ class ParticleEmitter {
      * @param {Object}  config           particle system config (uses defaultParticleConfig shape)
      */
     constructor(initialPosition, config) {
-        this.position = initialPosition ? Vector2.Copy(initialPosition) : new Vector2(0, 0);
+        this.position = initialPosition ? Vector2.Copy(initialPosition) : Vector2.Zero();
         this.config   = config;
 
         if (this.config.emitterType === emitterType.area) {
@@ -209,7 +220,7 @@ class ParticleSystem {
 
         // Create emitter
         this.emitter = new ParticleEmitter(
-            position ? position : new Vector2(0, 0),
+            position ? position : Vector2.Zero(),
             this.config
         );
 
@@ -252,6 +263,7 @@ class ParticleSystem {
             if (particle) {
                 particle.Activate(
                     this.emitter.GetSpawnPoint(),
+                    RandomBetweenFloat(this.config.MIN_OPACITY_INCREMENT_VELOCITY, this.config.MAX_OPACITY_INCREMENT_VELOCITY),
                     RandomBetweenFloat(this.config.MIN_OPACITY_DECREMENT_VELOCITY, this.config.MAX_OPACITY_DECREMENT_VELOCITY),
                     RandomBetweenFloat(this.config.MIN_INITIAL_SCALE,              this.config.MAX_INITIAL_SCALE),
                     RandomBetweenFloat(this.config.MIN_SCALE_VELOCITY,             this.config.MAX_SCALE_VELOCITY),

@@ -27,6 +27,7 @@
                 <li><a href="audio.html">Audio Manager</a></li>
                 <li><a href="ui.html">UI & Menus</a></li>
                 <li><a href="utilities.html">Utilities</a></li>
+                <li><a href="particles.html">Particle System</a></li>
                 <li><a href="debugging.html">Debugging Tools</a></li>
                 <li><a href="examples.html">Examples</a></li>
             </ul>
@@ -70,6 +71,8 @@
     &lt;script src="engine/game.js"&gt;&lt;/script&gt;
     &lt;script src="engine/utils_classes.js"&gt;&lt;/script&gt;
     &lt;script src="engine/gameobjects.js"&gt;&lt;/script&gt;
+    &lt;!-- add this to use particle systems --&gt;
+    &lt;script src="engine/particlesystem.js"&gt;&lt;/script&gt;
     &lt;!-- add these only if you want to use box2d physics --&gt;
     &lt;script src="lib/Box2D.js"&gt;&lt;/script&gt;
     &lt;script src="engine/box2d_helper.js"&gt;&lt;/script&gt;
@@ -133,13 +136,12 @@ window.onload = () => {
         super(renderer);
         
         // Configure display options
-        this.config = {
-            ...this.config, // Keep existing config
+        this.Configure({
             fillWindow: true,              // Make canvas fill entire window
             preserveAspectRatio: true,     // Keep aspect ratio when scaling
             matchNativeResolution: false,  // Use window size as resolution
             useDevicePixelRatio: false     // Handle high-DPI displays
-        };
+        });
     }
 }</code></pre>
                 
