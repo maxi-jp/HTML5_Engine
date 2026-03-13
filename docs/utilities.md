@@ -257,10 +257,16 @@ this.AddCollider(button);
 
 ### Debug visualisation
 
-Set `drawColliders: true` in your game config to draw all registered colliders every frame — very useful during development:
+Set `drawColliders: true` in your game config to draw all registered colliders on top of the normal game visuals every frame:
 
 ```javascript
 this.Configure({ drawColliders: true });
+```
+
+For pure hitbox debugging — skipping all game object drawing entirely — use `collidersOnly: true` instead:
+
+```javascript
+this.Configure({ collidersOnly: true });
 ```
 
 Colliders are drawn in **red** when not colliding and switch to **green** when overlapping.

@@ -97,7 +97,8 @@ Set `this.config` in the constructor. `super.Start()` reads it to configure the 
 | `audioAnalyzer` | `boolean` | `false` | Create a Web Audio analyser node when loading audio assets |
 | `analyzerFftSize` | `number` | `128` | FFT size for the audio analyser |
 | `analyzerSmoothing` | `number` | `0.5` | Smoothing time constant for the audio analyser |
-| `drawColliders` | `boolean` | `false` | Draw collision shapes every frame (debug aid) |
+| `drawColliders` | `boolean` | `false` | Draw collision shapes on top of game visuals every frame (debug aid) |
+| `collidersOnly` | `boolean` | `false` | Skip all game object rendering and draw **only** collision shapes — useful for pure hitbox debugging |
 
 Call `this.Configure(partialConfig)` in your Game's constructor to merge new values into an already-running config.
 

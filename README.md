@@ -287,6 +287,11 @@ class MyGame extends Game {
 }
 ```
 
+## Third-party credits
+
+- **Box2D physics** — the `src/lib/Box2D.js` file is [box2dweb](https://github.com/hecht-software/box2dweb) by [hecht-software](https://github.com/hecht-software), a JavaScript port of Box2D Flash / Box2D 2.1a.
+- **Documentation** — built with [Docsify](https://docsify.js.org/), a lightweight documentation site generator that renders Markdown files on-the-fly with no build step.
+
 ## License
 
 MIT License
