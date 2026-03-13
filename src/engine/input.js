@@ -150,7 +150,26 @@ const gamepadMapping = {
 
 const stickDeadzone = 0.1;
 
+/**
+ * Global input manager. Access keyboard, mouse, and gamepad state each frame.
+ *
+ * @example
+ * // In your Game's Update():
+ * if (Input.IsKeyPressed(KEY_SPACE)) { this.player.Jump(); }
+ * this.player.x += Input.GetAxis("MoveH") * speed * dt;
+ */
 var Input = {
+    /**
+     * Current mouse state. Updated every frame.
+     * @type {{
+     *   x: number,      // Mouse X position in canvas space
+     *   y: number,      // Mouse Y position in canvas space
+     *   down: boolean,  // True only on the frame the button was pressed
+     *   up: boolean,    // True only on the frame the button was released
+     *   pressed: boolean, // True every frame the button is held down
+     *   moved: boolean  // True if the mouse moved this frame
+     * }}
+     */
     mouse: {
         x: 0,
         y: 0,
@@ -500,28 +519,57 @@ var Input = {
 // #endregion
 
 // #region Keyboard and Mouse Events
+    /**
+     * Returns true every frame the key is held down.
+     * @param {number} keycode - A `KEY_*` constant (e.g. `KEY_SPACE`, `KEY_LEFT`).
+     * @returns {boolean}
+     */
     IsKeyPressed: function(keycode) {
         return this.keyboard.keypressed[keycode];
     },
 
+    /**
+     * Returns true only on the single frame the key was first pressed down.
+     * @param {number} keycode - A `KEY_*` constant.
+     * @returns {boolean}
+     */
     IsKeyDown: function(keycode) {
         return this.keyboard.keydown[keycode];
     },
 
+    /**
+     * Returns true only on the single frame the key was released.
+     * @param {number} keycode - A `KEY_*` constant.
+     * @returns {boolean}
+     */
     IsKeyUp: function(keycode) {
         return this.keyboard.keyup[keycode];
     },
 
+    /**
+     * Returns true every frame the mouse button is held down.
+     * @returns {boolean}
+     */
     IsMousePressed: function() {
         return this.mouse.pressed;
     },
 
+    /**
+     * Returns true only on the single frame the mouse button was first pressed.
+     * @returns {boolean}
+     */
     IsMouseDown: function () {
         return this.mouse.down;
     },
 // #endregion
 
 // #region Gamepad Events
+    /**
+     * Returns true only on the frame the gamepad button was first pressed.
+     * @param {number} gamepadIndex - Index of the gamepad (0 = first connected).
+     * @param {string} buttonId - A button name from `gamepadMapping`, e.g. `"FACE_DOWN"`, `"LB"`, `"DPAD_UP"`.
+     * @returns {boolean}
+     */
     IsGamepadButtonDown: function(gamepadIndex, buttonId) {
         const gamepad = this.gamepads[gamepadIndex];
         if (gamepad && gamepad.mapping)
@@ -529,6 +577,10 @@ var Input = {
         return false;
     },
 
+    /**
+     * Returns true only on the frame the gamepad button was released.
+     * @param {number} gamepadIndex @param {string} buttonId @returns {boolean}
+     */
     IsGamepadButtonUp: function(gamepadIndex, buttonId) {
         const gamepad = this.gamepads[gamepadIndex];
         if (gamepad && gamepad.mapping)
@@ -536,6 +588,10 @@ var Input = {
         return false;
     },
 
+    /**
+     * Returns true every frame the gamepad button is held down.
+     * @param {number} gamepadIndex @param {string} buttonId @returns {boolean}
+     */
     IsGamepadButtonPressed: function(gamepadIndex, buttonId) {
         const gamepad = this.gamepads[gamepadIndex];
         if (gamepad && gamepad.mapping)
@@ -570,6 +626,10 @@ var Input = {
         return this.GetGamepadStickAxisValue(gamepadIndex, "RS", axis);
     },
 
+    /**
+     * Returns the current value of a gamepad analog stick as a `{x, y}` object (values -1 to 1).
+     * @param {number} gamepadIndex @param {"LS"|"RS"} stick @returns {{x: number, y: number}}
+     */
     GetGamepadStickValue: function(gamepadIndex, stick) {
         const gamepad = this.gamepads[gamepadIndex];
         if (gamepad && gamepad.mapping) {
@@ -595,6 +655,10 @@ var Input = {
         return false;
     },
 
+    /**
+     * Returns the current value of a gamepad trigger (0 to 1).
+     * @param {number} gamepadIndex @param {"LT"|"RT"} trigger @returns {number}
+     */
     GetGamepadTriggerValue: function(gamepadIndex, trigger) {
         const gamepad = this.gamepads[gamepadIndex];
         if (gamepad && gamepad.mapping) {

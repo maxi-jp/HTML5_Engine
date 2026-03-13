@@ -1,8 +1,24 @@
 // #region Helper classes
 
+/**
+ * Represents an RGBA colour. Channel values are in the **0–1** range (not 0–255).
+ * The `string` field always holds the pre-computed CSS `rgba(...)` string for
+ * direct use with the canvas context.
+ *
+ * @example
+ * const red = new Color(1, 0, 0);          // opaque red
+ * const half = Color.FromRGB(128, 0, 255); // from 0-255 values
+ * const hex  = Color.FromHex('#ff8800');   // from hex string
+ */
 class Color {
     _rgba = [0, 0, 0, 1];
 
+    /**
+     * @param {number} r - Red channel, 0–1.
+     * @param {number} g - Green channel, 0–1.
+     * @param {number} b - Blue channel, 0–1.
+     * @param {number} [a=1] - Alpha channel, 0–1.
+     */
     constructor(r, g, b, a=1) {
         this._r = r;
         this._g = g;
@@ -56,40 +72,21 @@ class Color {
         this.string = this.toString();
     }
 
+    /** @returns {Color} A colour with random r, g, b and full opacity. */
     static Random() {
         return new Color(Math.random(), Math.random(), Math.random(), 1);
     }
 
-    static Black() {
-        return new Color(0, 0, 0, 1);
-    }
-    static White() {
-        return new Color(1, 1, 1, 1);
-    }
-    static Red() {
-        return new Color(1, 0, 0, 1);
-    }
-    static Green() {
-        return new Color(0, 0.5, 0, 1);
-    }
-    static Blue() {
-        return new Color(0, 0, 1, 1);
-    }
-    static Aqua() {
-        return new Color(0, 1, 1, 1);
-    }
-    static Yellow() {
-        return new Color(1, 1, 0, 1);
-    }
-    static Orange() {
-        return new Color(1, 0.647, 0, 1);
-    }
-    static Pink() {
-        return new Color(1, 0, 1, 1);
-    }
-    static Transparent() {
-        return new Color(0, 0, 0, 0);
-    }
+    /** @returns {Color} */ static Black()  { return new Color(0, 0, 0, 1); }
+    /** @returns {Color} */ static White()  { return new Color(1, 1, 1, 1); }
+    /** @returns {Color} */ static Red()    { return new Color(1, 0, 0, 1); }
+    /** @returns {Color} */ static Green()  { return new Color(0, 0.5, 0, 1); }
+    /** @returns {Color} */ static Blue()   { return new Color(0, 0, 1, 1); }
+    /** @returns {Color} */ static Aqua()   { return new Color(0, 1, 1, 1); }
+    /** @returns {Color} */ static Yellow() { return new Color(1, 1, 0, 1); }
+    /** @returns {Color} */ static Orange() { return new Color(1, 0.647, 0, 1); }
+    /** @returns {Color} */ static Pink()   { return new Color(1, 0, 1, 1); }
+    /** @returns {Color} */ static Transparent() { return new Color(0, 0, 0, 0); }
 
     static black  = Color.Black();
     static white  = Color.White();
@@ -108,18 +105,38 @@ class Color {
     static lightGrey = new Color(0.827, 0.827, 0.827, 1);
     static transparent = Color.Transparent();
 
+    /**
+     * Creates a deep copy of a colour.
+     * @param {Color} color
+     * @returns {Color}
+     */
     static Copy(color) {
         return new Color(color.r, color.g, color.b, color.a);
     }
 
+    /**
+     * Creates a Color from 0–255 integer channel values.
+     * @param {number} r @param {number} g @param {number} b
+     * @returns {Color}
+     */
     static FromRGB(r, g, b) {
         return new Color(r / 255, g / 255, b / 255);
     }
 
+    /**
+     * Creates a Color from 0–255 r/g/b values and a 0–1 alpha.
+     * @param {number} r @param {number} g @param {number} b @param {number} a
+     * @returns {Color}
+     */
     static FromRGBA(r, g, b, a) {
         return new Color(r / 255, g / 255, b / 255, a);
     }
 
+    /**
+     * Creates a Color from a 6-digit hex string, e.g. `'#ff8800'`.
+     * @param {string} hex
+     * @returns {Color}
+     */
     static FromHex(hex) {
         let r = parseInt(hex.substring(1, 3), 16) / 255;
         let g = parseInt(hex.substring(3, 5), 16) / 255;
@@ -127,6 +144,11 @@ class Color {
         return new Color(r, g, b);
     }
 
+    /**
+     * Creates a Color from an 8-digit hex string (includes alpha), e.g. `'#ff8800cc'`.
+     * @param {string} hex
+     * @returns {Color}
+     */
     static FromHexA(hex) {
         let r = parseInt(hex.substring(1, 3), 16) / 255;
         let g = parseInt(hex.substring(3, 5), 16) / 255;
@@ -135,6 +157,12 @@ class Color {
         return new Color(r, g, b, a);
     }
 
+    /**
+     * Parses a color from a hex string, `rgb(...)`, `rgba(...)`, or a comma-separated
+     * `'r,g,b'` string with 0–255 values.
+     * @param {string} color
+     * @returns {Color}
+     */
     static FromString(color) {
         if (color.startsWith("#")) {
             if (color.length === 7) {
@@ -157,10 +185,21 @@ class Color {
         }
     }
 
+    /**
+     * Creates a Color from an HTML/CSS named colour, e.g. `'cornflowerblue'`.
+     * @param {string} color
+     * @returns {Color}
+     */
     static FromHTMLColorName(color) {
         return Color.FromString(HTMLColorNameToRGB(color));
     }
 
+    /**
+     * Linearly interpolates between two colours.
+     * @param {Color} from @param {Color} to
+     * @param {number} step - 0 = `from`, 1 = `to`.
+     * @returns {Color} A new interpolated Color.
+     */
     static Lerp(from, to, step) {
         const stepMin1 = 1 - step;
 
@@ -172,6 +211,11 @@ class Color {
         );
     }
 
+    /**
+     * Shifts all channels towards their average, reducing saturation.
+     * @param {number} [desaturateValue=0.5] - 0 = no change, 1 = fully grey.
+     * @returns {Color} `this` (for chaining).
+     */
     Desaturate(desaturateValue=0.5) {
         const avg = (this.r + this.g + this.b) / 3;
         this.r = this.r + (avg - this.r) * desaturateValue;
@@ -186,12 +230,23 @@ class Color {
     }
 }
 
+/**
+ * A drawable sprite with position, rotation, scale, alpha and optional flip.
+ * Wraps an `HTMLImageElement` and exposes helper `Draw*` methods.
+ */
 class Sprite {
     _scale = new Vector2(1, 1);
     _flipX = false;
     _flipY = false;
     _computedScale = new Vector2(1, 1);
 
+    /**
+     * @param {HTMLImageElement} img
+     * @param {Vector2} position
+     * @param {number} [rotation=0] - In radians.
+     * @param {number|Vector2} [scale=1] - Uniform scale or `Vector2` for non-uniform.
+     * @param {number} [alpha=1]
+     */
     constructor(img, position, rotation=0, scale=1, alpha=1.0) {
         this.img = img;
         // this.img.halfWidth = img.width / 2;
@@ -300,7 +355,18 @@ class Sprite {
     }
 }
 
+/**
+ * A `Sprite` that is permanently bound to a rectangular section of its source image.
+ * Useful for sprite-sheet characters where the clip rect never changes.
+ */
 class SpriteSection extends Sprite {
+    /**
+     * @param {HTMLImageElement} img
+     * @param {Vector2} position
+     * @param {number} rotation
+     * @param {number|Vector2} scale
+     * @param {Rect} [rect] - Source rectangle on the sprite sheet; defaults to the full image.
+     */
     constructor(img, position, rotation, scale, rect=new Rect(0, 0, img.width, img.height)) {
         super(img, position, rotation, scale);
 
@@ -324,7 +390,24 @@ class SpriteSection extends Sprite {
     }
 }
 
+/**
+ * A linear colour gradient that works with both Canvas2D and WebGL renderers.
+ * Pass it to `renderer.DrawGradientRectangle()` as the fill colour.
+ *
+ * @example
+ * const grad = new LinearGradient(renderer, new Vector2(0, 1), [
+ *   [0,   Color.blue],
+ *   [0.5, Color.cyan],
+ *   [1,   Color.white],
+ * ]);
+ * renderer.DrawGradientRectangle(x, y, w, h, grad);
+ */
 class LinearGradient {
+    /**
+     * @param {Renderer} renderer
+     * @param {Vector2} direction - Normalised gradient direction vector (e.g. `new Vector2(0,1)` for top-to-bottom).
+     * @param {Array<[number, Color]>} [colorStops=[]] - Array of `[offset, Color]` pairs where offset is 0–1.
+     */
     constructor(renderer, direction, colorStops=[]) {
         this.renderer = renderer;
         this.direction = direction.Normalize();

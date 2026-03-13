@@ -1,4 +1,23 @@
+/**
+ * Manages loading and playback of audio assets using the Web Audio API.
+ * Supports per-clip pan, volume, pitch, looping, and optional FFT frequency analysis.
+ *
+ * The game engine exposes a pre-configured instance via `game.audioPlayer`.
+ *
+ * @example
+ * // In Game.Configure():
+ * this.audioAssets = { shoot: { path: 'assets/shoot.wav' } };
+ *
+ * // In game code:
+ * game.audioPlayer.PlayAudio('shoot');
+ * game.audioPlayer.PlayLoop('music', 0, 0.5);
+ */
 class AudioPlayer {
+    /**
+     * @param {boolean} [analyzer=false] - Enable FFT frequency analysis (for visualisers).
+     * @param {number} [analyzerfftSize=128] - FFT bin count, must be in [32, 2048].
+     * @param {number} [analyzerSmoothing=0.5] - `smoothingTimeConstant`, in [0, 0.99].
+     */
     constructor(analyzer=false, analyzerfftSize=128, analyzerSmoothing=0.5) {
         this.audioAssets = {};
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -25,6 +44,12 @@ class AudioPlayer {
         }
     }
 
+    /**
+     * Loads audio assets and calls `onloaded` once all files are ready.
+     * Called automatically by the engine — you typically do not call this directly.
+     * @param {Record<string,{path:string}>} assets - Map of name → asset descriptor.
+     * @param {()=>void} onloaded - Called when every file has loaded.
+     */
     LoadAudio(assets, onloaded) {
         if (assets === null || Object.keys(assets).length === 0) {
             onloaded();
@@ -67,6 +92,14 @@ class AudioPlayer {
         }
     }
 
+    /**
+     * Plays a sound from its current position (one-shot).
+     * @param {string} name - Asset key from `game.audioAssets`.
+     * @param {number} [pan=0] - Stereo pan, -1 (left) to 1 (right).
+     * @param {number} [volume=1] - Gain multiplier.
+     * @param {number} [pitch=1] - Playback rate (1 = normal speed).
+     * @returns {Promise<void>}
+     */
     PlayAudio(name, pan=0, volume=1, pitch=1) {
         if (this.audioAssets[name]) {
             this.audioAssets[name].panner.pan.value = pan;
@@ -82,6 +115,10 @@ class AudioPlayer {
         }
     }
 
+    /**
+     * Pauses playback of a clip (preserves position — resume with `PlayAudio`).
+     * @param {string} name
+     */
     PauseAudio(name) {
         if (this.audioAssets[name]) {
             if (this.audioAssets[name].audio.playPromise != undefined) {
@@ -97,6 +134,10 @@ class AudioPlayer {
         }
     }
 
+    /**
+     * Stops playback and resets the clip to the beginning.
+     * @param {string} name
+     */
     StopAudio(name) {
         if (this.audioAssets[name]) {
             if (this.audioAssets[name].audio.playPromise != undefined) {
@@ -113,6 +154,12 @@ class AudioPlayer {
         }
     }
 
+    /**
+     * Resets to the beginning and plays once (one-shot).
+     * @param {string} name
+     * @param {number} [pan=0] @param {number} [volume=1] @param {number} [pitch=1]
+     * @returns {Promise<void>}
+     */
     PlayFromTheStart(name, pan=0, volume=1, pitch=1) {
         if (this.audioAssets[name]) {
             this.audioAssets[name].panner.pan.value = pan;
@@ -129,6 +176,12 @@ class AudioPlayer {
         }
     }
 
+    /**
+     * Resets to the beginning and plays in a continuous loop.
+     * @param {string} name
+     * @param {number} [pan=0] @param {number} [volume=1] @param {number} [pitch=1]
+     * @returns {Promise<void>}
+     */
     PlayLoop(name, pan=0, volume=1, pitch=1) {
         if (this.audioAssets[name]) {
             this.audioAssets[name].panner.pan.value = pan;
@@ -145,6 +198,11 @@ class AudioPlayer {
         }
     }
 
+    /**
+     * Sets the stereo pan for a playing (or paused) clip.
+     * @param {string} name
+     * @param {number} panValue - -1 (left) to 1 (right).
+     */
     SetPan(name, panValue) {
         if (this.audioAssets[name]) {
             this.audioAssets[name].panner.pan.value = panValue;
@@ -154,6 +212,11 @@ class AudioPlayer {
         }
     }
 
+    /**
+     * Sets the volume (gain) of a clip.
+     * @param {string} name
+     * @param {number} volumeValue - Gain multiplier; 1 = original level.
+     */
     SetVolume(name, volumeValue) {
         if (this.audioAssets[name]) {
             this.audioAssets[name].gainNode.gain.value = volumeValue;
@@ -163,6 +226,11 @@ class AudioPlayer {
         }
     }
 
+    /**
+     * Sets the playback rate (pitch) of a clip.
+     * @param {string} name
+     * @param {number} pitchValue - 1 = normal speed, 2 = double speed/pitch, 0.5 = half.
+     */
     SetPitch(name, pitchValue) {
         if (this.audioAssets[name]) {
             this.audioAssets[name].audio.playbackRate = pitchValue;
@@ -172,15 +240,26 @@ class AudioPlayer {
         }
     }
 
+    /**
+     * Returns `true` if the named clip is currently playing.
+     * @param {string} name
+     * @returns {boolean}
+     */
     IsPlaying(name) {
         if (this.audioAssets[name]) {
             return !this.audioAssets[name].audio.paused;
-        } else {
+        }
+        else {
             console.warn(`Audio asset "${name}" not found.`);
             return false;
         }
     }
 
+    /**
+     * Returns the current FFT frequency byte data.
+     * Only available when the `AudioPlayer` was constructed with `analyzer = true`.
+     * @returns {Uint8Array}
+     */
     GetFrequencyData() {
         this.analyzerNode.getByteFrequencyData(this.frequencyData);        
         return this.frequencyData;

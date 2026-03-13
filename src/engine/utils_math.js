@@ -4,10 +4,18 @@ const degToRad = Math.PI / 180;
 
 const coord = { x: 0, y: 0 };
 
+/**
+ * Returns a random integer in the inclusive range [min, max].
+ * @param {number} min @param {number} max @returns {number}
+ */
 function RandomBetweenInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/**
+ * Returns a random float in the range [min, max).
+ * @param {number} min @param {number} max @returns {number}
+ */
 function RandomBetweenFloat(min, max) {
     return (Math.random() * (max - min)) + min;
 }
@@ -33,23 +41,50 @@ function SqrLength(v) {
     return x2 + y2;
 }
 
+/**
+ * Returns the squared Euclidean distance between two points.
+ * Cheaper than the real distance — prefer this when comparing distances.
+ * @param {number} p1x @param {number} p1y
+ * @param {number} p2x @param {number} p2y
+ * @returns {number}
+ */
 function DistanceSquaredPointToPoint(p1x, p1y, p2x, p2y) {
     const dx = p2x - p1x;
     const dy = p2y - p1y;
     return dx * dx + dy * dy;
 }
 
+/**
+ * Returns the signed perpendicular distance from point (px, py) to line segment AB.
+ * @param {{x:number,y:number}} A - Segment start.
+ * @param {{x:number,y:number}} B - Segment end.
+ * @param {number} px @param {number} py
+ * @returns {number}
+ */
 function DistancePointToSegment(A, B, px, py) {
     const difXAB = A.x - B.x;
     const difYAB = A.y - B.y;
     return (((B.x - A.x) * (A.y - py)) - ((A.x - px) * (B.y - A.y))) / (Math.sqrt(difXAB * difXAB + difYAB * difYAB));
 }
 
+/**
+ * Returns the un-normalised signed cross-product distance from point (px, py) to segment AB.
+ * Useful for side-of-line tests (positive = left, negative = right).
+ * @param {{x:number,y:number}} A @param {{x:number,y:number}} B
+ * @param {number} px @param {number} py
+ * @returns {number}
+ */
 function DistancePointToSegmentSign(A, B, px, py) {
     return ((B.x - A.x) * (A.y - py)) - ((A.x - px) * (B.y - A.y));
 }
 
-// Find the closest point on a line segment to a given point
+/**
+ * Finds the closest point on segment AB to point P (clamped to the segment).
+ * @param {{x:number,y:number}} A - Segment start.
+ * @param {{x:number,y:number}} B - Segment end.
+ * @param {{x:number,y:number}} P - The query point.
+ * @returns {{x:number, y:number}}
+ */
 function GetClosestPointOnSegment(A, B, P) {
     const APx = P.x - A.x;
     const APy = P.y - A.y;
@@ -69,12 +104,23 @@ function GetClosestPointOnSegment(A, B, P) {
     return { x: closestX, y: closestY };
 }
 
-// Squared distance from a point P to a line segment AB
+/**
+ * Returns the squared distance from point P to the nearest point on segment AB.
+ * @param {{x:number,y:number}} A @param {{x:number,y:number}} B
+ * @param {{x:number,y:number}} P
+ * @returns {number}
+ */
 function DistanceSquaredPointToSegment(A, B, P) {
     const closest = GetClosestPointOnSegment(A, B, P);
     return DistanceSquaredPointToPoint(P.x, P.y, closest.x, closest.y);
 }
 
+/**
+ * Rotates a point around an origin by `angle` radians.
+ * @param {{x:number,y:number}} point @param {{x:number,y:number}} origin @param {number} angle - In radians.
+ * @param {{x:number,y:number}} [transformedPoint] - Optional output object to reuse (avoids allocation).
+ * @returns {Vector2|{x:number,y:number}}
+ */
 function RotatePointAroundPoint(point, origin, angle, transformedPoint) {
     const dx = point.x - origin.x;
     const dy = point.y - origin.y;
@@ -96,6 +142,13 @@ function RotatePointAroundPoint(point, origin, angle, transformedPoint) {
     return new Vector2(newX, newY);
 }
 
+/**
+ * Finds the intersection point of two finite line segments.
+ * @param {{x:number,y:number}} l1p1 @param {{x:number,y:number}} l1p2
+ * @param {{x:number,y:number}} l2p1 @param {{x:number,y:number}} l2p2
+ * @returns {{det:number, x:number, y:number, t:number, u:number}}
+ *   `det !== 0` and `t`/`u` in (0,1) means the segments intersect at `(x, y)`.
+ */
 function IntersectionBetweenLines(l1p1, l1p2, l2p1, l2p2) {
     let result = {
         det: 0,
@@ -153,7 +206,10 @@ function AngleBetweenVectors(vec1, vec2) {
     return Math.acos(dotProduct);
 }
 
-// normalize an angle to the range -PI to PI
+/**
+ * Normalizes an angle to the range (-π, π].
+ * @param {number} angle - Angle in radians. @returns {number}
+ */
 function NormalizeAngle(angle) {
     angle = angle % PI2;
     if (angle > Math.PI) {
@@ -181,6 +237,13 @@ function SmoothRotation(currentRotation, targetRotation, speed) {
     return currentRotation + rotationIncrement;
 }
 
+/**
+ * Interpolates an angle toward a target, always taking the shortest arc.
+ * @param {number} currentRotation - Current angle in radians.
+ * @param {number} targetRotation - Target angle in radians.
+ * @param {number} interpolationFactor - 0 = current, 1 = target.
+ * @returns {number}
+ */
 function LerpRotation(currentRotation, targetRotation, interpolationFactor) {
     let rotationDifference = targetRotation - currentRotation;
     rotationDifference = NormalizeAngle(rotationDifference);
@@ -188,6 +251,11 @@ function LerpRotation(currentRotation, targetRotation, interpolationFactor) {
     return currentRotation + rotationDifference * interpolationFactor;
 }
 
+/**
+ * Linearly interpolates between `start` and `end`.
+ * @param {number} start @param {number} end @param {number} interpolationFactor - 0 = start, 1 = end.
+ * @returns {number}
+ */
 function Lerp(start, end, interpolationFactor) {
     return start + (end - start) * interpolationFactor;
 }
@@ -346,25 +414,45 @@ function CheckCollisionPolygonPolygon(polygon1Points, polygon2Points, accurate=f
 
 // #region Vector2 class
 
+/**
+ * A 2D vector with x and y components. Used for positions, directions, velocities, and scale.
+ *
+ * @example
+ * const vel = new Vector2(0, -1).MultiplyScalar(speed); // upward velocity
+ * const dir = Vector2.Copy(target.position).Sub(this.position).Normalize();
+ */
 class Vector2 {
+    /** @type {number} */
     _x = 0;
+    /** @type {number} */
     _y = 0;
     _onChange = null;
 
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {function(Vector2):void} [onChange] - Optional callback fired whenever x or y changes.
+     */
     constructor(x, y, onChange=null) {
         this._x = x;
         this._y = y;
         this._onChange = onChange;
     }
 
+    /** @returns {Vector2} A new `Vector2(0, 0)`. */
     static Zero() {
         return new Vector2(0, 0);
     }
 
+    /**
+     * Returns a new Vector2 that is a copy of `vector`.
+     * @param {Vector2} vector @returns {Vector2}
+     */
     static Copy(vector) {
         return new Vector2(vector.x, vector.y);
     }
 
+    /** @returns {Vector2} A new Vector2 with random components in the range [-1, 1]. */
     static Random() {
         return new Vector2((Math.random() * 2) - 1, (Math.random() * 2) - 1);
     }
@@ -390,6 +478,10 @@ class Vector2 {
             this._onChange(this);
     }
 
+    /**
+     * Sets x and y components in-place.
+     * @param {number} x @param {number} y
+     */
     Set(x, y) {
         this._x = x;
         this._y = y;
@@ -397,24 +489,35 @@ class Vector2 {
             this._onChange(this);
     }
 
+    /** @returns {number} The magnitude (length) of this vector. */
     Length() {
         return Math.sqrt(this.SqrLength());
     }
 
+    /** @returns {number} The squared magnitude. Faster than `Length()` for comparisons. */
     SqrLength() {
         const x2 = this._x * this._x;
         const y2 = this._y * this._y;
         return x2 + y2;
     }
 
+    /** @returns {boolean} True if both x and y are exactly 0. */
     IsZero() {
         return this._x === 0 && this._y === 0;
     }
 
+    /**
+     * Distance between two Vector2 points.
+     * @param {Vector2} v1 @param {Vector2} v2 @returns {number}
+     */
     static Magnitude(v1, v2) {
-        return Math.sqrt(SqrMagnitude(v1, v2));
+        return Math.sqrt(this.SqrMagnitude(v1, v2));
     }
 
+    /**
+     * Squared distance between two Vector2 points. Faster than `Magnitude` for comparisons.
+     * @param {Vector2} v1 @param {Vector2} v2 @returns {number}
+     */
     static SqrMagnitude(v1, v2) {
         const difX = v2.x - v1.x;
         const difY = v2.y - v1.y;
@@ -423,6 +526,10 @@ class Vector2 {
         return x2 + y2;
     }
 
+    /**
+     * Normalizes this vector to unit length in-place. Returns `this` for chaining.
+     * @returns {Vector2}
+     */
     Normalize() {
         const length = this.Length();
 
@@ -434,20 +541,35 @@ class Vector2 {
         return this;
     }
 
+    /**
+     * Adds `otherVector` to this vector in-place.
+     * @param {Vector2} otherVector
+     */
     Add(otherVector) {
         this._x += otherVector.x;
         this._y += otherVector.y;
     }
 
+    /**
+     * Subtracts `otherVector` from this vector in-place.
+     * @param {Vector2} otherVector
+     */
     Sub(otherVector) {
         this._x -= otherVector.x;
         this._y -= otherVector.y;
     }
 
+    /**
+     * @param {Vector2} otherVector @returns {number} The dot product of this and `otherVector`.
+     */
     DotProduct(otherVector) {
         return this._x * otherVector.x + this._y * otherVector.y;
     }
 
+    /**
+     * Multiplies both components by `scalar` in-place. Returns `this` for chaining.
+     * @param {number} scalar @returns {Vector2}
+     */
     MultiplyScalar(scalar) {
         this._x *= scalar;
         this._y *= scalar;
@@ -455,10 +577,15 @@ class Vector2 {
         return this;
     }
 
+    /** @returns {number} The angle of this vector in radians (from the positive X axis). */
     Angle() {
         return Math.atan2(this._y, this._x);
     }
 
+    /**
+     * Angle in radians between this vector and `otherVector`. Both should be normalized.
+     * @param {Vector2} otherVector @returns {number}
+     */
     AngleBetween(otherVector) {
         // vec1 and vec2 should be normalized
 
@@ -470,16 +597,23 @@ class Vector2 {
         return Math.acos(dotProduct);
     }
 
+    /** Sets components to random values in [-1, 1] in-place. */
     Randomize() {
         this._x = (Math.random() * 2) - 1;
         this._y = (Math.random() * 2) - 1;
     }
 
+    /** Sets this vector to a random unit direction in-place. */
     RandomNormalized() {
         this.Randomize();
         this.Normalize();
     }
 
+    /**
+     * Returns a new Vector2 linearly interpolated between `v1` and `v2`.
+     * @param {Vector2} v1 @param {Vector2} v2 @param {number} interpolationFactor - 0 = v1, 1 = v2.
+     * @returns {Vector2}
+     */
     static Lerp(v1, v2, interpolationFactor) {
         return new Vector2(
             Lerp(v1.x, v2.x, interpolationFactor),

@@ -1,3 +1,8 @@
+/**
+ * Base renderer class. The active instance is available as the global `renderer` and as
+ * `this.renderer` inside any `Game` subclass. Use `Canvas2DRenderer` (default) or
+ * `WebGLRenderer` (append `?webgl` to the URL). Both share the same API.
+ */
 class Renderer {
     _width = 640;
     _height = 480;
@@ -118,40 +123,150 @@ class Renderer {
             this.SetCanvasFillWindow(this._fillScreenMatchNativeResolution, this._fillScreenUseDevicePixelRatio, this._fillScreenPreserveAspectRatio);
     }
 
+    /** Clears the entire canvas. Called automatically each frame before `Draw()`. */
     Clear() {}
 
     // Draw primitives
+    /**
+     * Draws a line segment.
+     * @param {number} x1 @param {number} y1 @param {number} x2 @param {number} y2
+     * @param {Color} [color] @param {number} [lineWidth=1]
+     */
     DrawLine(x1, y1, x2, y2, color=Color.black, lineWidth = 1) {}
+    /**
+     * Draws a closed polygon.
+     * @param {{x:number,y:number}[]} points @param {Color} [strokeColor]
+     * @param {number} [lineWidth=1] @param {boolean} [fill=false] @param {Color} [fillColor]
+     */
     DrawPolygon(points, strokeColor=Color.black, lineWidth=1, fill=false, fillColor=Color.black) {}
+    /**
+     * Draws a rectangle centered on (x, y) with optional rotation.
+     * @param {number} x @param {number} y @param {number} w @param {number} h
+     * @param {Color} [color] @param {boolean} [stroke=false] @param {number} [lineWidth=1]
+     * @param {number} [rot=0] @param {{x:number,y:number}} [pivot]
+     */
     DrawRectangle(x, y, w, h, color=Color.black, stroke=false, lineWidth=1, rot=0, pivot=coord) {}
+    /**
+     * Draws a stroked rectangle centered on (x, y) with optional rotation.
+     * @param {number} x @param {number} y @param {number} w @param {number} h
+     * @param {Color} [color] @param {number} [lineWidth=1] @param {number} [rot=0] @param {{x:number,y:number}} [pivot]
+     */
     DrawStrokeRectangle(x, y, w, h, color=Color.black, lineWidth=1, rot=0, pivot=coord) {}
+    /**
+     * Draws a filled rectangle centered on (x, y) with optional rotation.
+     * @param {number} x @param {number} y @param {number} w @param {number} h
+     * @param {Color} [color] @param {number} [rot=0] @param {{x:number,y:number}} [pivot]
+     */
     DrawFillRectangle(x, y, w, h, color=Color.black, rot=0, pivot=coord) {}
+    /**
+     * Draws a rectangle with top-left at (x, y). No rotation — fast path for UI and backgrounds.
+     * @param {number} x @param {number} y @param {number} w @param {number} h
+     * @param {Color} [color] @param {boolean} [stroke=false] @param {number} [lineWidth=1]
+     */
     DrawBasicRectangle(x, y, w, h, color=Color.black, stroke=false, lineWidth=1) {}
+    /**
+     * Draws a stroked rectangle with top-left at (x, y). No rotation.
+     * @param {number} x @param {number} y @param {number} w @param {number} h
+     * @param {Color} [color] @param {number} [lineWidth=1]
+     */
     DrawStrokeBasicRectangle(x, y, w, h, color=Color.black, lineWidth=1) {}
+    /**
+     * Draws a filled rectangle with top-left at (x, y). No rotation — fastest rectangle call.
+     * @param {number} x @param {number} y @param {number} w @param {number} h @param {Color} [color]
+     */
     DrawFillBasicRectangle(x, y, w, h, color=Color.black) {}
+    /**
+     * Draws a circle.
+     * @param {number} x @param {number} y @param {number} radius
+     * @param {Color} [color] @param {boolean} [stroke=false] @param {number} [lineWidth=1]
+     */
     DrawCircle(x, y, radius, color=Color.black, stroke=false, lineWidth=1) {}
+    /**
+     * Draws a filled circle.
+     * @param {number} x @param {number} y @param {number} radius @param {Color} [color]
+     */
     DrawFillCircle(x, y, radius, color=Color.black) {}
+    /**
+     * Draws a stroked circle.
+     * @param {number} x @param {number} y @param {number} radius @param {Color} [color] @param {number} [lineWidth=1]
+     */
     DrawStrokeCircle(x, y, radius, color=Color.black, lineWidth=1) {}
 
     // Draw text
+    /**
+     * Draws text, optionally with a stroke outline.
+     * @param {string} text @param {number} x @param {number} y @param {string} font - CSS font string, e.g. `"16px Arial"`.
+     * @param {Color} [color] @param {string} [align="center"] - `"left"`, `"center"`, `"right"`.
+     * @param {string} [baseline="alphabetic"] - `"top"`, `"middle"`, `"alphabetic"`, `"bottom"`.
+     * @param {boolean} [stroke=false] @param {number} [lineWidth=1]
+     */
     DrawText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic", stroke=false, lineWidth=1) {}
+    /**
+     * Draws filled text.
+     * @param {string} text @param {number} x @param {number} y @param {string} font
+     * @param {Color} [color] @param {string} [align="center"] @param {string} [baseline="alphabetic"]
+     */
     DrawFillText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic") {}
+    /**
+     * Draws stroked (outline) text.
+     * @param {string} text @param {number} x @param {number} y @param {string} font
+     * @param {Color} [color] @param {string} [align="center"] @param {string} [baseline="alphabetic"]
+     */
     DrawStrokeText(text, x, y, font, color=Color.black, align="center", baseline="alphabetic") {}
 
     // Draw sprites
+    /**
+     * Draws an image centered on (x, y) with scale, rotation, and alpha.
+     * @param {HTMLImageElement} img @param {number} x @param {number} y
+     * @param {number} scaleX @param {number} scaleY @param {number} [rot=0]
+     * @param {{x:number,y:number}} [pivot] @param {number} [alpha=1.0]
+     */
     DrawImage(img, x, y, scaleX, scaleY, rot=0, pivot=coord, alpha=1.0) {}
+    /**
+     * Draws an image with top-left at (x, y). No rotation — fastest image draw.
+     * @param {HTMLImageElement} img @param {number} x @param {number} y
+     * @param {number} [w] @param {number} [h] @param {number} [alpha=1.0]
+     */
     DrawImageBasic(img, x, y, w=img.width, h=img.height, alpha=1.0) {}
+    /**
+     * Draws a cropped region of an image (e.g. one frame from a sprite sheet), centered on (x, y).
+     * @param {HTMLImageElement} img @param {number} x @param {number} y
+     * @param {number} sx - Source x in the sheet. @param {number} sy - Source y.
+     * @param {number} sw - Source width. @param {number} sh - Source height.
+     * @param {number} scaleX @param {number} scaleY @param {number} [rot=0]
+     * @param {{x:number,y:number}} [pivot] @param {number} [alpha=1.0]
+     */
     DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot=0, pivot=coord, alpha=1.0) {}
+    /**
+     * Draws a cropped region of an image with top-left at (x, y). No rotation.
+     * @param {HTMLImageElement} img @param {number} x @param {number} y
+     * @param {number} sx @param {number} sy @param {number} sw @param {number} sh
+     * @param {number} scaleX @param {number} scaleY @param {number} [alpha=1.0]
+     */
     DrawImageSectionBasic(img, x, y, sx, sy, sw, sh, scaleX, scaleY, alpha=1.0) {}
 
     // other Draw methods
+    /**
+     * Fills a rectangle with a linear gradient.
+     * @param {number} x @param {number} y @param {number} w @param {number} h
+     * @param {LinearGradient} gradient
+     */
     DrawGradientRectangle(x, y, w, h, gradient) { }
 
     // Camera transform methods
+    /**
+     * Translates the draw context by the camera's offset. Call before drawing world objects.
+     * @param {Camera} camera
+     */
     ApplyCameraTransform(camera) {}
+    /** Restores the draw context to screen space. Call after drawing world objects. */
     RestoreCameraTransform() {}
 
     // Other methods
+    /**
+     * Resizes the canvas.
+     * @param {number} width @param {number} height
+     */
     SetScreenSize(width, height) {
         this.width = width;
         this.height = height;
@@ -161,6 +276,13 @@ class Renderer {
         }
     }
 
+    /**
+     * Enables fill-window mode. The canvas expands to fill the browser window.
+     * A resize listener is attached to keep it in sync.
+     * @param {boolean} [matchNativeResolution=true] - If true, canvas pixel size matches window size.
+     * @param {boolean} [useDevicePixelRatio=false] - If true, scales for HiDPI/retina.
+     * @param {boolean} [preserveAspectRatio=true] - If true, letterboxes; otherwise stretches.
+     */
     SetCanvasFillWindow(matchNativeResolution=true, useDevicePixelRatio=false, preserveAspectRatio=true) {
         // Update instance variables with current parameters
         this._fillScreenMatchNativeResolution = matchNativeResolution;
@@ -300,6 +422,7 @@ class Renderer {
         document.body.style.overflow = 'hidden';
     }
 
+    /** Exits fill-window mode and restores the original canvas size and styles. */
     RestoreCanvasOriginalSize() {
         if (!this._fillScreen) {
             console.warn('Canvas is not in fullscreen mode');
@@ -360,8 +483,8 @@ class Renderer {
 // #region Canvas2DRenderer class
 
 class Canvas2DRenderer extends Renderer {
-    constructor(canvas, config) {
-        super(canvas, config);
+    constructor(canvas) {
+        super(canvas);
         this.ctx = canvas.getContext("2d");
     }
 
@@ -598,8 +721,8 @@ class Canvas2DRenderer extends Renderer {
 // #region WebGLRenderer class
 
 class WebGLRenderer extends Renderer {
-    constructor(canvas, gl, config) {
-        super(canvas, config);
+    constructor(canvas, gl) {
+        super(canvas);
         this.gl = gl;
 
         this.viewMatrix = new Float32Array([

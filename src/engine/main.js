@@ -51,10 +51,10 @@ function LoadImages(assets, onloaded) {
 }
 
 function Init(GameClass) {
-    canvas = document.getElementById("myCanvas");
+    canvas = /** @type {HTMLCanvasElement} */ (document.getElementById("myCanvas"));
 
     if (window.location.search.includes("webgl")) {
-        const gl = canvas.getContext("webgl2");
+        let gl = canvas.getContext("webgl2");
         if (!gl) {
             // fallback to webgl 1
             gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");

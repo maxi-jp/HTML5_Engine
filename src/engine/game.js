@@ -1,7 +1,43 @@
+/**
+ * Base class for all games. Extend this class and override `Start()`, `Update()`, and `Draw()`.
+ *
+ * @example
+ * class MyGame extends Game {
+ *   constructor(renderer) {
+ *     super(renderer);
+ *     this.Configure({ screenWidth: 800, screenHeight: 600 });
+ *     this.graphicAssets = { player: { path: 'player.png', img: null } };
+ *   }
+ *   Start() { this.player = new SpriteObject(...); }
+ *   Update(dt) { this.player.Update(dt); }
+ *   Draw()    { this.player.Draw(this.renderer); }
+ * }
+ */
 class Game {
+    /** @type {boolean} Whether audio playback is enabled. Toggle to mute/unmute all sounds. */
     _audioActive = true;
 
+    /**
+     * @param {Renderer} renderer - The renderer instance created by the engine.
+     */
     constructor(renderer) {
+        /**
+         * Game configuration object. Pass values to `Configure()` in the constructor.
+         * @type {{
+         *   screenWidth?: number,
+         *   screenHeight?: number,
+         *   imageSmoothingEnabled?: boolean,
+         *   fillWindow?: boolean,
+         *   matchNativeResolution?: boolean,
+         *   preserveAspectRatio?: boolean,
+         *   useDevicePixelRatio?: boolean,
+         *   audioAnalyzer?: boolean,
+         *   analyzerfftSize?: number,
+         *   analyzerSmoothing?: number,
+         *   drawColliders?: boolean,
+         *   collidersOnly?: boolean
+         * }}
+         */
         this.config = {
             // Screen configuration
             screenWidth: 640,
@@ -12,7 +48,8 @@ class Game {
             audioAnalyzer: false,
             
             // Debug configuration
-            drawColliders: false
+            drawColliders: false,
+            collidersOnly: false
         };
         // config example:
         // {
@@ -29,28 +66,24 @@ class Game {
         //     drawColliders: false,   // draw collision shapes for debugging
         // };
 
+        /**
+         * Graphic assets to preload. Assign in the constructor before the engine calls `Start()`.
+         * Format: `{ key: { path: 'path/to/image.png', img: null } }`
+         * @type {Object.<string, {path: string, img: HTMLImageElement|null}>|null}
+         */
         this.graphicAssets = null;
-        // graphicAssets format should be:
-        // {
-        //     asset_id: {
-        //         path: "path/to/asset",
-        //         img: null
-        //     },
-        //     another_asset_id: ...
-        // };
 
+        /**
+         * Audio assets to preload. Assign in the constructor before the engine calls `Start()`.
+         * Format: `{ key: { path: 'path/to/sound.mp3', audio: null } }`
+         * @type {Object.<string, {path: string, audio: *}>|null}
+         */
         this.audioAssets = null;
-        // audioAssets format should be:
-        // {
-        //     asset_id: {
-        //         path: "path/to/asset",
-        //         audio: null
-        //     },
-        //     another_asset_id: ...
-        // };
 
+        /** @type {Renderer} The active renderer (Canvas2D or WebGL). */
         this.renderer = renderer;
 
+        /** @type {GameObject[]} All active game objects managed by this game. */
         this.gameObjects = [];
         this.colliders = [];
         this.collidersById = new Map(); // Maps collider.id to Collider instance for quick lookups
@@ -58,18 +91,23 @@ class Game {
         this.detectedCollisions = new Set(); // collisions detected on this frame
     }
 
+    /** @returns {number} Current canvas width in pixels. */
     get screenWidth() {
         return this.renderer.width;
     }
+    /** @returns {number} Current canvas height in pixels. */
     get screenHeight() {
         return this.renderer.height;
     }
+    /** @returns {number} Half of the canvas width — useful for centering objects. */
     get screenHalfWidth() {
         return this.renderer.halfWidth;
     }
+    /** @returns {number} Half of the canvas height — useful for centering objects. */
     get screenHalfHeight() {
         return this.renderer.halfHeight;
     }
+    /** @returns {boolean} Whether audio playback is currently enabled. */
     get audioActive() {
         return this._audioActive;
     }
@@ -84,6 +122,7 @@ class Game {
         this._audioActive = value;
     }
 
+    /** Called once when the game starts. Override to set up your scene. */
     Start() {
         // Set initial screen size from config
         this.renderer.width = this.config.screenWidth ?? canvas.width;
@@ -110,6 +149,10 @@ class Game {
         this.detectedCollisions.clear();
     }
     
+    /**
+     * Called every frame. Override to update your game logic.
+     * @param {number} deltaTime - Elapsed time since the last frame, in seconds.
+     */
     Update(deltaTime) {
         // Update active game objects
         this.gameObjects.forEach((gameObject) => {
@@ -194,19 +237,26 @@ class Game {
         this.detectedCollisions = new Set();
     }
     
+    /** Called every frame after `Update()`. Override to draw custom graphics using `this.renderer`. */
     Draw() {
-        this.gameObjects.forEach((gameObject) => {
-            if (gameObject.active)
-                gameObject.Draw(this.renderer);
-        });
+        if (!this.config.collidersOnly) {
+            this.gameObjects.forEach((gameObject) => {
+                if (gameObject.active)
+                    gameObject.Draw(this.renderer);
+            });
+        }
 
-        if (this.config.drawColliders) {
+        if (this.config.drawColliders || this.config.collidersOnly) {
             this.colliders.forEach((collider) => {
                 collider.Draw(this.renderer);
             });
         }
     }
 
+    /**
+     * Removes a game object from the game, cleans up its collider, and calls its `Destroy()` method.
+     * @param {GameObject} gameObject - The game object to remove.
+     */
     Destroy(gameObject) {
         const index = this.gameObjects.indexOf(gameObject);
         if (index !== -1) {
@@ -217,9 +267,7 @@ class Game {
                 this.RemoveCollider(collider);
             }
 
-            if (typeof gameObject.Destroy === "function") {
-                gameObject.Destroy();
-            }
+            gameObject.Destroy();
 
             gameObject.active = false;
 
@@ -229,11 +277,19 @@ class Game {
             console.warn("Error when destroying the gameObjet: GO not found in the gameObjects array.", gameObject);
     }
 
+    /**
+     * Registers a collider with the collision system so it participates in collision detection.
+     * @param {Collider} collider - The collider to add.
+     */
     AddCollider(collider) {
         this.colliders.push(collider);
         this.collidersById.set(collider.id, collider);
     }
 
+    /**
+     * Removes a collider from the collision system.
+     * @param {Collider} collider - The collider to remove.
+     */
     RemoveCollider(collider) {
         const index = this.colliders.indexOf(collider);
         if (index !== -1) {
@@ -242,34 +298,58 @@ class Game {
 
             // check if the collider has collisions pending
             const idToRemove = collider.id;
-            const cleanCollisionSet = (collisionSet) => {
-                for (const pairId of collisionSet) {
-                    // Pair ID is a string like "id1-id2".
-                    const ids = pairId.split('-');
-                    if (ids[0] == idToRemove || ids[1] == idToRemove) {
-                        collisionSet.delete(pairId);
-                    }
-                }
-            };
 
-            cleanCollisionSet(this.lastCollisions);
-            cleanCollisionSet(this.detectedCollisions);
+            // Fire OnCollisionExit on active pairs and clean up both sets in one pass
+            for (const pairId of this.lastCollisions) {
+                const ids = pairId.split('-');
+                if (ids[0] == idToRemove || ids[1] == idToRemove) {
+                    const otherId = Number(ids[0] == idToRemove ? ids[1] : ids[0]);
+                    const otherCollider = this.collidersById.get(otherId);
+                    if (otherCollider) {
+                        otherCollider.isColliding = false;
+                        otherCollider.color = Collider.defaultColor;
+                        if (otherCollider.go) {
+                            otherCollider.go.OnCollisionExit(otherCollider, collider);
+                        }
+                    }
+                    this.lastCollisions.delete(pairId);
+                    this.detectedCollisions.delete(pairId);
+                }
+            }
         }
     }
 
+    /**
+     * Enables fill-window mode on the renderer at runtime.
+     * @param {boolean} [matchNativeResolution=true] - If true, canvas pixel size matches window size.
+     * @param {boolean} [useDevicePixelRatio=false] - If true, scales for HiDPI/retina displays.
+     * @param {boolean} [preserveAspectRatio=true] - If true, letterboxes; otherwise stretches to fill.
+     */
     SetFillWindow(matchNativeResolution = true, useDevicePixelRatio = false, preserveAspectRatio = true) {
         this.renderer.SetCanvasFillWindow(matchNativeResolution, useDevicePixelRatio, preserveAspectRatio);
     }
 
+    /**
+     * Resizes the canvas to the given dimensions.
+     * @param {number} width - New canvas width in pixels.
+     * @param {number} height - New canvas height in pixels.
+     */
     SetScreenSize(width, height) {
         this.renderer.SetScreenSize(width, height);
     }
 
+    /**
+     * Merges new values into `this.config`. Call this in the constructor to set up the game.
+     * @param {Object} newConfig - Config properties to merge. See `this.config` for all options.
+     */
     Configure(newConfig) {
         // Merge new configuration with existing config
         Object.assign(this.config, newConfig);
     }
 
-    // Callback from the Renderer informing that the canvas has changed
+    /**
+     * Called by the engine whenever the browser window is resized (only when `fillWindow` is active).
+     * Override to reposition UI elements or adjust layout.
+     */
     WindowResized() {}
 }

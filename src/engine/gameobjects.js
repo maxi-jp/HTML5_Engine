@@ -1,11 +1,21 @@
+/**
+ * Base class for all game objects. Extend this and override `Start()`, `Update()`, and `Draw()`.
+ */
 class GameObject {
+    /** @type {boolean} */
     _active = true;
+    /** @type {Vector2} */
     _position;
+    /** @type {number} */
     _rotation = 0;
+    /** @type {Vector2} */
     _scale = new Vector2(1, 1);
+    /** @type {{x: number, y: number}} */
     _pivot = { x: 0, y: 0 };
+    /** @type {Collider|undefined} */
     _collider;
 
+    /** @param {Vector2} position - Initial world position. */
     constructor(position) {
         this._position = Vector2.Copy(position);
     }
@@ -64,19 +74,56 @@ class GameObject {
         this._collider = value;
     }
 
+    /** Called once when the game starts. Override to initialise the object. */
     Start() { }
 
+    /**
+     * Called every frame. Override to update game logic.
+     * @param {number} deltaTime - Elapsed time since the last frame, in seconds.
+     */
     Update(deltaTime) {
         this._collider?.UpdateFromGO();
     }
 
-    Draw(ctx) { }
+    /**
+     * Called every frame after `Update()`. Override to draw the object.
+     * @param {Renderer} renderer
+     */
+    Draw(renderer) { }
+
+    /** Called from the game when the game object is removed from it */
+    Destroy() {}
+
+    /**
+     * Called when this object's collider first touches another collider.
+     * @param {Collider} myCollider - This object's collider.
+     * @param {Collider} otherCollider - The collider it collided with.
+     */
     OnCollisionEnter(myCollider, otherCollider) { }
+
+    /**
+     * Called when this object's collider stops touching another collider.
+     * @param {Collider} myCollider - This object's collider.
+     * @param {Collider} otherCollider - The collider it stopped colliding with.
+     */
     OnCollisionExit(myCollider, otherCollider) { }
+
+    /** Called when the player clicks on this object's collider. */
     OnClick() { }
 }
 
+/**
+ * A game object that renders a rectangle.
+ */
 class RectangleGO extends GameObject {
+    /**
+     * @param {Vector2} position
+     * @param {number} [width=100]
+     * @param {number} [height=100]
+     * @param {Color} [color]
+     * @param {boolean} [stroke=false] - If true, draws as outline only.
+     * @param {number} [lineWidth=1]
+     */
     constructor(position, width=100, height=100, color=Color.red, stroke=false, lineWidth=1) {
         super(position);
         this.rectangle = new Rectangle(this._position, width, height, color, stroke, lineWidth);
@@ -101,7 +148,17 @@ class RectangleGO extends GameObject {
     }
 }
 
+/**
+ * A game object that renders a circle.
+ */
 class CircleGO extends GameObject {
+    /**
+     * @param {Vector2} position
+     * @param {number} [radius=100]
+     * @param {Color} [color]
+     * @param {boolean} [stroke=false] - If true, draws as outline only.
+     * @param {number} [lineWidth=1]
+     */
     constructor(position, radius=100, color=Color.red, stroke=false, lineWidth=1) {
         super(position);
         this.circle = new Circle(this._position, radius, color, stroke=false, lineWidth=1)
@@ -112,7 +169,17 @@ class CircleGO extends GameObject {
     }
 }
 
+/**
+ * A game object that renders a sprite image. Supports scale, rotation, flip, and alpha.
+ */
 class SpriteObject extends GameObject {
+    /**
+     * @param {Vector2} position - World position (center of sprite).
+     * @param {number} rotation - Initial rotation in radians.
+     * @param {number|Vector2} scale - Uniform scale (number) or per-axis scale (Vector2).
+     * @param {HTMLImageElement} img - The image to display.
+     * @param {number} [alpha=1.0] - Opacity (0 = invisible, 1 = fully opaque).
+     */
     constructor(position, rotation, scale, img, alpha=1.0) {
         super(position);
         
@@ -192,7 +259,21 @@ class SpriteObject extends GameObject {
     }
 }
 
+/**
+ * A sprite object with simple sprite-sheet animation. All frames are the same size,
+ * arranged in a grid (columns = frames per animation, rows = animation index).
+ */
 class SSAnimationObjectBasic extends SpriteObject {
+    /**
+     * @param {Vector2} position
+     * @param {number} rotation - Initial rotation in radians.
+     * @param {number|Vector2} scale
+     * @param {HTMLImageElement} img - The full sprite sheet.
+     * @param {number} frameWidth - Width of a single frame in pixels.
+     * @param {number} frameHeight - Height of a single frame in pixels.
+     * @param {number[]} frameCount - Array where each index is an animation row and the value is its frame count.
+     * @param {number} framesDuration - Time per frame in seconds.
+     */
     constructor(position, rotation, scale, img, frameWidth, frameHeight, frameCount, framesDuration) {
         super(position, rotation, scale, img);
 
@@ -228,6 +309,11 @@ class SSAnimationObjectBasic extends SpriteObject {
         this.sprite.DrawSection(renderer, this.actualFrame * this.frameWidth, this.actualAnimation * this.frameHeight, this.frameWidth, this.frameHeight, 0, 0, this.frameWidth, this.frameHeight);
     }
 
+    /**
+     * Switches to the given animation row.
+     * @param {number} animationId - Row index in the sprite sheet.
+     * @param {boolean} [resetToFrame0=true] - Whether to restart from frame 0.
+     */
     PlayAnimationLoop(animationId, resetToFrame0=true) {
         this.actualAnimation = animationId;
 
@@ -239,7 +325,20 @@ class SSAnimationObjectBasic extends SpriteObject {
     }
 }
 
+/**
+ * A sprite object with complex sprite-sheet animation. Each frame can have a different
+ * size and position within the sheet, defined by an array of rectangles per animation.
+ */
 class SSAnimationObjectComplex extends SpriteObject {
+    /**
+     * @param {Vector2} position
+     * @param {number} rotation - Initial rotation in radians.
+     * @param {number|Vector2} scale
+     * @param {HTMLImageElement} img - The full sprite sheet.
+     * @param {Array<Array<{x:number, y:number, w:number, h:number}>>} animationsRectangles
+     *   - Outer array = animations; inner array = frames; each frame is a source rect.
+     * @param {number[]} framesDurations - Time per frame (seconds) for each animation.
+     */
     constructor(position, rotation, scale, img, animationsRectangles, framesDurations) {
         super(position, rotation, scale, img);
 
@@ -280,6 +379,11 @@ class SSAnimationObjectComplex extends SpriteObject {
         }
     }
 
+    /**
+     * Switches to the given animation.
+     * @param {number} animationId - Index into `animationsRectangles`.
+     * @param {boolean} [resetToFrame0=true] - Whether to restart from frame 0.
+     */
     PlayAnimationLoop(animationId, resetToFrame0=true) {
         this.actualAnimationIndex = animationId;
 
@@ -293,7 +397,20 @@ class SSAnimationObjectComplex extends SpriteObject {
     }
 }
 
+/**
+ * A game object that renders a tile map from a sprite sheet.
+ */
 class Tileset extends GameObject {
+    /**
+     * @param {HTMLImageElement} img - The tile sheet image.
+     * @param {Vector2} position - Top-left draw position.
+     * @param {number|Vector2} scale - Scale factor applied to tiles.
+     * @param {Object.<number, {rect: {x:number, y:number, w:number, h:number}}>} tilesetConfig
+     *   - Maps tile IDs to their source rect in the sheet.
+     * @param {number[][]} tilesetMap - 2D array of tile IDs (0 = empty).
+     * @param {number} tileWidth - Tile width in pixels.
+     * @param {number} tileHeight - Tile height in pixels.
+     */
     constructor(img, position, scale, tilesetConfig, tilesetMap, tileWidth, tileHeight) {
         super(position);
 
