@@ -7,15 +7,15 @@
 // -------------------------------------------------------
 
 const BALL_SIZES   = [48, 32, 20, 12];
-const BALL_SPEEDS  = [110, 150, 190, 230]; // horizontal speed per size
-const BALL_BOUNCEV = [-550, -480, -420, -360]; // vertical bounce speed per size
+const BALL_SPEEDS  = [80,  120, 180, 200];    // horizontal speed per size
+const BALL_BOUNCEV = [-650, -560, -470, -380]; // vertical bounce speed per size
 const GRAVITY      = 700;
 
 const BALL_COLORS = [
     new Color(0.9, 0.2, 0.2),   // large  - red
     new Color(0.9, 0.5, 0.1),   // medium - orange
     new Color(0.2, 0.7, 0.2),   // small  - green
-    new Color(0.2, 0.4, 0.9),   // tiny   - blue
+    new Color(0.2, 0.4, 0.9),   // tiny  a d - blue
 ];
 
 // Game states
@@ -30,12 +30,11 @@ class SuperPang extends Game {
     constructor(renderer) {
         super(renderer);
 
-        this.config = {
-            ...this.config,
+        this.Configure({
             screenWidth: 640,
             screenHeight: 480,
-            drawColliders: true
-        }
+            collidersOnly: true
+        });
 
         this.player = null;
         this.shot   = null;
@@ -55,14 +54,14 @@ class SuperPang extends Game {
         // Spawn player centered at the bottom
         this.player = new PangPlayer(new Vector2(
             this.screenHalfWidth - 14,
-            this.screenHeight - 60
+            this.screenHeight - 30
         ));
         this.player.Start();
         this.gameObjects.push(this.player);
 
-        // Spawn initial balls
-        // this._spawnBall(new Vector2(150, 200), 0,  1);
-        // this._spawnBall(new Vector2(480, 180), 0, -1);
+        // Spawn initial balls at floor level so the first arc matches all subsequent bounces
+        this._spawnBall(new Vector2(150, this.screenHeight - BALL_SIZES[0]), 0,  1);
+        this._spawnBall(new Vector2(480, this.screenHeight - BALL_SIZES[0]), 0, -1);
     }
 
     _spawnBall(position, sizeIndex, dirX) {
@@ -74,6 +73,11 @@ class SuperPang extends Game {
 
     // Called by PangBall when it is hit by a shot
     PopBall(ball) {
+        // Save spawn data before the ball is destroyed
+        const spawnX      = ball.position.x;
+        const spawnY      = ball.position.y;
+        const sizeIndex   = ball.sizeIndex;
+
         // Destroy the shot
         this.DestroyShot();
 
@@ -83,13 +87,13 @@ class SuperPang extends Game {
             this.balls.splice(idx, 1);
         this.Destroy(ball);
 
-        this.score += (this.balls.length === 0 ? 200 : 100) * (ball.sizeIndex + 1);
+        this.score += (this.balls.length === 0 ? 200 : 100) * (sizeIndex + 1);
 
-        // Spawn two smaller balls unless this is the smallest
-        if (ball.sizeIndex < BALL_SIZES.length - 1) {
-            const nextSize = ball.sizeIndex + 1;
-            this._spawnBall(Vector2.Copy(ball.position), nextSize,  1);
-            this._spawnBall(Vector2.Copy(ball.position), nextSize, -1);
+        // Spawn two smaller balls at the hit position
+        if (sizeIndex < BALL_SIZES.length - 1) {
+            const nextSize = sizeIndex + 1;
+            this._spawnBall(new Vector2(spawnX, spawnY), nextSize,  1);
+            this._spawnBall(new Vector2(spawnX, spawnY), nextSize, -1);
         }
 
         // Check win condition
@@ -107,13 +111,15 @@ class SuperPang extends Game {
     }
 
     Update(deltaTime) {
+        if (Input.IsKeyDown(KEY_F))
+            this.config.collidersOnly = !this.config.collidersOnly;
+
         if (this.state === STATE_PLAYING) {
             super.Update(deltaTime);
 
             // Fire shot
             if (Input.IsKeyPressed(KEY_SPACE) && !this.shot) {
-                const sx = this.player.position.x + this.player.width * 0.5;
-                this.shot = new PangShot(sx);
+                this.shot = new PangShot(this.player.x);
                 this.shot.Start();
                 this.gameObjects.push(this.shot);
             }
@@ -127,10 +133,10 @@ class SuperPang extends Game {
 
     Draw() {
         // Background
-        this.renderer.DrawFillBasicRectangle(0, 0, this.screenWidth, this.screenHeight, new Color(0.1, 0.1, 0.2));
+        // this.renderer.DrawFillBasicRectangle(0, 0, this.screenWidth, this.screenHeight, new Color(0.1, 0.1, 0.2));
 
         // Floor line
-        this.renderer.DrawLine(0, this.screenHeight - 4, this.screenWidth, this.screenHeight - 4, Color.white, 4);
+        this.renderer.DrawLine(0, this.screenHeight - 4, this.screenWidth, this.screenHeight - 4, Color.black, 4);
 
         // Game objects (player, shot, balls)
         super.Draw();
@@ -141,7 +147,8 @@ class SuperPang extends Game {
         // Overlays
         if (this.state === STATE_DEAD) {
             this._drawOverlay("GAME OVER", "Press ENTER to restart", new Color(0.8, 0.1, 0.1, 0.75));
-        } else if (this.state === STATE_WIN) {
+        }
+        else if (this.state === STATE_WIN) {
             this._drawOverlay("YOU WIN!", "Press ENTER to play again", new Color(0.1, 0.6, 0.1, 0.75));
         }
     }
@@ -165,13 +172,14 @@ class PangPlayer extends GameObject {
         this.speed  = 240;
         this.color  = Color.blue;
         this.alive  = true;
+
+        this.collider = null;
     }
 
     Start() {
         // Create collider with zero-offset so UpdateFromGO works correctly
-        const col = new RectangleCollider(Vector2.Zero(), this.width, this.height, this);
-        this.collider = col;
-        game.AddCollider(col);
+        this.collider = new RectangleCollider(Vector2.Zero(), this.width, this.height, this);
+        game.AddCollider(this.collider);
     }
 
     Update(deltaTime) {
@@ -185,25 +193,26 @@ class PangPlayer extends GameObject {
             move += 1;
 
         this.position.x += move * this.speed * deltaTime;
+
         // Clamp to screen bounds
-        this.position.x = Math.max(0, Math.min(this.position.x, game.screenWidth - this.width));
+        this.position.x = Math.max(this.width, Math.min(this.position.x, game.screenWidth - this.width));
 
         super.Update(deltaTime); // updates collider
     }
 
     Draw(renderer) {
-        // Body
-        renderer.DrawFillBasicRectangle(this.position.x, this.position.y, this.width, this.height, this.color);
-        // Head
         const headR = this.width * 0.5;
-        renderer.DrawFillCircle(this.position.x + this.width * 0.5, this.position.y - headR * 0.7, headR, this.color);
+        // Body
+        renderer.DrawFillRectangle(this.position.x, this.position.y, this.width, this.height, this.color);
+        // Head
+        renderer.DrawFillCircle(this.position.x, this.position.y - this.height * 0.5, headR, Color.pink);
     }
 
     OnCollisionEnter(myCollider, otherCollider) {
-        if (otherCollider.go instanceof PangBall) {
-            this.alive = false;
-            game.state = STATE_DEAD;
-        }
+        // if (otherCollider.go instanceof PangBall) {
+        //     this.alive = false;
+        //     game.state = STATE_DEAD;
+        // }
     }
 }
 
@@ -213,22 +222,23 @@ class PangPlayer extends GameObject {
 class PangShot extends GameObject {
     constructor(x) {
         super(new Vector2(x, game.screenHeight));
-        this.width    = 4;
-        this.top      = game.screenHeight; // current top of the wire
-        this.speed    = 600;
-        this._shotX   = x;
+        this.width  = 4;
+        this.top    = game.screenHeight - 10; // current top of the wire
+        this.speed  = 600;
+        this._shotX = x;
+
+        this.collider = null;
     }
 
     Start() {
-        const sh = game.screenHeight;
-        // Collider covers the full wire column; updated manually each frame
-        const col = new RectangleCollider(new Vector2(this._shotX, sh * 0.5), this.width, sh, this);
-        this.collider = col;
-        game.AddCollider(col);
+        const wireHeight = game.screenHeight - this.top;
+        const wireCenterY = this.top + wireHeight * 0.5;
+        this.collider = new RectangleCollider(new Vector2(this._shotX, wireCenterY), this.width, wireHeight, this);
+        game.AddCollider(this.collider);
     }
 
-    Update(dt) {
-        this.top -= this.speed * dt;
+    Update(deltaTime) {
+        this.top -= this.speed * deltaTime;
         if (this.top <= 0) {
             this.top = 0;
             game.DestroyShot();
@@ -279,11 +289,11 @@ class PangBall extends GameObject {
         game.AddCollider(col);
     }
 
-    Update(dt) {
-        this.vy += GRAVITY * dt;
+    Update(deltaTime) {
+        this.vy += GRAVITY * deltaTime;
 
-        this.position.x += this.vx * dt;
-        this.position.y += this.vy * dt;
+        this.position.x += this.vx * deltaTime;
+        this.position.y += this.vy * deltaTime;
 
         const sw = game.screenWidth;
         const sh = game.screenHeight;
@@ -292,7 +302,8 @@ class PangBall extends GameObject {
         if (this.position.x - this.radius < 0) {
             this.position.x = this.radius;
             this.vx = Math.abs(this.vx);
-        } else if (this.position.x + this.radius > sw) {
+        }
+        else if (this.position.x + this.radius > sw) {
             this.position.x = sw - this.radius;
             this.vx = -Math.abs(this.vx);
         }
@@ -309,7 +320,7 @@ class PangBall extends GameObject {
             this.vy = Math.abs(this.vy);
         }
 
-        super.Update(dt); // updates collider
+        super.Update(deltaTime); // updates collider
     }
 
     Draw(renderer) {
