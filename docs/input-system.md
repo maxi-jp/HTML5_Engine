@@ -184,6 +184,42 @@ Update(deltaTime) {
 }
 ```
 
+#### Any-button helpers (menu/start flows)
+
+The Input API also includes helpers for "Press any button" style prompts:
+
+| Function | Returns `true` when… |
+|---|---|
+| `Input.IsAnyGamepadButtonDown()` | Any connected gamepad pressed any physical button this frame |
+| `Input.IsAnyGamepadFaceButtonDown()` | Any connected gamepad pressed one of `FACE_DOWN`, `FACE_RIGHT`, `FACE_LEFT`, `FACE_UP` this frame |
+
+Example: continue from a main menu when player uses keyboard, mouse/touch, or gamepad face buttons:
+
+```javascript
+if (
+    Input.keyboard.anyKeyPressed ||
+    Input.touch.any ||
+    Input.mouse.down ||
+    Input.IsAnyGamepadFaceButtonDown()
+) {
+    this.mainMenu.StartButton();
+}
+```
+
+### "Press anything" helper
+
+For generic menu prompts, you can use:
+
+| Function | Returns `true` when… |
+|---|---|
+| `Input.Anything()` | Keyboard, touch, mouse (button or wheel), or gamepad button activity is detected |
+
+```javascript
+if (Input.Anything()) {
+    this.mainMenu.StartButton();
+}
+```
+
 ### Rumble / Haptic Feedback
 
 Controllers that support the [Gamepad Vibration API](https://developer.mozilla.org/en-US/docs/Web/API/GamepadHapticActuator) can be made to rumble with a single call.
@@ -359,8 +395,14 @@ Update(deltaTime) {
 #### `RegisterAction(name, mappings)`
 Registers a new action with a given name and maps it to one or more physical inputs.
 
+#### `UnregisterAction(name)`
+Removes a previously registered action mapping.
+
 #### `RegisterAxis(name, mappings)`
 Registers a new axis with a given name and maps it to one or more physical inputs.
+
+#### `UnregisterAxis(name)`
+Removes a previously registered axis mapping.
 
 #### `GetAction(name)`
 Returns `true` as long as any mapped input for the action is held down.
@@ -455,6 +497,9 @@ Triggers haptic feedback on a gamepad. See [Rumble / Haptic Feedback](#rumble--h
 
 #### `RegisterRumble(id, strong, weak, duration, delay)`
 Registers a named rumble preset. `preset` fields: `strong` (0–1), `weak` (0–1), `duration` (ms), `delay` (ms) — all optional, defaults to `1`, `1`, `200`, `0`.
+
+#### `UnregisterRumble(id)`
+Removes a previously registered rumble preset.
 
 #### `ExecuteRumble(id, gamepadIndex)`
 Fires a previously registered preset. `gamepadIndex` defaults to `0`. Logs a warning if the id is not found.
@@ -626,6 +671,9 @@ Registers an existing `VirtualJoystick` instance under `id` for use in axis bind
 |---|---|---|
 | `id` | `string` | Unique key referenced in axis bindings |
 | `joystick` | `VirtualJoystick` | The instance to register |
+
+#### `RemoveVirtualJoystick(id)`
+Unregisters a previously registered virtual joystick id, so it no longer contributes to axis bindings.
 
 #### `RegisterVirtualButton(id, button)`
 Registers an existing `VirtualButton` instance under `id` for use in action bindings `{ type: 'virtualbutton', id }`. The instance must be created first with `new VirtualButton(...)`, which auto-registers it for drawing.

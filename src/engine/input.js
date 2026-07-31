@@ -836,7 +836,7 @@ var Input = {
      * Unregisters a named rumble preset.
      * @param {string} id The id of the rumble preset to unregister.
      */
-    unregisterRumble: function(id) {
+    UnregisterRumble: function(id) {
         delete this.rumbleMaps[id];
     },
 
@@ -926,6 +926,37 @@ var Input = {
     IsMouseUp: function(button = 0) {
         return this._mouseButton(button).up;
     },
+
+    /**
+     * Returns true when the player used any common input source.
+     * Useful for "Press anything to continue" menu flows.
+     *
+     * Includes:
+     * - keyboard (`anyKeyPressed`)
+     * - touch (`touch.any`)
+     * - mouse button down (left/middle/right) or wheel
+     * - any gamepad button down this frame
+     *
+     * @returns {boolean}
+     */
+    Anything: function() {
+        if (this.keyboard.anyKeyPressed)
+            return true;
+
+        if (this.touch.any)
+            return true;
+
+        if (this.mouse.left.down || this.mouse.middle.down || this.mouse.right.down)
+            return true;
+        
+        if (this.mouse.wheel !== 0)
+            return true;
+
+        if (this.IsAnyGamepadButtonDown())
+            return true;
+
+        return false;
+    },
 // #endregion
 
 // #region Gamepad Events
@@ -961,6 +992,48 @@ var Input = {
         const gamepad = this.gamepads[gamepadIndex];
         if (gamepad && gamepad.mapping)
             return gamepad.pressed[gamepad.mapping.buttons[buttonId]];
+        return false;
+    },
+
+    /**
+     * Returns true if any connected gamepad pressed any physical button this frame.
+     * Useful for generic "Press any button" prompts.
+     * @returns {boolean}
+     */
+    IsAnyGamepadButtonDown: function() {
+        for (let i = 0; i < this.gamepads.length; i++) {
+            const gamepad = this.gamepads[i];
+            if (!gamepad || !gamepad.gamepad)
+                continue;
+
+            for (let b = 0; b < gamepad.gamepad.buttons.length; b++) {
+                if (gamepad.down[b])
+                    return true;
+            }
+        }
+
+        return false;
+    },
+
+    /**
+     * Returns true if any connected gamepad pressed any face button this frame.
+     * Face buttons: FACE_DOWN, FACE_RIGHT, FACE_LEFT, FACE_UP.
+     * @returns {boolean}
+     */
+    IsAnyGamepadFaceButtonDown: function() {
+        const faceButtons = ["FACE_DOWN", "FACE_RIGHT", "FACE_LEFT", "FACE_UP"];
+
+        for (let i = 0; i < this.gamepads.length; i++) {
+            const gamepad = this.gamepads[i];
+            if (!gamepad || !gamepad.mapping)
+                continue;
+
+            for (const buttonId of faceButtons) {
+                if (this.IsGamepadButtonDown(i, buttonId))
+                    return true;
+            }
+        }
+
         return false;
     },
 
