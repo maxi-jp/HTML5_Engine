@@ -1,3 +1,11 @@
+// ============================================================
+// Input System
+// Keyboard/mouse/gamepad constants, the abstract Input namespace
+// (actions, axes, rumble), and virtual controls registration.
+// Globals provided: KEY_*, MOUSE_*, gamepadMapping, Input
+// Requires: utils_classes.js (Vector2), virtualcontrols.js
+// ============================================================
+
 // #region Keyboard key ids
 const KEY_LEFT   = 37;
 const KEY_UP     = 38;

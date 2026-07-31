@@ -511,6 +511,7 @@ class LinearGradient {
     }
 }
 
+/** @deprecated Radial gradient wrapper. Currently only works with the Canvas2D context; needs refactoring for WebGLRenderer. */
 class RadialGradient {
     // TODO refactor this class to work with the new renderers
     constructor(x0, y0, r0, x1, y1, r1, colorStops) {
@@ -525,6 +526,7 @@ class RadialGradient {
     }
 }
 
+/** Drawable rectangle (filled or stroked). Call `Draw(renderer)` each frame. Position is the centre. */
 class Rectangle {
     constructor(position, width, height, color=Color.Black(), stroke=false, lineWidth=1) {
         this.position = position;
@@ -545,6 +547,7 @@ class Rectangle {
     }
 }
 
+/** Drawable circle (filled or stroked). Call `Draw(renderer)` each frame. */
 class Circle {
     constructor(position, radius, color, stroke=false, lineWidth=1) {
         this.position = position;
@@ -559,6 +562,10 @@ class Circle {
     }
 }
 
+/**
+ * Drawable text label compatible with both Canvas2D and WebGL renderers.
+ * Caches a GPU texture in WebGL mode and only re-uploads when `text`, `font`, or `color` changes.
+ */
 class TextLabel {
     constructor(text, position, font, color=Color.black, align="center", baseline="bottom", stroke=false, lineWidth=1) {
         this._text = text;
@@ -651,6 +658,7 @@ class TextLabel {
     }
 }
 
+/** Text label with a fill colour and a separate outline stroke. Simpler than `TextLabel` — Canvas2D only. */
 class TextLabelFillAndStroke {
     constructor(text, position, font, fillColor="white", strokeColor="black", align="center", baseline="bottom") {
         this.text = text;
@@ -752,6 +760,11 @@ class CollisionManager {
     }
 }
 
+/**
+ * Base class for non-physics colliders. Register with `game.AddCollider(collider)` and remove with
+ * `game.RemoveCollider(collider)`. On overlap the engine calls `OnCollisionEnter`/`OnCollisionExit`
+ * on the attached `go` game object. Use `CircleCollider` or `RectangleCollider` in practice.
+ */
 class Collider {
     static defaultColor   = new Color(1, 0, 0, 0.2); // Red for no collision
     static collisionColor = new Color(0, 1, 0, 0.2); // Green for collision
@@ -852,6 +865,7 @@ class Collider {
     IsPointInside(x, y) { return false; }
 }
 
+/** Axis-aligned rectangular collider. Position is the centre of the rectangle. */
 class RectangleCollider extends Collider {
 
     get width() {
@@ -898,6 +912,7 @@ class RectangleCollider extends Collider {
     }
 }
 
+/** Circular collider. The most common shape for game objects. */
 class CircleCollider extends Collider {
     constructor(position, radius, gameObject=null) {
         super(position, radius, gameObject);
@@ -913,6 +928,7 @@ class CircleCollider extends Collider {
     }
 }
 
+/** Convex-polygon collider. `points` are in local space relative to the object's pivot; they rotate with `rotation`. */
 class PolygonCollider extends Collider {
     constructor(position, rotation, points, gameObject=null) {
         super(position, 0, gameObject);

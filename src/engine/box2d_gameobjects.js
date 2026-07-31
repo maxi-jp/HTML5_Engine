@@ -1,4 +1,28 @@
+// ============================================================
+// Box2D Game Objects
+// Physics-backed GameObject subclasses: Box2DGameObject (base),
+// Box2DRectangleGO, Box2DSpriteObject, Box2DSSAnimationObjectBasic,
+// Box2DSSAnimationObjectComplex, Box2DTrigger.
+// Globals provided: Box2DGameObject, Box2DRectangleGO,
+//   Box2DSpriteObject, Box2DSSAnimationObjectBasic,
+//   Box2DSSAnimationObjectComplex, Box2DTrigger
+// Requires: gameobjects.js, box2d_helper.js
+// ============================================================
+
+/**
+ * Base class for all physics-backed game objects.
+ * Automatically creates a Box2D body and syncs its position/rotation
+ * back to the `GameObject` every frame.
+ * Override `OnContactDetected` and `OnContactDetectEnded` to respond to collisions.
+ */
 class Box2DGameObject extends GameObject {
+    /**
+     * @param {Vector2}           position    - Initial canvas-space position.
+     * @param {*}                 physicsWorld - The Box2D world (from `Box2DGame.physicsWorld`).
+     * @param {PhysicsObjectType} type        - Shape of the physics body (Box, Circle, or Edge).
+     * @param {object}            bodyOptions - Body options: density, friction, restitution,
+     *   width/height (Box), radius (Circle), p1/p2 (Edge), type (b2_dynamicBody etc.), isSensor, …
+     */
     constructor(position, physicsWorld, type, bodyOptions) {
         super(position);
 
@@ -192,6 +216,7 @@ class Box2DGameObject extends GameObject {
     }
 }
 
+/** A physics rectangle that draws itself as a filled rectangle. Mostly used for debugging. */
 class Box2DRectangleGO extends Box2DGameObject {
     constructor(position, physicsWorld, type, bodyOptions, width, height, color = "red") {
         super(position, physicsWorld, type, bodyOptions);
@@ -209,6 +234,7 @@ class Box2DRectangleGO extends Box2DGameObject {
     }
 }
 
+/** A physics body that renders as a sprite. Position and rotation are driven by the Box2D body. */
 class Box2DSpriteObject extends Box2DGameObject {
     constructor(position, rotation, scale, img, type, physicsWorld, bodyOptions) {
         super(position, physicsWorld, type, bodyOptions);
@@ -240,6 +266,7 @@ class Box2DSpriteObject extends Box2DGameObject {
     }
 }
 
+/** A physics body that renders as a single-strip sprite sheet animation. */
 class Box2DSSAnimationObjectBasic extends Box2DGameObject {
     constructor(position, rotation, scale, img, frameWidth, frameHeight, frameCount, framesDuration, type, physicsWorld, bodyOptions) {
         super(position, physicsWorld, type, bodyOptions);
@@ -279,6 +306,7 @@ class Box2DSSAnimationObjectBasic extends Box2DGameObject {
     }
 }
 
+/** A physics body that renders as a multi-animation sprite sheet (named animation clips). */
 class Box2DSSAnimationObjectComplex extends Box2DGameObject {
     constructor(position, rotation, scale, img, animationsRectangles, framesDuration, type, physicsWorld, bodyOptions) {
         super(position, physicsWorld, type, bodyOptions);

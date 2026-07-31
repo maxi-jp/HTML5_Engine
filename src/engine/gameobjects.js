@@ -478,6 +478,10 @@ class Tileset extends GameObject {
 
 //#region Cameras
 
+/**
+ * Base camera class. Apply with `camera.PreDraw(renderer)` before drawing and `camera.PostDraw(renderer)` after.
+ * Supports smooth zoom via `Zoom()` and an instant punch-zoom via `ZoomPunch()`.
+ */
 class Camera {
     _position;
     _rotation = 0;
@@ -581,7 +585,13 @@ class Camera {
     }
 }
 
+/** Camera that snaps instantly to follow a target GameObject, centred on it. */
 class FollowCameraBasic extends Camera {
+    /**
+     * @param {Vector2} position - Initial camera position.
+     * @param {GameObject} target - The game object to follow.
+     * @param {Vector2} [offset] - Pixel offset from the target's centre.
+     */
     constructor(position, target, offset=Vector2.Zero()) {
         super(position);
 
@@ -604,7 +614,21 @@ class FollowCameraBasic extends Camera {
     }
 }
 
+/**
+ * Smooth-following camera with world bounds clamping and optional screen shake.
+ * Lerps toward the target each frame; supports `Shake()` for impact feedback.
+ */
 class FollowCamera extends Camera {
+    /**
+     * @param {Vector2} position - Initial camera position.
+     * @param {GameObject} target - The game object to follow.
+     * @param {number} minX - Left world bound (camera won't scroll past this).
+     * @param {number} maxX - Right world bound.
+     * @param {number} minY - Top world bound.
+     * @param {number} maxY - Bottom world bound.
+     * @param {number} [smoothingSpeed=5] - Lerp factor per second. Higher = snappier (5 = fast, 1 = slow).
+     * @param {Vector2} [offset] - Pixel offset from the target's centre.
+     */
     constructor(position, target, minX, maxX, minY, maxY, smoothingSpeed=5, offset=Vector2.Zero()) {
         super(position);
 
@@ -665,6 +689,12 @@ class FollowCamera extends Camera {
         super.Update(deltaTime); // handles zoom animation
     }
 
+    /**
+     * Triggers a screen-shake effect.
+     * @param {number} time  - Duration in seconds.
+     * @param {number} speed - Oscillation frequency (higher = faster shaking, e.g. 40).
+     * @param {number} size  - Shake amplitude in pixels.
+     */
     Shake(time, speed, size) {
         this.shakingTime = time;
         this.shakingSpeed = speed;
@@ -677,9 +707,20 @@ class FollowCamera extends Camera {
 
 // #region Object Pool
 
+/**
+ * Fixed-capacity object pool. Pre-allocates `maxSize` instances of `objectConstructor` and recycles
+ * them via `Get()`/`Release()` to avoid garbage-collection spikes.
+ * Typical use: bullets, particles, enemies.
+ */
 class Pool {
     static semiTransparentRed = new Color(1, 0, 0, 0.5);
 
+    /**
+     * @param {object}   owner             - The game object that owns this pool (stored on each pooled object as `.owner`).
+     * @param {number}   maxSize           - Fixed pool capacity.
+     * @param {Function} objectConstructor - Class to instantiate (e.g. `Bullet`).
+     * @param {Array}    [constructorParams=[]] - Arguments forwarded to `new objectConstructor(...params)`.
+     */
     constructor(owner, maxSize, objectConstructor, constructorParams=[]) {
         this.owner = owner;
         this.maxSize = maxSize;
@@ -763,7 +804,16 @@ class Pool {
 
 // #region BackgroundLayers
 
+/**
+ * Base class for a single parallax background layer. Attach to a `BackgroundLayers` container.
+ * @abstract
+ */
 class BackgroundLayer {
+    /**
+     * @param {Vector2} position - Initial world position of the layer.
+     * @param {Vector2} speed    - Parallax factor per axis (0–1).
+     *   `0` = moves with the camera (foreground/UI); `1` = fixed in world space (far background).
+     */
     constructor(position, speed) {
         this.position = position;
         this.speed = speed;
@@ -780,6 +830,7 @@ class BackgroundLayer {
     Draw(renderer) {}
 }
 
+/** Background layer filled with a solid colour that scrolls with the camera. */
 class StaticColorLayer {
     constructor(color) {
         this.color = color;
@@ -793,6 +844,7 @@ class StaticColorLayer {
     }
 }
 
+/** Background layer filled with a linear gradient that scrolls with the camera. */
 class StaticGradientLayer {
     constructor(renderer, direction, colorStops) {
         this.gradient = new LinearGradient(renderer, direction, colorStops);
@@ -806,6 +858,7 @@ class StaticGradientLayer {
     }
 }
 
+/** Parallax background layer drawn as a solid-colour rectangle. */
 class ColorRectangleLayer extends BackgroundLayer {
     constructor(color, position, width, height, speed=Vector2.Zero()) {
         super(position, speed);
@@ -822,6 +875,7 @@ class ColorRectangleLayer extends BackgroundLayer {
     }
 }
 
+/** Parallax background layer drawn as a linear-gradient rectangle. */
 class GradientRectangleLayer extends BackgroundLayer {
     constructor(renderer, direction, colorStops, position, width, height, speed=Vector2.Zero()) {
         super(position, speed);
@@ -838,6 +892,7 @@ class GradientRectangleLayer extends BackgroundLayer {
     }
 }
 
+/** Parallax background layer that renders a single sprite (or sprite-sheet section). */
 class SpriteBackgroundLayer extends BackgroundLayer {
     constructor(img, position, rotation, scale, speed=Vector2.Zero(), section=null) {
         super(position, speed);
@@ -854,6 +909,7 @@ class SpriteBackgroundLayer extends BackgroundLayer {
     }
 }
 
+/** Parallax background layer that renders multiple sprites moving together as one group. */
 class MultispritesBackgroundLayer extends BackgroundLayer {
     constructor(position, sprites, speed=Vector2.Zero()) {
         super(position, speed);
@@ -882,6 +938,7 @@ class MultispritesBackgroundLayer extends BackgroundLayer {
     }
 }
 
+/** Parallax background layer that renders a full tile map. */
 class TilesetBackgroundLayer extends BackgroundLayer {
     constructor(img, position, scale, speed, tilesetConfig, tilesetMap, tileWidth, tileHeight) {
         super(position, speed);
@@ -901,6 +958,10 @@ class TilesetBackgroundLayer extends BackgroundLayer {
     }
 }
 
+/**
+ * Container that manages and renders an ordered stack of background layers.
+ * Assign a `Camera` and call `Start()`, `Update()`, `Draw()` each frame.
+ */
 class BackgroundLayers {
     constructor(camera, layers=[]) {
         this.camera = camera;

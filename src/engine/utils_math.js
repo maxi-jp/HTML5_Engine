@@ -200,10 +200,15 @@ function IntersectionBetweenLines(l1p1, l1p2, l2p1, l2p2) {
     return result;
 }
 
+/** @param {{x:number,y:number}} vec1 @param {{x:number,y:number}} vec2 @returns {number} */
 function DotProduct(vec1, vec2) {
     return vec1.x * vec2.x + vec1.y * vec2.y;
 }
 
+/**
+ * Returns the angle (radians) between two vectors. Both vectors must be normalised.
+ * @param {{x:number,y:number}} vec1 @param {{x:number,y:number}} vec2 @returns {number}
+ */
 function AngleBetweenVectors(vec1, vec2) {
     // vec1 and vec2 should be normalized
 
@@ -231,6 +236,13 @@ function NormalizeAngle(angle) {
     return angle;
 }
 
+/**
+ * Steps `currentRotation` toward `targetRotation` by at most `speed` radians, taking the shortest arc.
+ * Call once per frame. `speed` is the maximum rotation step per call (in radians), not a rate.
+ * @param {number} currentRotation @param {number} targetRotation
+ * @param {number} speed - Max radians to rotate per call.
+ * @returns {number} The new rotation angle.
+ */
 function SmoothRotation(currentRotation, targetRotation, speed) {
     let rotationDifference = targetRotation - currentRotation;
     rotationDifference = NormalizeAngle(rotationDifference);
@@ -274,6 +286,12 @@ function Lerp(start, end, interpolationFactor) {
 
 // #region Point-inside-geometry-forms functions
 
+/**
+ * @param {number} px @param {number} py
+ * @param {{x:number,y:number}} circlePosition
+ * @param {number} radius2 - The circle's radius **squared** (pre-compute for performance).
+ * @returns {boolean}
+ */
 function CheckPointInsideCircle(px, py, circlePosition, radius2) {
     // d^2 = (p.x - c.x)^2 + (p.y - c.y)^2
     // c = d < r
@@ -323,6 +341,11 @@ function CheckCollisionTwoCircles(positionA, radiusA, positionB, radiusB) {
     return distanceSquared < (sumofRadius * sumofRadius);
 }
 
+/**
+ * @param {{x:number,y:number,w:number,h:number}} rectA
+ * @param {{x:number,y:number,w:number,h:number}} rectB
+ * @returns {boolean}
+ */
 function CheckCollisionTwoRects(rectA, rectB) {
     return rectA.x < rectB.x + rectB.w &&
            rectA.x + rectA.w > rectB.x &&
@@ -330,6 +353,11 @@ function CheckCollisionTwoRects(rectA, rectB) {
            rectA.y + rectA.h > rectB.y;
 }
 
+/**
+ * @param {{position:{x:number,y:number}, boundingRadius2?:number, radius?:number}} circle - Must have `position` and either `boundingRadius2` (preferred, squared) or `radius`.
+ * @param {{x:number,y:number,w:number,h:number}} rect
+ * @returns {boolean}
+ */
 function CheckCollisionCircleRect(circle, rect) {
     // Find the closest point on the rectangle to the center of the circle
     let testX = circle.position.x;

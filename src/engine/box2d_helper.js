@@ -1,3 +1,14 @@
+// ============================================================
+// Box2D Helper
+// Low-level glue between the Box2D library and the engine:
+// lib aliases, body/fixture factory functions, world creation,
+// contact routing, and coordinate conversion utilities.
+// Globals provided: PhysicsObjectType, CreatePhysicsObject,
+//   CreateBox2DWorld, DrawWorldDebug, CanvasToBox2DPosition,
+//   Box2DToCanvasPosition, b2Vec2 (and other b2* aliases)
+// Requires: src/lib/Box2D.js, renderer.js
+// ============================================================
+
 // Box2D lib shortcuts
 var b2Vec2 = Box2D.Common.Math.b2Vec2
     ,   b2AABB = Box2D.Collision.b2AABB
@@ -22,13 +33,37 @@ var b2Vec2 = Box2D.Common.Math.b2Vec2
     ,   b2GearJointDef = Box2D.Dynamics.Joints.b2GearJointDef
     ;
 
+/** Shape types for `CreatePhysicsObject` and `Box2DGameObject` constructors. */
 const PhysicsObjectType = {
+    /** Axis-aligned rectangle defined by `options.width` and `options.height` (in meters). */
     Box: 0,
+    /** Circle defined by `options.radius` (in meters). */
     Circle: 1,
+    /** Thin edge (line segment) defined by `options.p1x/p1y` and `options.p2x/p2y` (in meters). */
     Edge: 2
 }
 
 var webglDebugDraw = null;
+
+/**
+ * Options bag passed to `Box2DGameObject` and `CreatePhysicsObject`.
+ * All fields are optional and fall back to the defaults shown below.
+ * @typedef {object} BodyOptions
+ * @property {number}  [density=1.0]       - Fixture density.
+ * @property {number}  [friction=1.0]      - Fixture friction.
+ * @property {number}  [restitution=0.5]   - Fixture bounciness (0 = none, 1 = perfect).
+ * @property {boolean} [isSensor=false]    - If true, detects overlaps but has no physical response.
+ * @property {number}  [linearDamping=0.0] - Linear velocity damping.
+ * @property {number}  [angularDamping=0.1]- Angular velocity damping.
+ * @property {boolean} [fixedRotation=false] - Prevents the body from rotating.
+ * @property {*}       [type=b2_dynamicBody] - Body type: `b2Body.b2_dynamicBody`, `b2_staticBody`, or `b2_kinematicBody`.
+ * @property {number}  [width]             - Box half-extents width in meters (Box only).
+ * @property {number}  [height]            - Box half-extents height in meters (Box only).
+ * @property {number}  [radius]            - Circle radius in meters (Circle only).
+ * @property {number}  [p1x] @property {number} [p1y] - Edge start point in meters (Edge only).
+ * @property {number}  [p2x] @property {number} [p2y] - Edge end point in meters (Edge only).
+ * @property {{x:number,y:number}} [offset] - Local offset of the shape centre (Box/Circle).
+ */
 
 function AsignDefaultValues(options) {
     // default values
@@ -158,6 +193,17 @@ function CreatePolygon(world, x, y, options) {
     return body;
 }
 
+/**
+ * Creates a Box2D body with the given shape type and options.
+ * Called internally by `Box2DGameObject`; prefer using the game-object
+ * classes directly rather than calling this function yourself.
+ * @param {*}                 world   - The Box2D world.
+ * @param {PhysicsObjectType} type    - Box, Circle, or Edge.
+ * @param {number}            x       - Position x in **meters** (Box2D space).
+ * @param {number}            y       - Position y in **meters** (Box2D space, Y-up).
+ * @param {object}            options - Body options (density, friction, restitution, width/height/radius, type, …).
+ * @returns {b2Body}
+ */
 function CreatePhysicsObject(world, type, x, y, options) {
     switch (type) {
         case PhysicsObjectType.Box:
@@ -176,7 +222,15 @@ function RemoveBody(world, body) {
     world.DestroyBody(body);
 }
 
-// Create a Box2D world object
+/**
+ * Creates and configures a Box2D world, wires up debug drawing, and attaches
+ * the engine's contact listener. Called once by `Box2DGame.Start()`.
+ * @param {Renderer}          renderer - Used to attach the debug draw context.
+ * @param {{x:number,y:number}} gravity - Gravity in m/s² (e.g. `{x:0, y:-9.8}`).
+ * @param {boolean}           doSleep  - Allow Box2D to sleep inactive bodies.
+ * @param {number}            scale    - Pixels per meter.
+ * @returns {b2World}
+ */
 function CreateBox2DWorld(renderer, gravity, doSleep, scale) {
     const grav = new b2Vec2(gravity.x, gravity.y);
     const world = new b2World(grav, doSleep);

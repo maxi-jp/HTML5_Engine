@@ -1,4 +1,29 @@
+// ============================================================
+// Box2DGame
+// Game subclass that owns a Box2D physics world and steps it
+// each frame before updating game objects.
+// Globals provided: Box2DGame
+// Requires: game.js (Game), box2d_helper.js (CreateBox2DWorld)
+// ============================================================
+
+/**
+ * Game subclass that integrates a Box2D physics world.
+ * Extend this instead of `Game` when the game needs rigid-body physics.
+ *
+ * @example
+ * class MyPhysicsGame extends Box2DGame {
+ *   constructor(renderer) {
+ *     super(renderer, 30, { x: 0, y: -9.8 }, true);
+ *   }
+ * }
+ */
 class Box2DGame extends Game {
+    /**
+     * @param {Renderer} renderer - The renderer instance created by the engine.
+     * @param {number}   scale    - Pixels per meter (e.g. 30 means 30 px = 1 m).
+     * @param {{x:number, y:number}} gravity  - Gravity vector in m/s².
+     * @param {boolean}  doSleep  - Whether Box2D may put inactive bodies to sleep.
+     */
     constructor(renderer, scale, gravity, doSleep) {
         super(renderer);
         

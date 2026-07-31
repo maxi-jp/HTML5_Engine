@@ -1,3 +1,12 @@
+// ============================================================
+// HTMLMenu
+// DOM overlay system for game menus and HUDs layered above the canvas.
+// Handles positioning, scaling, and clip sync with the canvas in both
+// normal and fillWindow modes.
+// Globals provided: HTMLMenu
+// Requires: game.js (Game)
+// ============================================================
+
 class HTMLMenu {
     /**
      * @param {Game}   game                     - The active game instance.

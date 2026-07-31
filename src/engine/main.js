@@ -2,6 +2,7 @@
 var canvas = /** @type {HTMLCanvasElement} */(null);
 var requestAnimationFrameID = -1;
 
+/** @type {Renderer} The active Renderer instance. Set by the engine at startup and available globally throughout the game's lifetime. */
 var renderer = null
 
 var targetDT = 1/60; // 60fps

@@ -6,6 +6,7 @@
 // Based on: https://github.com/maxi-jp/HTML5_ParticleSystem
 // ============================================================
 
+/** Emitter shape: `point` spawns all particles at one position; `area` spawns randomly within a rectangle. */
 const emitterType = {
     point: 0,
     area: 1
@@ -64,6 +65,7 @@ const defaultParticleConfig = {
 // ─────────────────────────────────────────────────────────────────────────────
 // Particle
 // ─────────────────────────────────────────────────────────────────────────────
+/** Single pooled particle. Managed internally by `ParticleSystem` — do not instantiate directly. */
 class Particle {
     
     static pivot = { x: 0, y: 0 };
