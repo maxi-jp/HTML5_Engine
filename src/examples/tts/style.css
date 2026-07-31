@@ -47,6 +47,10 @@
 body {
     background-color: black;
     font-family: futuristic, sans-serif;
+    /* Prevent the pre-fillWindow canvas from causing a wider layout viewport on mobile */
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
 }
 
 #container {

@@ -269,7 +269,16 @@ class TTSC extends Game {
             }
         };
 
-        window.addEventListener('blur', pauseIfNeeded);
+        // Android Chrome fires window.blur when the address bar toggles on first touch.
+        // Guard against it so the game doesn't auto-pause on the tap that starts it.
+        let touchInProgress = false;
+        document.addEventListener('touchstart', () => { touchInProgress = true; }, { passive: true });
+        document.addEventListener('touchend',   () => { setTimeout(() => { touchInProgress = false; }, 300); }, { passive: true });
+
+        window.addEventListener('blur', () => {
+            if (touchInProgress) return;
+            pauseIfNeeded();
+        });
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 pauseIfNeeded();
