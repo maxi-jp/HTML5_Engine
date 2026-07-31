@@ -105,13 +105,13 @@ window.onload = () => { Init(MyGame); }
 | Mouse button | `Input.IsMouseButtonDown(0)` |
 | Gamepad raw | `Input.GetGamepad(0)` |
 | Register action | `Input.RegisterAction('Fire', [{type:'key', keyCode:KEY_SPACE}])` |
-| Action held | `Input.IsActionDown('Fire')` |
-| Action just pressed | `Input.IsActionPressed('Fire')` |
+| Action held | `Input.GetAction('Fire')` |
+| Action just pressed | `Input.GetActionDown('Fire')` |
 | Register axis | `Input.RegisterAxis('MoveX', [{type:'key', keyCode:KEY_LEFT, value:-1}, …])` |
 | Read axis | `Input.GetAxis('MoveX')` — returns –1..1 |
 | Any input | `Input.Anything()` — true if any device triggered anything |
 | Any gamepad face btn | `Input.IsAnyGamepadFaceButtonDown()` |
-| Rumble preset | `Input.RegisterRumble('hit', {duration:200, strongMagnitude:0.6})` → `Input.PlayRumble('hit', 0)` |
+| Rumble preset | `Input.RegisterRumble('hit', 0.8, 0.4, 150)` → `Input.ExecuteRumble('hit', 0)` |
 | Virtual joystick | `Input.RegisterVirtualJoystick('move', x, y, radius)` → `Input.GetAxis('move_x')` |
 
 ---

@@ -248,3 +248,126 @@ const centerY = this.screenHeight / 2;
 const centerX = canvas.width / 2;
 const centerY = canvas.height / 2;
 ```
+
+---
+
+## Cameras
+
+The engine provides three camera classes. Call `camera.PreDraw(renderer)` before drawing the scene and `camera.PostDraw(renderer)` after to apply/restore the transform.
+
+| Class | Description |
+|---|---|
+| `Camera` | Base camera. Supports smooth `Zoom(scale, duration)` and instant `ZoomPunch(scale, returnDuration)`. |
+| `FollowCameraBasic` | Snaps instantly to keep a target GameObject centered. |
+| `FollowCamera` | Smooth-follow with world bounds clamping and optional screen shake. |
+
+### `FollowCamera` — typical platformer setup
+
+```javascript
+Start() {
+    super.Start();
+
+    this.camera = new FollowCamera(
+        new Vector2(0, 0),  // initial position
+        this.player,        // target to follow
+        0,    600,          // minX, maxX world bounds
+        0,    400,          // minY, maxY world bounds
+        5,                  // smoothingSpeed (higher = snappier)
+        Vector2.Zero()      // optional offset from target
+    );
+    this.gameObjects.push(this.camera);
+}
+
+Update(deltaTime) {
+    super.Update(deltaTime);
+    this.camera.Update(deltaTime);
+}
+
+Draw() {
+    this.camera.PreDraw(this.renderer);  // apply transform
+    super.Draw();                         // all objects drawn in camera space
+    this.camera.PostDraw(this.renderer); // restore transform
+}
+```
+
+### Screen shake and zoom
+
+```javascript
+// Trigger shake on hit: (duration, oscillationSpeed, amplitude)
+this.camera.Shake(0.4, 40, 6);
+
+// Smooth zoom in over 0.5 s, then back to normal
+this.camera.Zoom(1.5, 0.5);
+setTimeout(() => this.camera.Zoom(1.0, 0.5), 800);
+
+// Instant punch-zoom (great for impacts)
+this.camera.ZoomPunch(1.08, 0.3);
+```
+
+---
+
+## Background Layers
+
+`BackgroundLayers` manages an ordered stack of parallax layers. Each layer is updated with the camera position every frame and drawn before your game objects.
+
+```javascript
+Start() {
+    super.Start();
+
+    this.bg = new BackgroundLayers(this.camera);
+
+    // Layer 1: solid sky colour (no parallax — always fills the screen)
+    this.bg.InsertLayer(new StaticColorLayer(Color.FromHex('#1a1a2e')));
+
+    // Layer 2: distant mountains sprite (slow parallax, speed=0.2)
+    this.bg.InsertLayer(new SpriteBackgroundLayer(
+        this.graphicAssets.mountains.img,
+        new Vector2(0, 0), 0, 1,
+        new Vector2(0.2, 0)  // parallax speed — 0 = moves with camera, 1 = fixed in world
+    ));
+
+    // Layer 3: near trees (faster parallax)
+    this.bg.InsertLayer(new SpriteBackgroundLayer(
+        this.graphicAssets.trees.img,
+        new Vector2(0, 0), 0, 1,
+        new Vector2(0.6, 0)
+    ));
+
+    this.bg.Start();
+    this.gameObjects.push(this.bg); // NOT needed — call manually below
+}
+
+Update(deltaTime) {
+    super.Update(deltaTime);
+    this.bg.Update(deltaTime);
+}
+
+Draw() {
+    this.bg.Draw(this.renderer);     // draw backgrounds first
+    this.camera.PreDraw(this.renderer);
+    super.Draw();
+    this.camera.PostDraw(this.renderer);
+}
+```
+
+### Parallax speed values
+
+The `speed` parameter on each layer is a `Vector2` parallax factor (0–1 per axis):
+
+| `speed.x` | Effect |
+|---|---|
+| `0` | Layer moves with the camera (like a UI element — no parallax) |
+| `0.5` | Layer moves at half the camera speed (medium depth) |
+| `1` | Layer stays fixed in world space (far background) |
+
+### Available layer types
+
+| Class | Description |
+|---|---|
+| `StaticColorLayer` | Screen-filling solid colour, scrolls with camera |
+| `StaticGradientLayer` | Screen-filling linear gradient |
+| `ColorRectangleLayer` | Coloured rectangle with parallax |
+| `GradientRectangleLayer` | Gradient rectangle with parallax |
+| `SpriteBackgroundLayer` | Single sprite or sprite-sheet section with parallax |
+| `MultispritesBackgroundLayer` | Group of sprites moving together with parallax |
+| `TilesetBackgroundLayer` | Full tile map with parallax |

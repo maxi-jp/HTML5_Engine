@@ -324,6 +324,7 @@ Global functions available throughout the engine:
 | `RandomBetweenFloat(min, max)` | Random float in `[min, max)` |
 | `Lerp(start, end, t)` | Linear interpolation |
 | `LerpRotation(current, target, t)` | Lerp between angles, wrapping correctly through `±π` |
+| `SmoothRotation(current, target, maxStep)` | Steps toward `target` by at most `maxStep` radians; call once per frame |
 | `NormalizeAngle(angle)` | Normalises an angle to `[-π, π]` |
 | `RotatePointAroundPoint(point, origin, angle)` | Rotates a point around an origin |
 | `IntersectionBetweenLines(l1p1, l1p2, l2p1, l2p2)` | Returns the intersection point of two line segments |

@@ -51,11 +51,11 @@ declare namespace Input {
     function RegisterAction(name: string, bindings: object[]): void;
     function UnregisterAction(name: string): void;
     /** True every frame the action binding is held. */
-    function GetActionDown(name: string): boolean;
+    function GetAction(name: string): boolean;
     /** True on the single frame the action binding was first triggered. */
-    function IsActionDown(name: string): boolean;
-    /** @deprecated Use IsActionDown */
-    function IsActionPressed(name: string): boolean;
+    function GetActionDown(name: string): boolean;
+    /** True on the single frame the action binding was released. */
+    function GetActionUp(name: string): boolean;
 
     // Abstract axes — returns −1…1
     function RegisterAxis(name: string, bindings: object[]): void;
@@ -69,9 +69,9 @@ declare namespace Input {
     function IsAnyGamepadFaceButtonDown(): boolean;
 
     // Rumble
-    function RegisterRumble(name: string, config: { duration: number; weakMagnitude?: number; strongMagnitude?: number }): void;
+    function RegisterRumble(name: string, strong?: number, weak?: number, duration?: number, delay?: number): void;
     function UnregisterRumble(name: string): void;
-    function PlayRumble(name: string, gamepadIndex: number): void;
+    function ExecuteRumble(id: string, gamepadIndex?: number): void;
 
     // Virtual controls
     function RegisterVirtualJoystick(id: string, x: number, y: number, radius: number): void;

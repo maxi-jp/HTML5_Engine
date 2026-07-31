@@ -1,6 +1,6 @@
 # Physics (Box2D)
 
-The engine integrates with Box2D for robust 2D physics simulations. Extend `Box2DGame` for your game class and use `Box2DRectangleGO` / `Box2DCircleGO` for physics-enabled game objects.
+The engine integrates with Box2D for robust 2D physics simulations. Extend `Box2DGame` for your game class and use `Box2DGameObject` subclasses (`Box2DSpriteObject`, `Box2DSSAnimationObjectBasic`, `Box2DSSAnimationObjectComplex`) for physics-enabled game objects.
 
 ## Initial Configuration
 
@@ -40,15 +40,23 @@ class MyBox2DGame extends Box2DGame {
 
 ## GameObjects with a Box2D body
 
+The most common pattern is to extend `Box2DSpriteObject` (physics body + sprite) or subclass `Box2DGameObject` directly for custom drawing:
+
 ```javascript
-class MyPhysicsBox extends Box2DRectangleGO {
-    constructor(position, physicsWorld) {
-        // super(position, physicsWorld, PhysicsObjectType, { width, height }, friction, restitution, color)
-        super(position, physicsWorld, PhysicsObjectType.Box, { width: 1, height: 1, density: 1 }, 1, 0.5, Color.green);
+class MyPhysicsBox extends Box2DSpriteObject {
+    constructor(position, physicsWorld, img) {
+        // Box2DSpriteObject(position, rotation, scale, img, PhysicsObjectType, physicsWorld, bodyOptions)
+        super(position, 0, 1, img, PhysicsObjectType.Box, physicsWorld, {
+            width:       1.0,   // metres
+            height:      1.0,   // metres
+            density:     1.0,
+            friction:    0.5,
+            restitution: 0.3,
+        });
     }
 
-    OnContactDetected(other) {
-        console.log("Collision with:", other.name);
+    OnContactDetected(other, contactPoint) {
+        console.log('Hit:', other);
     }
 }
 ```
@@ -74,12 +82,6 @@ The Box2D `b2World` instance. Use for advanced physics operations.
 #### Debug Drawing
 To visualise physics bodies, joints, and collision shapes overlaid on the canvas, set `drawColliders: true` in your game's config during `this.Configure()`.
 
-#### `AddBody(bodyDef)` / `RemoveBody(body)`
-Add or remove a `b2Body` from the world. Typically called internally by `Box2DGameObject`s.
-
-#### `SetGravity(gravityVector)`
-Changes the gravity vector at runtime.
-
 ---
 
 ### `Box2DGameObject` classes
@@ -102,7 +104,7 @@ Called when this object's body begins contact with another `Box2DGameObject`. `c
 
 > **Note:** If you need to destroy an object during a collision, just use `game.Destroy(this)`. The engine uses deferred deletion (a kill queue) at the end of the frame, making it 100% safe to destroy bodies inside Box2D contact callbacks!
 
-#### `OnContactEnded(otherGameObject)`
+#### `OnContactDetectEnded(otherGameObject)`
 Called when contact ends.
 
 #### `SetLinearVelocity(x, y)` / `GetLinearVelocity()`

@@ -35,22 +35,26 @@ Include the engine scripts in your `index.html`. The order of script inclusion i
 <html>
 <head>
     <title>My Awesome Game</title>
-    <script src="engine/renderer.js"></script>
-    <script src="engine/main.js"></script>
     <script src="engine/utils_math.js"></script>
+    <script src="engine/utils_classes.js"></script>
+    <script src="engine/renderer.js"></script>
+    <script src="engine/gameobjects.js"></script>
     <script src="engine/input.js"></script>
     <script src="engine/audioplayer.js"></script>
-    <script src="engine/game.js"></script>
-    <script src="engine/utils_classes.js"></script>
-    <script src="engine/gameobjects.js"></script>
-    <!-- add this to use particle systems -->
+    <!-- optional: particle system -->
     <script src="engine/particlesystem.js"></script>
-    <!-- add these only if you want to use box2d physics -->
+    <!-- optional: HTML menus and virtual controls -->
+    <script src="engine/htmlmenu.js"></script>
+    <script src="engine/virtualcontrols.js"></script>
+    <script src="engine/game.js"></script>
+    <!-- optional: Box2D physics (load Box2D.js first) -->
     <script src="lib/Box2D.js"></script>
     <script src="engine/box2d_helper.js"></script>
     <script src="engine/box2d_game.js"></script>
     <script src="engine/box2d_gameobjects.js"></script>
-    <!-- add here your game scripts -->
+    <!-- main.js must always be last — it bootstraps the engine -->
+    <script src="engine/main.js"></script>
+    <!-- your game scripts: -->
     <script src="src/my-game.js"></script>
 </head>
 <body>
