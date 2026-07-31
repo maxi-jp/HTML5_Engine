@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/style.css">    
     <link rel="stylesheet" href="./src/examples/tts/fonts/aircruiserlaserital.ttf">
     <link rel="stylesheet" href="./src/examples/tts/style.css">
+    <link rel="stylesheet" href="./src/examples/tts/logo.css">
     <script src="src/engine/renderer.js"></script>
     <script src="src/engine/main.js"></script>
     <script src="src/engine/utils_math.js"></script>
@@ -33,9 +34,81 @@
 
         <!-- UI - main menu -->
         <div id="mainMenu">
-            <h1>Twin Stick Shooter</h1>
+            <!-- Scanlines -->
+            <div class="scan-lines"></div>
+
+            <div class="neon-logo">
+                <!-- Background Triangle -->
+                <svg class="triangle" viewBox="0 0 1000 700">
+                    <defs>
+                        <!-- gradientUnits to make rotation math perfectly centered -->
+                        <linearGradient id="triangleGradient"
+                                        x1="0%" y1="0%" x2="100%" y2="0%"
+                                        gradientUnits="objectBoundingBox">
+                            <stop offset="0%" stop-color="#36dfff"/>
+                            <stop offset="50%" stop-color="#6d5cff"/>
+                            <stop offset="100%" stop-color="#ff39dc"/>
+                            
+                            <!-- 360-degree rotation -->
+                            <animateTransform 
+                                attributeName="gradientTransform" 
+                                type="rotate" 
+                                from="0 0.5 0.5" 
+                                to="360 0.5 0.5" 
+                                dur="10s" 
+                                repeatCount="indefinite" 
+                            />
+                        </linearGradient>
+                    </defs>
+                    <polygon points="40,40 960,40 500,660"/>
+                </svg>
+
+                <!-- Main Title -->
+                <div class="title">
+
+                    <!-- Main text -->
+                    <div class="title-outline" aria-hidden="true">
+                        <span>NEON</span>
+                        <div class="strike-wrapper">
+                            <span class="outline-s">S</span>
+                            <span>TRIKE</span>
+                        </div>
+                    </div>
+
+                    <h1 class="logo-text">
+                        <span title="NEON" class="gradient-multicolor-bg">NEON</span>
+                        <div class="strike-wrapper">
+                            <span title="S" class="strike-s gradient-multicolor-bg">S</span>
+                            <span title="TRIKE" class="gradient-multicolor-bg">TRIKE</span>
+                        </div>
+                    </h1>
+
+                    <!-- Chrome reflection -->
+                    <div class="reflection"></div>
+
+                    <!-- Neon bloom -->
+                    <div class="bloom"></div>
+
+                    <!-- Lens flares -->
+                    <div class="flares">
+                        <span class="flare flare-1"></span>
+                        <span class="flare flare-2"></span>
+                        <span class="flare flare-3"></span>
+                        <span class="flare flare-4"></span>
+                    </div>
+                </div>
+
+                <!-- Subtitle -->
+                <div class="subtitle">
+                    ARCADE SHOOTER
+                </div>
+
+                <div id="press-to-start" class="gradient-multicolor-bg" title="Press anything to start!">Press anything to start!</div>
+            </div>
+
+            <!-- <h1>Twin Stick Shooter</h1>
             <h2>move'n'shoot</h2>
-            <div class="menuButton" id="menuStart">Start</div>            
+            <div class="menuButton" id="menuStart">Start</div> -->
         </div>
 
         <!-- UI - pause menu -->

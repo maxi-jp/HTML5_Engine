@@ -4,6 +4,46 @@
   src: url(./fonts/aircruiserlaserital.ttf) format('truetype');
 }
 
+@font-face {
+  font-family: trivial;
+  src: url(./fonts/Trivial-Bold.otf) format('truetype');
+}
+
+:root {
+     /* Colors */
+    --white: #ffffff;
+
+    --cyan-100: #dffcff;
+    --cyan-200: #9eeeff;
+    --cyan-300: #53dcff;
+    --cyan-400: #00cfff;
+
+    --blue-100: #7db8ff;
+    --blue-200: #3ba9ff;
+    --blue-300: #3b8cff;
+
+    --pink-100: #ffb4ff;
+    --pink-200: #ff73ef;
+    --pink-300: #ff39dc;
+
+    --purple-100: #b35cff;
+    --purple-200: #8d39ff;
+    --purple-300: #5f1aff;
+
+    --yellow: #fff870;
+    --lime: #b4ff63;
+    --green: #6fff97;
+
+    --outline: #111327;
+    --shadow: #060710;
+
+    /* Glow Colors */
+    --glow-cyan: rgba(0,220,255,.8);
+    --glow-pink: rgba(255,55,220,.75);
+    --glow-purple: rgba(120,30,255,.70);
+    --glow-white: rgba(255,255,255,.95);
+}
+
 body {
     background-color: black;
     font-family: futuristic, sans-serif;
@@ -50,10 +90,10 @@ canvas {
     transition: opacity 0.1s ease-in-out;
 }
 
-#mainMenu h1, #gameOverMenu h1 {
+/* #mainMenu h1, #gameOverMenu h1 {
     font-size: 48px;
     margin-bottom: 30px;    
-}
+} */
 
 #mainMenu h2 {
     font-size: 24px;
@@ -90,6 +130,43 @@ canvas {
 
 #finalScore {
     font-size: 72px;
+}
+
+.gradient-multicolor-bg {
+    width: fit-content;
+    color: transparent;
+    background:
+        linear-gradient(
+            180deg,
+            var(--shadow) 0%,
+            var(--blue-200) 25%,
+            var(--cyan-200) 40%,
+            var(--cyan-100) 46%,
+            var(--white) 48%,
+            var(--shadow) 50%,
+            var(--pink-300) 70%,
+            var(--pink-100) 84%,
+            var(--white) 100%
+        );
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+#press-to-start {
+    position: relative;
+    font-family: trivial, Arial;
+    font-size: 2.5em;
+}
+
+#press-to-start::before {
+    content: attr(title);
+    position: absolute;
+    left: 0;
+    top: 0;
+    -webkit-text-stroke: 1px var(--white);
+    color: transparent;
+    z-index: 2;
+    pointer-events: none;
 }
 
 @keyframes CreditsMovement {

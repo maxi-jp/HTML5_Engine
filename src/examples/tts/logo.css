@@ -1,0 +1,347 @@
+/*==================================================
+    NEON STRIKE LOGO
+    Theme Variables
+==================================================*/
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@1,900&family=Permanent+Marker&display=swap');
+
+@font-face {
+  font-family: lazer84;
+  src: url(./fonts/Lazer84.ttf) format('truetype');
+}
+
+:root {
+    /* Size */
+    --logo-scale: 1;
+
+    --title-size: calc(10.5rem * var(--logo-scale));
+    --subtitle-size: calc(3.5rem * var(--logo-scale));
+
+    --triangle-width: calc(420px * var(--logo-scale));
+    --triangle-height: calc(260px * var(--logo-scale));
+
+    --letter-spacing: .08em;
+
+    /* Animation */
+    --breath-speed: 3.5s;
+    --reflection-speed: 5.5s;
+    --triangle-speed: 10s;
+    --spark-speed: 2.2s;
+    --crt-speed: 9s;
+
+    /* Effects */
+    --title-glow: 18px;
+    --title-bloom: 45px;
+    --subtitle-glow: 12px;
+
+    --stroke-width: 5px;
+}
+
+/*==================================================
+    Components
+==================================================*/
+
+/* .neon-logo * {
+    outline:1px solid red;
+} */
+
+.neon-logo {
+    position: relative;
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+    isolation: isolate;
+    overflow: visible;
+}
+
+.title {
+    position: relative;
+    z-index: 10;
+    top: -15%;
+    isolation: isolate;
+}
+
+.subtitle {
+    position: relative;
+    top: -0.35em;
+    z-index: 12;
+    width: 100%;
+    font-size: var(--subtitle-size);
+    font-family: "lazer84", 'Permanent Marker', cursive;
+    text-transform: uppercase;
+    word-spacing: 0.3em;
+    white-space: nowrap;
+    margin: 0;
+    background: linear-gradient(
+        to bottom,
+        var(--yellow),
+        var(--yellow) 45%,
+        var(--green) 60%,
+        var(--cyan-100) 80%,
+        var(--cyan-100) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-stroke: 0.5px var(--yellow);
+    filter:
+        drop-shadow(2px 2px 1px var(--outline))
+        drop-shadow(0 0 10px var(--pink-300))
+        drop-shadow(0 0 4px var(--pink-300));
+    animation: subtitleBreathe var(--breath-speed) ease-in-out infinite;
+}
+
+.logo-text, .title-outline {
+    position: relative;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    font-family: "lazer84", sans-serif;
+    font-size: var(--title-size);
+    font-weight: 500;
+    line-height: .87;
+    letter-spacing: var(--letter-spacing);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.strike-wrapper {
+    display: flex;
+    flex-direction: row;
+}
+
+.strike-s {
+    margin-right: -1.05em;
+    left: 0 !important;
+}
+
+.logo-text {
+    inset:0;
+    display: flex;
+    flex-direction: column;
+    z-index: 2;
+    filter:
+        drop-shadow(0 2px 0 #121529)
+        drop-shadow(0 6px 10px rgba(0,0,0,.45));
+}
+
+.logo-text span::before,
+.logo-text span::after {
+    content: attr(title); 
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+}
+
+/* Inner Stroke 1 */
+.logo-text span::before {
+    -webkit-text-stroke: 5px var(--white);
+    color: transparent;
+    z-index: 2;
+}
+
+/* Inner Stroke 2 */
+.logo-text span::after {
+    -webkit-text-stroke: 2px var(--outline);
+    color: transparent;
+    z-index: 3;
+}
+
+.logo-text span {
+    display: block;
+    position: relative;
+}
+
+.title-outline {
+    color: transparent;
+    -webkit-text-stroke:10px var(--shadow);
+    z-index: 1;
+    position: absolute;
+    top: 2px;
+    left: 45px;
+    text-shadow:
+        9px 6px 20px var(--cyan-400),
+        1px 7px 0.5em var(--pink-300),
+        -8px -8px 0.1em var(--cyan-300);
+}
+
+.title-outline span:last-child {
+    margin-left: -0.07em !important;
+}
+
+.outline-s {
+    position: relative;
+    left: 0.15em !important;
+    margin-right: 0.38em;
+}
+
+.title-outline span:first-child, .logo-text span:first-child {
+    left: 0.54em;
+}
+.title-outline span:last-child, .logo-text span:last-child {
+    margin-left: .42em;
+    margin-top: 0.05em;
+    padding-bottom: 0.1em;
+}
+
+.logo-text span, .logo-text span::before, .logo-text span::after {
+    padding: 0 0.4em;
+}
+
+.triangle{
+    position: absolute;
+    left: 50%;
+    top: 48%;
+    width: 700px;
+    height: auto;
+    transform: translate(-50%, -50%) rotate(358deg);
+    overflow: visible;
+    z-index: 0;
+    animation: triangleRock var(--triangle-speed) ease-in-out infinite;
+}
+
+.triangle polygon{
+    fill: rgba(5, 5, 15, 0.22);
+    stroke: url(#triangleGradient);
+    stroke-width: 10;
+    filter: drop-shadow(0 0 6px rgba(0,255,255,.6))
+           drop-shadow(0 0 16px rgba(255,0,220,.45));  
+}
+
+.reflection {
+    position: absolute;
+    inset: -25px;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.bloom {
+    position: absolute;
+    inset: -40px;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.flares {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.flare {
+    position: absolute;
+    display: block;
+}
+
+.scan-lines {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    overflow: hidden;
+}
+
+/* Glowing Tracking Line (::before) */
+.scan-lines::before {
+    content: "";
+    position: absolute;
+    inset: 0; /* Cover the whole container */
+    z-index: 99; /* Sit high above the text but below the scanlines */
+    pointer-events: none;
+    
+    /* A translucent cyan-to-pink gradient band */
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(0, 255, 255, 0.15) 30%,
+        rgba(255, 0, 255, 0.15) 70%,
+        transparent 100%
+    );
+    background-size: 100% 50%; /* Make the band half the height of the container */
+    background-repeat: no-repeat;
+    
+    /* Use your predefined CSS variable for the speed! */
+    animation: crtTracking var(--crt-speed) linear infinite;
+    
+    /* Color-dodge blends the light into your existing colors for a true screen glow */
+    mix-blend-mode: color-dodge; 
+}
+
+/* CRT Scanlines (::after) */
+.scan-lines::after {
+    content: "";
+    position: absolute;
+    inset: 0; 
+    z-index: 100;
+    pointer-events: none;
+    
+    /* Creates 2px clear space, 2px dark space */
+    background: linear-gradient(
+        to bottom,
+        transparent 50%,
+        rgba(0, 0, 0, 0.35) 50%
+    );
+    background-size: 100% 4px; /* 4px total thickness per line */
+    
+    /* Slowly moves the scanlines downwards */
+    animation: scanlinesMove var(--crt-speed) linear infinite;
+}
+
+/*==================================================
+    Animation keyframes
+==================================================*/
+
+@keyframes triangleRock {
+    0% {
+        transform: translate(-50%, -50%) rotate(354deg);
+    }
+    50% {
+        transform: translate(-50%, -50%) rotate(362deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(354deg);
+    }
+}
+
+@keyframes triangleGlow{
+    0%{
+        opacity: .55;
+        transform: scale(1.00);
+    }
+    50%{
+        opacity: .95;
+        transform: scale(1.04);
+    }
+    100%{
+        opacity: .55;
+        transform: scale(1.00);
+    }
+}
+
+@keyframes subtitleBreathe {
+    0% {
+        transform: rotate(-3deg) scale(0.96);
+    }
+    50% {
+        transform: rotate(1deg) scale(1.04);
+    }
+    100% {
+        transform: rotate(-3deg) scale(0.96);
+    }
+}
+
+@keyframes crtTracking {
+    0% { background-position: 0 -100%; }
+    100% { background-position: 0 200%; }
+}
+
+@keyframes scanlinesMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 400px; } 
+}

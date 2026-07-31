@@ -1,7 +1,10 @@
 const ENEMY_TYPE = {
     NORMAL: 0,
     KAMIKAZE: 1,
-    ASTEROID: 2
+    ASTEROID: 2,
+    WAVER: 3,
+    STRAFER: 4,
+    TANK: 5
 }
 
 class Enemy extends SpriteObject {
@@ -91,7 +94,7 @@ class EnemyBasic extends Enemy {
     constructor(initialPosition, img, player, sceneLimits) {
         super(initialPosition, img, player, sceneLimits);
 
-        this.speed = 100;
+        this.speed = 110;
         this.life = 1;
         this.score = 1;
         this.collisionDamage = 1;
@@ -135,7 +138,7 @@ class EnemyKamikaze extends Enemy {
         this.lookingTime = 2;
         this.lookingTimeAux = 0;
 
-        this.speed = 800;
+        this.speed = 850;
         this.score = 2;
 
         this.thrustFireSprite = new Sprite(img, initialPosition, 0, 0.66);
@@ -229,7 +232,7 @@ class EnemyAsteroid extends Enemy {
     constructor(initialPosition, img, player, sceneLimits, direction, small) {
         super(initialPosition, img, player, sceneLimits);
         
-        this.speed = 20;
+        this.speed = 24;
         this.rotationSpeed = RandomBetweenFloat(-2, 2);
         this.score = 1;
 
@@ -294,5 +297,128 @@ class EnemyAsteroid extends Enemy {
         }
 
         return dead;
+    }
+}
+
+class EnemyWaver extends Enemy {
+    constructor(initialPosition, img, player, sceneLimits) {
+        super(initialPosition, img, player, sceneLimits);
+
+        this.speed = 188;
+        this.score = 2;
+
+        this.waveFreq = RandomBetweenFloat(4.2, 6.5);
+        this.waveAmplitude = RandomBetweenFloat(0.45, 0.8);
+        this.waveTime = RandomBetweenFloat(0, PI2);
+    }
+
+    Update(deltaTime) {
+        super.Update(deltaTime);
+
+        if (this.IsSpawning())
+            return;
+
+        this.waveTime += deltaTime * this.waveFreq;
+
+        const toPlayer = new Vector2(
+            this.player.position.x - this.position.x,
+            this.player.position.y - this.position.y
+        );
+        toPlayer.Normalize();
+
+        const perp = new Vector2(-toPlayer.y, toPlayer.x);
+        const wave = Math.sin(this.waveTime) * this.waveAmplitude;
+
+        const move = new Vector2(
+            toPlayer.x + perp.x * wave,
+            toPlayer.y + perp.y * wave
+        );
+        move.Normalize();
+
+        this.rotation = Math.atan2(move.y, move.x) + PIH;
+        this.position.x += move.x * this.speed * deltaTime;
+        this.position.y += move.y * this.speed * deltaTime;
+    }
+
+    Draw(renderer) {
+        super.DrawSection(renderer, 149, 182, 31, 46);
+        super.Draw(renderer);
+    }
+}
+
+class EnemyStrafer extends Enemy {
+    constructor(initialPosition, img, player, sceneLimits) {
+        super(initialPosition, img, player, sceneLimits);
+
+        this.speed = 150;
+        this.score = 3;
+        this.orbitRadius = 220;
+        this.strafeDirection = Math.random() < 0.5 ? -1 : 1;
+    }
+
+    Update(deltaTime) {
+        super.Update(deltaTime);
+
+        if (this.IsSpawning())
+            return;
+
+        const toPlayer = new Vector2(
+            this.player.position.x - this.position.x,
+            this.player.position.y - this.position.y
+        );
+        const distance = toPlayer.Length();
+        toPlayer.Normalize();
+
+        const tangent = new Vector2(-toPlayer.y * this.strafeDirection, toPlayer.x * this.strafeDirection);
+        const radialWeight = distance > this.orbitRadius ? 0.55 : distance < this.orbitRadius - 45 ? -0.55 : 0.0;
+
+        const move = new Vector2(
+            tangent.x + toPlayer.x * radialWeight,
+            tangent.y + toPlayer.y * radialWeight
+        );
+        move.Normalize();
+
+        this.rotation = Math.atan2(move.y, move.x) + PIH;
+        this.position.x += move.x * this.speed * deltaTime;
+        this.position.y += move.y * this.speed * deltaTime;
+    }
+
+    Draw(renderer) {
+        super.DrawSection(renderer, 149, 182, 31, 46);
+        super.Draw(renderer);
+    }
+}
+
+class EnemyTank extends Enemy {
+    constructor(initialPosition, img, player, sceneLimits) {
+        super(initialPosition, img, player, sceneLimits);
+
+        this.speed = 84;
+        this.life = 3;
+        this.score = 5;
+        this.collisionDamage = 2;
+        this.boundingRadious = 26;
+        this.boundingRadious2 = this.boundingRadious * this.boundingRadious;
+    }
+
+    Update(deltaTime) {
+        super.Update(deltaTime);
+
+        if (this.IsSpawning())
+            return;
+
+        this.rotation = Math.atan2(
+            this.player.position.y - this.position.y,
+            this.player.position.x - this.position.x
+        ) + PIH;
+
+        this.position.x += Math.cos(this.rotation - PIH) * this.speed * deltaTime;
+        this.position.y += Math.sin(this.rotation - PIH) * this.speed * deltaTime;
+    }
+
+    Draw(renderer) {
+        // Reuse asteroid body as a heavier silhouette for tank enemies.
+        super.DrawSection(renderer, 144, 428, 48, 48);
+        super.Draw(renderer);
     }
 }

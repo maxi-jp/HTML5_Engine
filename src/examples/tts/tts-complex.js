@@ -45,6 +45,10 @@ class TTSC extends Game {
             crosshair: {
                 path: "src/examples/tts/assets/crosshair060.png",
                 img: null
+            },
+            logo: {
+                path: "src/examples/tts/assets/logo.png",
+                img: null
             }
         };        
 
@@ -52,6 +56,11 @@ class TTSC extends Game {
 
         // background gradient
         this.bgGrad = null;
+
+        // logo
+        this.logoNeonStrike = null;
+        this.logoArcadeShooter = null;
+        this.logoTriangle = null;
 
         this.player = null;
         this.lives = 5;
@@ -104,7 +113,12 @@ class TTSC extends Game {
             [0.35, "#07073e"],
             [0.95, "#22375e"],
             [1, "#274f98"]
-        ]);                                
+        ]);
+
+        // sprites
+        // this.logoNeonStrike = null;
+        // this.logoArcadeShooter = null;
+        // this.logoTriangle = null;
         
         // Initialize menus
         this.mainMenu = new MainMenu(this, canvas);
@@ -270,6 +284,9 @@ class TTSC extends Game {
                 if (this.lastState !== GAME_STATE.MAIN_MENU) {
                     this.mainMenu.ShowMenu();
                 }
+                if (Input.Anything()) {
+                    this.mainMenu.StartButton();
+                }
                 break;
             case GAME_STATE.INTRO:
                 super.Update(deltaTime);
@@ -425,7 +442,16 @@ class TTSC extends Game {
                 break;
             case 2: // Asteroid
                 enemy = new EnemyAsteroid(spawnPoint, this.graphicAssets.ships.img, this.player, this.sceneLimits);
-                break;        
+                break;
+            case 3: // Waver
+                enemy = new EnemyWaver(spawnPoint, this.graphicAssets.ships.img, this.player, this.sceneLimits);
+                break;
+            case 4: // Strafer
+                enemy = new EnemyStrafer(spawnPoint, this.graphicAssets.ships.img, this.player, this.sceneLimits);
+                break;
+            case 5: // Tank
+                enemy = new EnemyTank(spawnPoint, this.graphicAssets.ships.img, this.player, this.sceneLimits);
+                break;
             default:
                 break;
         }
