@@ -97,13 +97,17 @@ class HTMLMenu {
         elementsSelectors.forEach(selector => {
             const element = document.querySelector(selector);
             this.elements[selector] = element;
-            this._enablePointerEvents(element);
+            // Only enable pointer events if CSS doesn't explicitly set it to 'none'
+            if (element && !this._hasPointerEventsNone(element)) {
+                this._enablePointerEvents(element);
+            }
         });
     }
 
     SetupButtons(buttonsSelectorsAndCallbacks) {
         this.buttons = buttonsSelectorsAndCallbacks.map(button => {
             const element = document.querySelector(button.selector);
+            // Always enable pointer events for buttons (they must be clickable)
             this._enablePointerEvents(element);
             return element;
         });
@@ -116,15 +120,13 @@ class HTMLMenu {
     }
 
     /**
-     * Makes an element interactable when the menu container uses
-     * `pointer-events: none` for canvas passthrough.
-     * @param {HTMLElement|null} element
+     * Checks if an element has `pointer-events: none` set in CSS (not inherited
+     * from the menu container's `pointer-events: none`).
+     * @param {HTMLElement} element
+     * @returns {boolean} True if the element's CSS explicitly sets `pointer-events: none`.
      * @private
      */
-    _enablePointerEvents(element) {
-        if (!element || element.style.pointerEvents)
-            return;
-
+    _hasPointerEventsNone(element) {
         // Temporarily clear the container's pointer-events to check the element's 
         // true computed CSS without the inherited 'none' from the overlay wrapper.
         const parentPointerEvents = this.container.style.pointerEvents;
@@ -144,12 +146,18 @@ class HTMLMenu {
             this._clipLayer.style.pointerEvents = clipLayerPointerEvents;
         }
 
-        console.log(element);
+        return computed === 'none';
+    }
 
-        // Only apply 'auto' if the element's CSS doesn't explicitly disable pointer events
-        if (computed !== 'none') {
+    /**
+     * Makes an element interactable when the menu container uses
+     * `pointer-events: none` for canvas passthrough.
+     * @param {HTMLElement|null} element
+     * @private
+     */
+    _enablePointerEvents(element) {
+        if (element)
             element.style.pointerEvents = 'auto';
-        }
     }
 
     SetContainerStyle(style) {

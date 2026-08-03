@@ -94,10 +94,12 @@ class GameOverMenu extends HTMLMenu {
     }
 
     ShowMenu() {
+        this.RemoveClassFromContainer("hidden");
         this.SetContainerStyle('top: 0%; opacity: 1;');
     }
 
     HideMenu() {
+        this.AddClassToContainer("hidden");
         this.SetContainerStyle('top: -100%; opacity: 0;');
     }
 }
