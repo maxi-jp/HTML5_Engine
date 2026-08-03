@@ -45,10 +45,6 @@ class TTSC extends Game {
             crosshair: {
                 path: "src/examples/tts/assets/crosshair060.png",
                 img: null
-            },
-            logo: {
-                path: "src/examples/tts/assets/logo.png",
-                img: null
             }
         };        
 
