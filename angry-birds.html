@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Angry Birds Clone - spark.js</title>
+    <style>
+        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        canvas { background-color: white; border: 1px solid #333; }
+    </style>
+    
+    <!-- Base Engine -->
+    <script src="src/engine/utils_math.js"></script>
+    <script src="src/engine/utils_classes.js"></script>
+    <script src="src/engine/renderer.js"></script>
+    <script src="src/engine/gameobjects.js"></script>
+    <script src="src/engine/input.js"></script>
+    <script src="src/engine/audioplayer.js"></script>
+    <script src="src/engine/game.js"></script>
+    <!-- Physics Integration -->
+    <script src="src/lib/Box2D.js"></script>
+    <script src="src/engine/box2d_helper.js"></script>
+    <script src="src/engine/box2d_game.js"></script>
+    <script src="src/engine/box2d_gameobjects.js"></script>
+    <!-- Main Loop & Game Script -->
+    <script src="src/engine/main.js"></script>
+    <script src="src/examples/box2d/angry_birds.js"></script>
+</head>
+<body>
+    <canvas width="800" height="600" id="myCanvas"></canvas>
+</body>
+</html>
