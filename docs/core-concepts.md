@@ -158,6 +158,8 @@ Some methods that the base `Game` class provides and can be used in your game:
 | `SetFillWindow(matchNative, useDevicePixelRatio, preserveAspectRatio)` | Enable fill-window mode at runtime |
 | `Configure(partialConfig)` | Merge new values into `this.config` |
 | `WindowResized()` | Override to react to window resize events (called by the renderer automatically) |
+| `OnFocusLost()` | Override to react when the game window genuinely loses focus (tab switch, app switch, home button). The engine automatically filters out the spurious `blur` that mobile browsers fire when the address bar toggles, so this only fires on real focus loss. Common use: pause the game and mute audio. |
+| `OnFocusGained()` | Override to react when the game window regains focus after a real focus-loss event. Common use: resume audio, show a "tap to resume" prompt. |
 
 ## GameObjects
 

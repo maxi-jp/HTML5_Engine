@@ -182,6 +182,8 @@ class Game {
         this.lastCollisions.clear();
         this.detectedCollisions.clear();
         this._objectsToDestroy.clear();
+
+        this._setupFocusEvents();
     }
     
     /**
@@ -417,4 +419,43 @@ class Game {
      * Override to reposition UI elements or adjust layout.
      */
     WindowResized() {}
+
+    /**
+     * Called when the game window genuinely loses focus (tab switch, app switch, home button).
+     * The engine already filters out the spurious blur that mobile browsers fire when the
+     * address bar toggles on first touch — this callback only fires on real focus loss.
+     * Override to pause the game, mute audio, etc.
+     */
+    OnFocusLost() {}
+
+    /**
+     * Called when the game window regains focus after a real focus-loss event.
+     * Override to resume the game, restore audio, etc.
+     */
+    OnFocusGained() {}
+
+    // Sets up window blur/focus and visibilitychange listeners with a mobile touch guard.
+    _setupFocusEvents() {
+        // Android Chrome fires window.blur when the address bar toggles on first touch.
+        // Track active touches so we can ignore those spurious blur events.
+        let touchInProgress = false;
+        document.addEventListener('touchstart', () => { touchInProgress = true; }, { passive: true });
+        document.addEventListener('touchend',   () => { setTimeout(() => { touchInProgress = false; }, 300); }, { passive: true });
+
+        window.addEventListener('blur', () => {
+            if (touchInProgress) return;
+            this.OnFocusLost();
+        });
+        window.addEventListener('focus', () => {
+            this.OnFocusGained();
+        });
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.OnFocusLost();
+            }
+            else {
+                this.OnFocusGained();
+            }
+        });
+    }
 }

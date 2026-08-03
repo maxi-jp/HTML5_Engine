@@ -77,6 +77,9 @@ class TTSC extends Game {
             new Vector2(this.sceneLimits.width / 2, this.sceneLimits.height - 50)
         ]
 
+        this.menuPhase = 0;
+        this.menuTimer = 0;
+
         // UI and Menu related variables
         this.mainMenu = null;
         this.pauseMenu = null;
@@ -128,9 +131,6 @@ class TTSC extends Game {
         this.gameOverMenu.Start();
         this.gameOverMenu.HideMenu();
 
-        // Setup events to automatically pause the game when the window loses focus or the tab becomes inactive
-        this.SetupPauseEvents();
-        
         if (this.spawnMode == SPAWN_MODE.JSON_LEVELS)
             this.LoadLevelData(0);
     }
@@ -258,28 +258,8 @@ class TTSC extends Game {
         }
     }
 
-    SetupPauseEvents() {
-        const pauseIfNeeded = () => {
-            if (this.state === GAME_STATE.GAME && !this.gamePaused) {
-                this.PauseGame(true);
-            }
-        };
-
-        // Android Chrome fires window.blur when the address bar toggles on first touch.
-        // Guard against it so the game doesn't auto-pause on the tap that starts it.
-        let touchInProgress = false;
-        document.addEventListener('touchstart', () => { touchInProgress = true; }, { passive: true });
-        document.addEventListener('touchend',   () => { setTimeout(() => { touchInProgress = false; }, 300); }, { passive: true });
-
-        window.addEventListener('blur', () => {
-            if (touchInProgress) return;
-            pauseIfNeeded();
-        });
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                pauseIfNeeded();
-            }
-        });
+    OnFocusLost() {
+        this.PauseGame(true);
     }
 
     Update(deltaTime) {
@@ -287,10 +267,19 @@ class TTSC extends Game {
             case GAME_STATE.MAIN_MENU:
                 super.Update(deltaTime);
                 if (this.lastState !== GAME_STATE.MAIN_MENU) {
-                    this.mainMenu.ShowMenu();
+                    this.mainMenu.PressToStart();
                 }
-                if (Input.Anything()) {
-                    this.mainMenu.StartButton();
+                if (this.mainMenu.phase === 0) {
+                    if (Input.Anything()) {
+                        this.mainMenu.PressToStart();
+                    }
+                }
+                else if (this.mainMenu.phase === 1) {
+                    this.mainMenu.timer += deltaTime;
+                    // wait 1 second before accepting input to start the game
+                    if (this.mainMenu.timer > 2.0 && Input.Anything()) {
+                        this.mainMenu.StartButton();
+                    }
                 }
                 break;
             case GAME_STATE.INTRO:

@@ -122,7 +122,32 @@ class HTMLMenu {
      * @private
      */
     _enablePointerEvents(element) {
-        if (element) {
+        if (!element || element.style.pointerEvents)
+            return;
+
+        // Temporarily clear the container's pointer-events to check the element's 
+        // true computed CSS without the inherited 'none' from the overlay wrapper.
+        const parentPointerEvents = this.container.style.pointerEvents;
+        this.container.style.pointerEvents = '';
+
+        // Also clear the clipping layer if it exists
+        let clipLayerPointerEvents = '';
+        if (this._clipLayer) {
+            clipLayerPointerEvents = this._clipLayer.style.pointerEvents;
+            this._clipLayer.style.pointerEvents = '';
+        }
+
+        const computed = window.getComputedStyle(element).pointerEvents;
+        
+        this.container.style.pointerEvents = parentPointerEvents;
+        if (this._clipLayer) {
+            this._clipLayer.style.pointerEvents = clipLayerPointerEvents;
+        }
+
+        console.log(element);
+
+        // Only apply 'auto' if the element's CSS doesn't explicitly disable pointer events
+        if (computed !== 'none') {
             element.style.pointerEvents = 'auto';
         }
     }
@@ -154,6 +179,16 @@ class HTMLMenu {
             }
 
             this.container.style.setProperty(property, value);
+        }
+    }
+
+    AddClassToContainer(className) {
+        this.container.classList.add(className);
+    }
+
+    RemoveClassFromContainer(className) {
+        if (this.container.classList.contains(className)) {
+            this.container.classList.remove(className);
         }
     }
 

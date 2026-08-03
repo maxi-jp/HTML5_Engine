@@ -1,22 +1,38 @@
 class MainMenu extends HTMLMenu {
     constructor(game, canvas) {
         super(game, "#mainMenu", "#container", canvas, true, true, true);
+
+        this.phase = 0;
+        this.timer = 0;
     }
 
     Start() {
         super.Start();
 
         this.SetupElements([
-            "#menuStart",
+            // "#menuStart",
+            '#press-to-start',
+            '.neon-logo'
         ]);
 
-        this.SetupButtons([
-            { selector: "#menuStart", callback: this.StartButton.bind(this) }
-        ]);
+        // this.SetupButtons([
+        //     { selector: "#menuStart", callback: this.StartButton.bind(this) }
+        // ]);
+
+        this.timer = 0;
+    }
+
+    PressToStart() {
+        this.elements[".neon-logo"].classList.remove("hidden");
+        this.elements["#press-to-start"].classList.add("hidden");
+
+        this.phase = 1;
+        this.timer = 0;
     }
 
     StartButton() {
         this.SetContainerStyle('top: -100%; opacity: 0;');
+
         this.game.OnMenuStartButton();
     }
     
@@ -33,9 +49,9 @@ class PauseMenu extends HTMLMenu {
     Start() {
         super.Start();
 
-        this.SetupElements([
-            "#menuResume"
-        ]);
+        // this.SetupElements([
+        //     "#menuResume"
+        // ]);
 
         this.SetupButtons([
             { selector: "#menuResume", callback: this.ResumeButton.bind(this) }
@@ -47,10 +63,12 @@ class PauseMenu extends HTMLMenu {
     }
     
     ShowMenu() {
+        this.RemoveClassFromContainer("hidden");
         this.SetContainerStyle('top: 0%; opacity: 1;');
     }
 
     HideMenu() {
+        this.AddClassToContainer("hidden");
         this.SetContainerStyle('top: -100%; opacity: 0;');
     }
 }

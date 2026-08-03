@@ -54,6 +54,8 @@
     user-select: none;
     isolation: isolate;
     overflow: visible;
+    pointer-events: none;
+    transition: opacity 1s ease-in;
 }
 
 .title {

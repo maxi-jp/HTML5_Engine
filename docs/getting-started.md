@@ -94,6 +94,17 @@ class MyGame extends Game {
         super.Draw();
         // your draw logic here
     }
+
+    // Optional: called when the window genuinely loses focus (tab switch, home button, etc.).
+    // The engine filters out spurious mobile blur events automatically.
+    OnFocusLost() {
+        // e.g. this.PauseGame(true);
+    }
+
+    // Optional: called when the window regains focus after a real focus-loss event.
+    OnFocusGained() {
+        // e.g. show a "tap to resume" prompt
+    }
 }
 
 window.onload = () => {
