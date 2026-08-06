@@ -146,7 +146,7 @@ function Loop() {
     // which would otherwise consume ~25% of screen height in landscape.
     if (Input.keyboard.anyKeyPressed || Input.mouse.pressed || Input.touch.any) {
         ResumeAudioContext();
-        if (mobileWithTouchScreen && !document.fullscreenElement) {
+        if (mobileWithTouchScreen && game.config.autoFullscreen && !document.fullscreenElement) {
             document.documentElement.requestFullscreen?.().catch(() => {
                 console.warn("Failed to request fullscreen.");
             });

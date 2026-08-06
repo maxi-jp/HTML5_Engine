@@ -36,7 +36,8 @@ class Game {
          *   analyzerSmoothing?: number,
          *   drawColliders?: boolean,
          *   collidersOnly?: boolean,
-         *   mobileSupport?: boolean
+         *   mobileSupport?: boolean,
+         *   autoFullscreen?: boolean
          * }}
          */
         this.config = {
@@ -53,7 +54,8 @@ class Game {
             collidersOnly: false,
 
             // Mobile support
-            mobileSupport: false
+            mobileSupport: false,
+            autoFullscreen: false
         };
         // config example:
         // {
@@ -71,6 +73,7 @@ class Game {
         //     mobileSupport: false,   // mobile support is activated automatically on touch-capable
         //                             // devices. Set to false to suppress it (e.g. hybrid laptops).
         //                             // Set to true to force it on non-touch devices (e.g. for testing).
+        //     autoFullscreen: false   // automatically requests fullscreen on first interaction on mobile
         // };
 
         /**
@@ -405,7 +408,8 @@ class Game {
      *   analyzerSmoothing?: number,
      *   drawColliders?: boolean,
      *   collidersOnly?: boolean,
-     *   mobileSupport?: boolean
+     *   mobileSupport?: boolean,
+     *   autoFullscreen?: boolean
      *   
      * }} newConfig - Config properties to merge. All fields are optional.
      */

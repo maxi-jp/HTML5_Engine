@@ -34,7 +34,8 @@ class TTSC extends Game {
             screenWidth: 1280,
             screenHeight: 720,
             fillWindow: true,
-            mobileSupport: true
+            mobileSupport: true,
+            autoFullscreen: true
         });
 
         this.graphicAssets = {

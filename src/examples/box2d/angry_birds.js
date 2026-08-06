@@ -13,7 +13,8 @@ class AngryBirdsClone extends Box2DGame {
             screenWidth: 800,
             screenHeight: 600,
             drawColliders: false,
-            imageSmoothingEnabled: true
+            imageSmoothingEnabled: true,
+            fillWindow: true
         });
 
         this.slingshotPos = new Vector2(150, 400);

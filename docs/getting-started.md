@@ -361,7 +361,8 @@ class MyGame extends Game {
             fillWindow: true,              // Make canvas fill entire window
             preserveAspectRatio: true,     // Keep aspect ratio when scaling
             matchNativeResolution: false,  // Use window size as resolution
-            useDevicePixelRatio: false     // Handle high-DPI displays
+            useDevicePixelRatio: false,    // Handle high-DPI displays
+            autoFullscreen: true           // Automatically go fullscreen on mobile tap
         });
     }
 }
@@ -370,4 +371,3 @@ class MyGame extends Game {
 > **Important:** Always use `this.screenWidth` and `this.screenHeight` instead of `canvas.width` and `canvas.height` for proper fullscreen compatibility.
 
 💡 See the [Canvas Resizing Demo](../canvas-resize.html ':ignore :target=_blank') for an interactive example of all display options.
-
