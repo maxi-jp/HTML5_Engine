@@ -21,6 +21,9 @@ class AngryBirdsClone extends Box2DGame {
         this.maxDragDistance = 100;
         this.bird = null;
         this.state = BIRD_STATE.IDLE;
+        this.settleTimer = 0;
+        this.pigs = [];
+        this.blocks = [];
     }
 
     Start() {
@@ -32,8 +35,11 @@ class AngryBirdsClone extends Box2DGame {
         CreateEdge(this.physicsWorld, 4, 1, {
             p1x: -4, p1y: 0, p2x: 4, p2y: 0,
             type: b2Body.b2_staticBody, 
-            friction: 1.0
+            friction: 5.0
         });
+
+        this.pigs = [];
+        this.blocks = [];
 
         this.SpawnBird();
         this.BuildLevel();
@@ -43,27 +49,40 @@ class AngryBirdsClone extends Box2DGame {
         this.bird = new Bird(this.slingshotPos, this.physicsWorld);
         this.gameObjects.push(this.bird);
         this.state = BIRD_STATE.IDLE;
+        this.settleTimer = 0;
     }
 
     BuildLevel() {
         const bx = 600;
         const by = 500 - 30; // Rest on floor (Y=500), minus half-height of block
 
+        const addBlock = (pos, w, h) => {
+            const b = new Block(pos, w, h, this.physicsWorld);
+            this.blocks.push(b);
+            this.gameObjects.push(b);
+        };
+
+        const addPig = (pos) => {
+            const p = new Pig(pos, this.physicsWorld);
+            this.pigs.push(p);
+            this.gameObjects.push(p);
+        };
+
         // First floor
-        this.gameObjects.push(new Block(new Vector2(bx - 50, by), 20, 60, this.physicsWorld));
-        this.gameObjects.push(new Block(new Vector2(bx + 50, by), 20, 60, this.physicsWorld));
-        this.gameObjects.push(new Pig(new Vector2(bx, by + 10), this.physicsWorld));
+        addBlock(new Vector2(bx - 50, by), 20, 60);
+        addBlock(new Vector2(bx + 50, by), 20, 60);
+        addPig(new Vector2(bx, by + 10));
         
         // Ceiling 1
-        this.gameObjects.push(new Block(new Vector2(bx, by - 40), 140, 20, this.physicsWorld));
+        addBlock(new Vector2(bx, by - 40), 140, 20);
         
         // Second floor
-        this.gameObjects.push(new Block(new Vector2(bx - 30, by - 80), 20, 60, this.physicsWorld));
-        this.gameObjects.push(new Block(new Vector2(bx + 30, by - 80), 20, 60, this.physicsWorld));
-        this.gameObjects.push(new Pig(new Vector2(bx, by - 70), this.physicsWorld));
+        addBlock(new Vector2(bx - 30, by - 80), 20, 60);
+        addBlock(new Vector2(bx + 30, by - 80), 20, 60);
+        addPig(new Vector2(bx, by - 70));
 
         // Ceiling 2
-        this.gameObjects.push(new Block(new Vector2(bx, by - 120), 100, 20, this.physicsWorld));
+        addBlock(new Vector2(bx, by - 120), 100, 20);
     }
 
     Update(deltaTime) {
@@ -106,6 +125,40 @@ class AngryBirdsClone extends Box2DGame {
                 );
             }
         } 
+        else if (this.state === BIRD_STATE.FLYING) {
+            let allAsleep = true;
+            
+            const dynamicObjects = [this.bird, ...this.pigs, ...this.blocks];
+
+            // Check our tracked physics objects to see if the scene has settled
+            for (let i = 0; i < dynamicObjects.length; i++) {
+                const go = dynamicObjects[i];
+                if (go && go.active && go.body) {
+                    // If an object falls completely out of bounds, safely destroy it
+                    if (go.position.x < -200 || go.position.x > this.screenWidth + 200 || go.position.y > this.screenHeight + 100) {
+                        this.Destroy(go);
+                        continue;
+                    }
+                    
+                    if (go.body.IsAwake()) {
+                        allAsleep = false;
+                    }
+                }
+            }
+
+            // Once everything is asleep, wait a moment and spawn the next bird
+            if (allAsleep) {
+                this.settleTimer += deltaTime;
+                if (this.settleTimer > 2.0) {
+                    if (this.bird && this.bird.active) {
+                        this.Destroy(this.bird);
+                    }
+                    this.SpawnBird();
+                }
+            } else {
+                this.settleTimer = 0;
+            }
+        }
 
         // Reset level binding
         if (Input.IsKeyDown(KEY_R)) {
@@ -144,7 +197,7 @@ class Bird extends Box2DGameObject {
     constructor(position, physicsWorld) {
         super(position, physicsWorld, PhysicsObjectType.Circle, {
             radius: 0.15, density: 2.0, friction: 0.5, restitution: 0.4,
-            type: b2Body.b2_dynamicBody
+            type: b2Body.b2_dynamicBody, angularDamping: 2.0, linearDamping: 0.2
         });
         this.drawRadius = 15;
         this.body.SetActive(false); // disable physics initially so it stays in the slingshot
