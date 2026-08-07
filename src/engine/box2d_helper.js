@@ -264,6 +264,8 @@ function DrawWorldDebug(renderer, world) {
         ctx.save();
         ctx.translate(0, canvas.height);
         ctx.scale(1, -1);
+        // fix the lineWidth is not well stablished in the box2d script
+        renderer.ctx.lineWidth = world.m_debugDraw.GetLineThickness();
         world.DrawDebugData();
         ctx.restore();
     }

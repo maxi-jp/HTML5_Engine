@@ -132,7 +132,7 @@ class Renderer {
      * @param {number} x1 @param {number} y1 @param {number} x2 @param {number} y2
      * @param {Color} [color] @param {number} [lineWidth=1]
      */
-    DrawLine(x1, y1, x2, y2, color=Color.black, lineWidth = 1) {}
+    DrawLine(x1, y1, x2, y2, color=Color.black, lineWidth=1) {}
     /**
      * Draws a closed polygon.
      * @param {{x:number,y:number}[]} points @param {Color} [strokeColor]
@@ -516,7 +516,7 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    DrawLine(x1, y1, x2, y2, color=Color.black, lineWidth = 1) {
+    DrawLine(x1, y1, x2, y2, color=Color.black, lineWidth=1) {
         this.ctx.strokeStyle = color;
         this.ctx.lineWidth = lineWidth;
         this.ctx.beginPath();
