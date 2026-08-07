@@ -351,7 +351,7 @@ MIT License
 - [x] ~~Create an action system for the input (i.e. `Input.Action("move_left")` instead of `Input.IsKeyDown(KEY_LEFT) || Input.IsKeyDown(KEY_A) || Input.IsGamepadButtonDown(0, "DPAD_LEFT") || Input.IsGamepadButtonDown(0, "LS_LEFT")`).~~ ✅DONE
 - [ ] Improve the webgl renderer (draw batching).
 - [ ] Implement other physic engines.
-- [x] Create a documentation page/wiki. ✅DONE (see [the documentation page](https://maxi-jp.github.io/spark.js/docs/).)
+- [x] ~~Create a documentation page/wiki.~~ ✅DONE (see [the documentation page](https://maxi-jp.github.io/spark.js/docs/).)
 - [ ] Multiplayer with nodejs.
 - [x] ~~Think on a great name for the engine (like **`wat.js`** or something like that).~~ ✅DONE (engine renamed as "spark.js"!!! ✨)
 - [x] ~~Add mobile / touch-screen support with virtual on-screen controls.~~ ✅DONE
