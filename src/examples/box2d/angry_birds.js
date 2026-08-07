@@ -66,7 +66,7 @@ class AngryBirdsClone extends Box2DGame {
             drawColliders: false,
             collidersOnly: false,
             imageSmoothingEnabled: true,
-            fillWindow: false
+            fillWindow: 'mobile'
         });
 
         this.slingshotPos = new Vector2(150, 400);
@@ -298,7 +298,7 @@ class Pig extends Box2DGameObject {
     }
 
     OnContactDetected(other, contactPoint) {
-        if (!this.active)
+        if (!this.active || !other)
             return;
 
         // Calculate relative velocity as a proxy for impact force
@@ -369,7 +369,7 @@ class Block extends Box2DRectangleGO {
     }
 
     OnContactDetected(other, contactPoint) {
-        if (!this.active)
+        if (!this.active || !other)
             return;
 
         // Calculate relative velocity as a proxy for impact force
@@ -400,7 +400,7 @@ class Block extends Box2DRectangleGO {
         if (!this.active)
             return;
         game.score += 500;
-        
+
         game.gameObjects.push(new PuffExplosion(new Vector2(this.position.x, this.position.y), 500));
         game.Destroy(this);
     }

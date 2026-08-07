@@ -329,6 +329,7 @@ class MyGame extends Game {
             screenWidth: 640,              // Game resolution
             screenHeight: 480,
             fillWindow: true,              // Fill entire browser window
+                                           // false = never, true = always, "mobile" = mobile only
             preserveAspectRatio: true,     // Maintain aspect ratio
             matchNativeResolution: false,  // Use window size as resolution
             useDevicePixelRatio: false     // Handle high-DPI displays

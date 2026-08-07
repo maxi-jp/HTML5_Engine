@@ -359,6 +359,7 @@ class MyGame extends Game {
 
         this.Configure({
             fillWindow: true,              // Make canvas fill entire window
+                                           // Options: false (never), true (always), "mobile" (mobile only)
             preserveAspectRatio: true,     // Keep aspect ratio when scaling
             matchNativeResolution: false,  // Use window size as resolution
             useDevicePixelRatio: false,    // Handle high-DPI displays

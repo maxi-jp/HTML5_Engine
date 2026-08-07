@@ -105,9 +105,9 @@ Set `this.config` in the constructor. `super.Start()` reads it to configure the 
 | `screenWidth` | `number` | `640` | Initial canvas / game resolution width |
 | `screenHeight` | `number` | `480` | Initial canvas / game resolution height |
 | `imageSmoothingEnabled` | `boolean` | `true` | Canvas image smoothing |
-| `fillWindow` | `boolean` | `false` | Stretch canvas to fill the browser window |
-| `matchNativeResolution` | `boolean` | `false` | When `fillWindow=true`: update internal resolution to match window size (vs. stretching) |
-| `preserveAspectRatio` | `boolean` | `true` | When `fillWindow=true` and `matchNativeResolution=false`, maintain aspect ratio |
+| `fillWindow` | `boolean \| "mobile"` | `false` | Stretch canvas to fill the browser window. `false` = never, `true` = always, `"mobile"` = only on mobile/touch devices |
+| `matchNativeResolution` | `boolean` | `false` | When `fillWindow` is enabled: update internal resolution to match window size (vs. stretching) |
+| `preserveAspectRatio` | `boolean` | `true` | When `fillWindow` is enabled and `matchNativeResolution=false`, maintain aspect ratio |
 | `useDevicePixelRatio` | `boolean` | `false` | Multiply resolution by `devicePixelRatio` for crisp high-DPI rendering |
 | `audioAnalyzer` | `boolean` | `false` | Create a Web Audio analyser node when loading audio assets |
 | `analyzerFftSize` | `number` | `128` | FFT size for the audio analyser |

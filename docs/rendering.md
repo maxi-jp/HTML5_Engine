@@ -332,7 +332,7 @@ The renderer can expand to fill the browser window at runtime. This is usually c
 ```javascript
 // In your Game constructor — configure via config:
 this.Configure({
-    fillWindow: true,
+    fillWindow: true,            // false = never, true = always, "mobile" = mobile only
     matchNativeResolution: true, // resize canvas pixels to match window size
     preserveAspectRatio: true,   // letterbox if aspect differs
     useDevicePixelRatio: false   // HiDPI / retina scaling

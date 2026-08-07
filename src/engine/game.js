@@ -27,7 +27,7 @@ class Game {
          *   screenWidth?: number,
          *   screenHeight?: number,
          *   imageSmoothingEnabled?: boolean,
-         *   fillWindow?: boolean,
+         *   fillWindow?: boolean | "mobile",
          *   matchNativeResolution?: boolean,
          *   preserveAspectRatio?: boolean,
          *   useDevicePixelRatio?: boolean,
@@ -63,8 +63,11 @@ class Game {
         //     screenHeight: 720,          // initial canvas height
         //     imageSmoothingEnabled: true, // enable/disable image smoothing on the canvas context
         //     fillWindow: false,      // make the game canvas to fill the entire window
-        //     matchNativeResolution: false, // if fillWindow=true this controls how the canvas behaves when filling window (true: updates the canvas internal resolution to match window size | false: keeps existing resolution and stretches to fit window)
-        //     preserveAspectRatio: true,    // if fillWindow=true and matchNativeResolution=false, maintains canvas aspect ratio when scaling to fit window
+        //                             // false: never fill window (pixel-perfect on all devices)
+        //                             // true: always fill window (on both desktop and mobile)
+        //                             // "mobile": fill window only on mobile/touch devices
+        //     matchNativeResolution: false, // if fillWindow is enabled, this controls how the canvas behaves when filling window (true: updates the canvas internal resolution to match window size | false: keeps existing resolution and stretches to fit window)
+        //     preserveAspectRatio: true,    // if fillWindow is enabled and matchNativeResolution=false, maintains canvas aspect ratio when scaling to fit window
         //     useDevicePixelRatio: false,   // Use device pixel ratio for crisp rendering on high DPI displays
         //     audioAnalyzer: true,    // if true it will create an audio analyzer when loading the audio assets
         //     analyzerfftSize: 128,   // size of the audio analyzer fft, default is 128
@@ -145,7 +148,11 @@ class Game {
         }
 
         // Fill window if configured
-        if (this.config.fillWindow) {
+        // Supports: false (never), true (always), or "mobile" (mobile devices only)
+        const shouldFillWindow = this.config.fillWindow === true || 
+                                 (this.config.fillWindow === "mobile" && mobileWithTouchScreen);
+        
+        if (shouldFillWindow) {
             this.renderer.SetCanvasFillWindow(
                 this.config.matchNativeResolution || false, 
                 this.config.useDevicePixelRatio || false,
@@ -399,7 +406,7 @@ class Game {
      *   screenWidth?: number,
      *   screenHeight?: number,
      *   imageSmoothingEnabled?: boolean,
-     *   fillWindow?: boolean,
+     *   fillWindow?: boolean | "mobile",
      *   matchNativeResolution?: boolean,
      *   preserveAspectRatio?: boolean,
      *   useDevicePixelRatio?: boolean,
