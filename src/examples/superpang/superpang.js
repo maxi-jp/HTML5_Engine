@@ -73,7 +73,10 @@ class SuperPang extends Game {
             screenWidth: 512,
             screenHeight: 424,
             imageSmoothingEnabled: false,
-            collidersOnly: false
+            collidersOnly: false,
+            autoFullscreen: true,
+            fillWindow: 'mobile',
+            mobileSupport: true
         });
 
         this.graphicAssets = {
@@ -131,6 +134,37 @@ class SuperPang extends Game {
         this.scoreLabel = new TextLabel(this.score, new Vector2(170, this.screenHeight - 6), "20px monospace", Color.orange, "right", "bottom");
         this.timerLabel = new TextLabel(this.timer, new Vector2(this.screenHalfWidth + 10, this.screenHeight - 2), "32px monospace", Color.yellow, "left", "bottom");
         this.levelLabel = new TextLabel(String(this.level + 1).padStart(2, '0'), new Vector2(this.screenWidth - 80, this.screenHeight - 2), "32px monospace", Color.yellow, "right", "bottom");
+
+        // ── Input bindings ───────────────────────────────────────────
+        Input.ClearMappings();
+        Input.RegisterAxis('MoveH', [
+            { type: 'key', positive: KEY_RIGHT, negative: KEY_LEFT },
+            { type: 'key', positive: KEY_D, negative: KEY_A },
+            { type: 'gamepadaxis', stick: 'LS', axis: 0 },
+            { type: 'virtualjoystick', id: 'move', axis: 0 }
+        ]);
+
+        const shootBindings = [
+            { type: 'key', code: KEY_SPACE },
+            { type: 'gamepad', code: 'FACE_DOWN' },
+            { type: 'virtualbutton', id: 'shoot' }
+        ];
+        if (!mobileWithTouchScreen) {
+            shootBindings.push({ type: 'mouse' });
+        }
+        Input.RegisterAction('Shoot', shootBindings);
+
+        if (mobileWithTouchScreen) {
+            const jsRadius = 45;
+            Input.RegisterVirtualJoystick('move', new VirtualJoystick(jsRadius + 15, this.screenHeight - jsRadius - 10, jsRadius));
+            
+            const btn = new VirtualButton(this.screenWidth - jsRadius - 15, this.screenHeight - jsRadius - 10, jsRadius - 5, '🎯');
+            btn.color = new Color(1, 0, 0, 0.2);
+            btn.pressedColor = new Color(1, 0, 0, 0.6);
+            btn.rimColor = new Color(1, 0, 0, 0.5);
+            Input.RegisterVirtualButton('shoot', btn);
+        }
+        // ─────────────────────────────────────────────────────────────
 
         if (hasLevelParam) {
             this._startLevel();
@@ -345,6 +379,9 @@ class SuperPang extends Game {
         else if (this.state === GameState.STATE_LEVEL_WIN) {
             this._drawOverlay(`Level ${this.level + 1} Clear!`, "Get ready...", new Color(0.1, 0.5, 0.8, 0.75));
         }
+
+        // Virtual controls — always on top (renders nothing on desktop unless forced)
+        VirtualControlls.Draw(this.renderer);
     }
 
     PlayerShot() {
@@ -437,21 +474,17 @@ class PangPlayer extends SSAnimationObjectComplex {
 
         this.timeSinceLastShot += deltaTime;
 
-        let move = 0;
-        if (Input.IsKeyPressed(KEY_LEFT)  || Input.IsKeyPressed(KEY_A))
-            move -= 1;
-        if (Input.IsKeyPressed(KEY_RIGHT) || Input.IsKeyPressed(KEY_D))
-            move += 1;
+        let move = Input.GetAxis('MoveH');
 
         if (this.timeSinceLastShot >= this.shotTime) {
             // move when not shooting
             this.position.x += move * this.speed * deltaTime;
 
-            if (move > 0) {
+            if (move > 0.1) {
                 this.flipX = true;
                 this.PlayAnimationLoop(1, false);
              }
-            else if (move < 0) {
+            else if (move < -0.1) {
                 this.flipX = false;
                 this.PlayAnimationLoop(1, false);
             }
@@ -463,7 +496,7 @@ class PangPlayer extends SSAnimationObjectComplex {
         this.position.x = Math.max(game.leftWall + this.width * 0.5, Math.min(this.position.x, game.rightWall - this.width * 0.5));
 
         // Fire shot
-        if ((Input.IsKeyDown(KEY_SPACE) || Input.IsMouseDown()) && !game.shot && this.timeSinceLastShot >= this.shotTime) {
+        if (Input.GetAction('Shoot') && !game.shot && this.timeSinceLastShot >= this.shotTime) {
             this.timeSinceLastShot = 0;
             game.PlayerShot();
             this.PlayAnimationLoop(2);
