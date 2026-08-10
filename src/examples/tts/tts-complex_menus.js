@@ -12,7 +12,8 @@ class MainMenu extends HTMLMenu {
         this.SetupElements([
             // "#menuStart",
             '#press-to-start',
-            '.neon-logo'
+            '.neon-logo',
+            '#press-to-start-2'
         ]);
 
         // this.SetupButtons([
@@ -26,6 +27,8 @@ class MainMenu extends HTMLMenu {
         this.elements[".neon-logo"].classList.remove("hidden");
         this.elements["#press-to-start"].classList.add("hidden");
 
+        game.Invoke(this.ShowPressAgain, 4, this);
+
         this.phase = 1;
         this.timer = 0;
     }
@@ -38,6 +41,10 @@ class MainMenu extends HTMLMenu {
     
     ShowMenu() {
         this.SetContainerStyle('top: 0%; opacity: 1;');
+    }
+
+    ShowPressAgain() {
+        this.elements["#press-to-start-2"].classList.remove("hidden");
     }
 }
 

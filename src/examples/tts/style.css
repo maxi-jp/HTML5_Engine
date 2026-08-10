@@ -88,6 +88,25 @@ canvas {
     height: 100%;
     top: 0;
     transition: top 0.5s, opacity 0.5s ease-in-out;
+    perspective: 800px;
+}
+
+#mainMenu::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: -10px;
+    background-size: 50px 50px;
+    background-image:
+        linear-gradient(to right, rgba(255, 255, 255, .2) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, .2) 1px, transparent 1px);
+    transform: rotateX(50deg);
+    transform-origin: top center;
+    animation: 5s linear infinite SlantedPattern;
+    background-position-y: top;
+    z-index: 0;
 }
 
 #pauseMenu {
@@ -187,6 +206,32 @@ canvas {
     width: 100%;
 }
 
+#press-to-start-2 {
+    bottom: -156px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: trivial, Arial;
+    font-size: 2.5em;
+    transition: opacity 0.5s ease-out;
+    animation: pressPulse 1s infinite alternate ease-in-out;
+    pointer-events: none;
+}
+
+#press-to-start-2::before {
+    content: attr(title);
+    left: 0;
+    top: 0;
+    -webkit-text-stroke: 1px var(--white);
+    color: transparent;
+    z-index: 2;
+    pointer-events: none;
+}
+
+#press-to-start-2, #press-to-start-2::before {
+    position: absolute;
+    width: 100%;
+}
+
 @keyframes pressPulse {
     0% {
         transform: translate(-50%, -50%) scale(1);
@@ -199,4 +244,10 @@ canvas {
 @keyframes CreditsMovement {
     0% { transform: translateY(0); }
     100% { transform: translateY(-100%); }
+}
+
+@keyframes SlantedPattern {
+    100% {
+        background-position-y: bottom;
+    }
 }
