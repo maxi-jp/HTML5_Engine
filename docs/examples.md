@@ -20,6 +20,7 @@ Explore the `src/examples/` directory for practical demonstrations of the engine
 ### Other systems
 - [Audio system test](../audiotest.html ':ignore :target=_blank')
 - [Colliders test](../colliders.html ':ignore :target=_blank')
+- [Timer System test](../timer-test.html ':ignore :target=_blank') — one-shot and repeating timers, GameObject-owned timers, and automatic cleanup on destruction
 - [Object pooling](../object_pooling.html ':ignore :target=_blank')
 - [Particle System](../particles.html ':ignore :target=_blank') — smoke (area and point emitters), rain, and snow presets
 - [Tileset](../tileset.html ':ignore :target=_blank') *(WIP)*

@@ -116,6 +116,76 @@ window.onload = () => { Init(MyGame); }
 
 ---
 
+## Renderer API quick-reference
+All methods are called on `renderer` (or `this.renderer` inside Game). Colors use 0–1 range (use `Color.FromRGB()` for 0-255).
+
+### Text rendering
+| Method | Usage |
+|---|---|
+| `DrawFillText(text, x, y, font, color?, align?, baseline?)` | Filled text. Font ex: `"16px Arial"`. Align: `"left"` / `"center"` / `"right"` |
+| `DrawStrokeText(text, x, y, font, color?, align?, baseline?, lineWidth?)` | Outlined text |
+| `DrawText(text, x, y, font, color?, align?, baseline?, stroke?, lineWidth?)` | Text with optional stroke |
+
+### Rectangles (centered on x,y with rotation)
+| Method | Notes |
+|---|---|
+| `DrawFillRectangle(x, y, w, h, color?, rot?, pivot?)` | Filled, supports rotation |
+| `DrawStrokeRectangle(x, y, w, h, color?, lineWidth?, rot?, pivot?)` | Outlined, supports rotation |
+| `DrawRectangle(x, y, w, h, color?, stroke?, lineWidth?, rot?, pivot?)` | Generic (fill or stroke) |
+
+### Rectangles (top-left at x,y — faster, no rotation)
+| Method | Notes |
+|---|---|
+| `DrawFillBasicRectangle(x, y, w, h, color?)` | **Fastest** — use for UI/backgrounds |
+| `DrawStrokeBasicRectangle(x, y, w, h, color?, lineWidth?)` | Outlined, no rotation |
+| `DrawBasicRectangle(x, y, w, h, color?, stroke?, lineWidth?)` | Generic (fill or stroke) |
+
+### Circles
+| Method | Notes |
+|---|---|
+| `DrawFillCircle(x, y, radius, color?)` | Filled circle |
+| `DrawStrokeCircle(x, y, radius, color?, lineWidth?)` | Outlined circle |
+| `DrawCircle(x, y, radius, color?, stroke?, lineWidth?)` | Generic (fill or stroke) |
+
+### Images (centered on x,y with rotation)
+| Method | Notes |
+|---|---|
+| `DrawImage(img, x, y, scaleX, scaleY, rot?, pivot?, alpha?)` | Full-featured image draw |
+| `DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, rot?, pivot?, alpha?)` | Sprite sheet / cropped region |
+
+### Images (top-left at x,y — faster, no rotation)
+| Method | Notes |
+|---|---|
+| `DrawImageBasic(img, x, y, w?, h?, alpha?)` | **Fastest** — use when no rotation needed |
+| `DrawImageSectionBasic(img, x, y, sx, sy, sw, sh, scaleX, scaleY, alpha?)` | Sprite sheet, no rotation |
+
+### Other
+| Method | Notes |
+|---|---|
+| `DrawLine(x1, y1, x2, y2, color?, lineWidth?)` | Line segment |
+| `DrawPolygon(points, strokeColor?, lineWidth?, fill?, fillColor?)` | Closed polygon. `points` is `{x,y}[]` |
+| `DrawGradientRectangle(x, y, w, h, gradient)` | Gradient-filled rectangle |
+| `ApplyCameraTransform(camera)` | Apply camera offset (call before drawing world objects) |
+| `RestoreCameraTransform()` | Restore to screen space (call after world objects) |
+
+---
+
+## Timer API quick-reference
+Timers run on game time (pause with game) and auto-cleanup when GameObjects are destroyed.  
+**Callbacks are automatically bound to the owner** (Unity-style) — pass methods directly without `.bind(this)`.
+
+| Usage | Call |
+|---|---|
+| One-shot delay | `game.Invoke(() => { ... }, 2.0)` |
+| Repeating timer | `game.InvokeRepeating(() => { ... }, delay, interval)` |
+| Cancel timer | `game.CancelInvoke(timer)` |
+| From GameObject (arrow) | `this.Invoke(() => this.method(), 2.0)` — auto-cancelled on destroy |
+| From GameObject (direct) | `this.Invoke(this.method, 2.0)` — auto-bound, no `.bind()` needed |
+| From non-GameObject | `game.Invoke(this.method, 2.0, this)` — pass owner as 3rd param |
+| Cancel all (GO) | `this.CancelAllInvokes()` |
+
+---
+
 ## Assets and collider patterns
 
 ### Loading images and audio

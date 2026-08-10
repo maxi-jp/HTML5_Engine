@@ -16,6 +16,7 @@ Documentation can be consulted [here](https://maxi-jp.github.io/spark.js/docs/).
 - **Physics Integration**: Box2D physics support with easy-to-use Box2DGameObject classes for rectangles, sprites, and animated objects.
 - **Input Handling**: A powerful, abstract input system that maps actions (e.g., "Jump") and axes (e.g., "MoveHorizontal") to keyboard, mouse, gamepad, and **touch / virtual controls** (on-screen joysticks and buttons for mobile devices).
 - **Mobile Support**: Automatic touch input mirroring, viewport injection, and scroll-prevention — enabled with a single `mobileSupport` config flag (auto-detected on touch devices).
+- **Timer System**: Unity-style `Invoke` and `InvokeRepeating` for delayed and repeating callbacks that run on game time, auto-pause with the game, and clean up automatically when GameObjects are destroyed.
 - **Audio Manager**: A simple yet powerful system to manage and play audio with optional analyzer support.
 - **UI & Menus**: Use standard HTML and CSS for creating game menus and overlays.
 - **Background Layers**: Create rich backgrounds with solid colors, gradients, parallax scrolling layers, and tilemaps.
@@ -76,6 +77,7 @@ Documentation can be consulted [here](https://maxi-jp.github.io/spark.js/docs/).
   - puzzlebobble.js       # Puzzle Bobble clone
   - render_test.js        # Renderer feature testing
   - snake.js              # Snake game implementation
+  - timer_test.js         # Timer system demo (Invoke, InvokeRepeating, auto-cleanup)
 
 ## Getting Started
 

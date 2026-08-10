@@ -82,3 +82,91 @@ declare namespace Input {
     /** True if any keyboard key, mouse button, touch, or gamepad button was triggered this frame. */
     function Anything(): boolean;
 }
+
+// ── Timer class ──────────────────────────────────────────────────────────────
+
+/**
+ * Represents a game timer. Created via game.Invoke() or gameObject.Invoke().
+ * Timers run on game time and are automatically paused when the game loses focus.
+ */
+declare class Timer {
+    /** Unique timer ID. */
+    id: number;
+    /** The callback function to execute. */
+    callback: Function;
+    /** Delay or interval in seconds. */
+    delay: number;
+    /** Interval for repeating timers (0 for one-shot). */
+    interval: number;
+    /** Time elapsed since last execution. */
+    elapsed: number;
+    /** Whether this timer repeats. */
+    repeating: boolean;
+    /** GameObject that owns this timer (if any). */
+    owner: GameObject | null;
+    /** Whether this timer is active. */
+    active: boolean;
+    
+    /** Cancels this timer. */
+    Cancel(): void;
+}
+
+// ── Renderer class ───────────────────────────────────────────────────────────
+
+/**
+ * Base renderer class. Canvas2DRenderer and WebGLRenderer share this API.
+ * Available globally as `renderer` and within Game as `this.renderer`.
+ */
+declare class Renderer {
+    canvas: HTMLCanvasElement;
+    width: number;
+    height: number;
+    halfWidth: number;
+    halfHeight: number;
+    imageSmoothingEnabled: boolean;
+    fillScreen: boolean;
+    fillScreenMatchNativeResolution: boolean;
+    fillScreenUseDevicePixelRatio: boolean;
+    fillScreenPreserveAspectRatio: boolean;
+
+    // Core methods
+    Clear(): void;
+    SetScreenSize(width: number, height: number): void;
+    SetCanvasFillWindow(matchNativeResolution?: boolean, useDevicePixelRatio?: boolean, preserveAspectRatio?: boolean): void;
+    RestoreCanvasOriginalSize(): void;
+
+    // Camera
+    ApplyCameraTransform(camera: any): void;
+    RestoreCameraTransform(): void;
+
+    // Primitives
+    DrawLine(x1: number, y1: number, x2: number, y2: number, color?: Color, lineWidth?: number): void;
+    DrawPolygon(points: {x: number, y: number}[], strokeColor?: Color, lineWidth?: number, fill?: boolean, fillColor?: Color): void;
+    
+    // Rectangles
+    DrawRectangle(x: number, y: number, w: number, h: number, color?: Color, stroke?: boolean, lineWidth?: number, rot?: number, pivot?: {x: number, y: number}): void;
+    DrawStrokeRectangle(x: number, y: number, w: number, h: number, color?: Color, lineWidth?: number, rot?: number, pivot?: {x: number, y: number}): void;
+    DrawFillRectangle(x: number, y: number, w: number, h: number, color?: Color, rot?: number, pivot?: {x: number, y: number}): void;
+    DrawBasicRectangle(x: number, y: number, w: number, h: number, color?: Color, stroke?: boolean, lineWidth?: number): void;
+    DrawStrokeBasicRectangle(x: number, y: number, w: number, h: number, color?: Color, lineWidth?: number): void;
+    DrawFillBasicRectangle(x: number, y: number, w: number, h: number, color?: Color): void;
+    
+    // Circles
+    DrawCircle(x: number, y: number, radius: number, color?: Color, stroke?: boolean, lineWidth?: number): void;
+    DrawFillCircle(x: number, y: number, radius: number, color?: Color): void;
+    DrawStrokeCircle(x: number, y: number, radius: number, color?: Color, lineWidth?: number): void;
+    
+    // Text
+    DrawText(text: string, x: number, y: number, font: string, color?: Color, align?: "left" | "center" | "right", baseline?: "top" | "middle" | "alphabetic" | "bottom", stroke?: boolean, lineWidth?: number): void;
+    DrawFillText(text: string, x: number, y: number, font: string, color?: Color, align?: "left" | "center" | "right", baseline?: "top" | "middle" | "alphabetic" | "bottom"): void;
+    DrawStrokeText(text: string, x: number, y: number, font: string, color?: Color, align?: "left" | "center" | "right", baseline?: "top" | "middle" | "alphabetic" | "bottom", lineWidth?: number): void;
+    
+    // Images
+    DrawImage(img: HTMLImageElement, x: number, y: number, scaleX: number, scaleY: number, rot?: number, pivot?: {x: number, y: number}, alpha?: number): void;
+    DrawImageBasic(img: HTMLImageElement, x: number, y: number, w?: number, h?: number, alpha?: number): void;
+    DrawImageSection(img: HTMLImageElement, x: number, y: number, sx: number, sy: number, sw: number, sh: number, scaleX: number, scaleY: number, rot?: number, pivot?: {x: number, y: number}, alpha?: number): void;
+    DrawImageSectionBasic(img: HTMLImageElement, x: number, y: number, sx: number, sy: number, sw: number, sh: number, scaleX: number, scaleY: number, alpha?: number): void;
+    
+    // Other
+    DrawGradientRectangle(x: number, y: number, w: number, h: number, gradient: any): void;
+}

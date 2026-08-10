@@ -32,6 +32,10 @@ Seamless integration with the Box2D physics engine. The engine provides easy-to-
 
 A powerful, abstract input system that maps high-level "Actions" (e.g., "Jump", "Fire") and continuous "Axes" (e.g., "MoveHorizontal", "Rotate") to various physical inputs: keyboard keys, mouse clicks, and gamepad buttons/axes/triggers. This system promotes clean game logic and simplifies control remapping.
 
+### Timer System
+
+Unity-style `Invoke` and `InvokeRepeating` methods for delayed and repeating callbacks. Timers run on game time (not wall-clock time), automatically pause when the game loses focus, and clean up automatically when GameObjects are destroyed. Perfect for cooldowns, wave spawning, delayed destruction, and any time-based game logic.
+
 ### Audio Manager
 
 A simple yet powerful system to manage and play audio files. Supports basic playback controls and can be extended for more advanced audio features.

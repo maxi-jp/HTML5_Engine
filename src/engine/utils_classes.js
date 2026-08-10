@@ -1089,4 +1089,68 @@ function ApplyColorKey(img, hexColor) {
     return offscreen;
 }
 
+/**
+ * Represents a game timer that executes a callback after a delay.
+ * Used internally by the Game timer system. Users should call `game.Invoke()` instead.
+ */
+class Timer {
+    static _nextId = 1;
+
+    /**
+     * @param {Function} callback - Function to execute when timer completes.
+     * @param {number} delay - Delay in seconds before first execution.
+     * @param {number} [interval=0] - If > 0, timer repeats every interval seconds.
+     * @param {GameObject} [owner=null] - Optional GameObject that owns this timer.
+     */
+    constructor(callback, delay, interval = 0, owner = null) {
+        this.id = Timer._nextId++;
+        this.callback = callback;
+        this.delay = delay;
+        this.interval = interval;
+        this.elapsed = 0;
+        this.repeating = interval > 0;
+        this.owner = owner; // GameObject that created this timer (for cleanup)
+        this.active = true;
+    }
+
+    /**
+     * Updates the timer and executes callback if time is up.
+     * @param {number} deltaTime - Time elapsed since last frame in seconds.
+     * @returns {boolean} True if timer should continue, false if it should be removed.
+     */
+    Update(deltaTime) {
+        if (!this.active)
+            return false;
+
+        this.elapsed += deltaTime;
+
+        if (this.elapsed >= this.delay) {
+            try {
+                this.callback();
+            }
+            catch (error) {
+                console.error('Timer callback error:', error);
+            }
+
+            if (this.repeating) {
+                // Reset for next repetition
+                this.elapsed = 0;
+                this.delay = this.interval;
+                return true;
+            }
+            else {
+                // One-shot timer completed
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /** Cancels the timer. */
+    Cancel() {
+        this.active = false;
+    }
+}
+
 // #endregion

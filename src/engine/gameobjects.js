@@ -94,6 +94,56 @@ class GameObject {
     /** Called from the game when the game object is removed from it */
     Destroy() {}
 
+    // #region Timer Methods (delegate to Game)
+
+    /**
+     * Executes a callback after a delay. Automatically cancelled when this GameObject is destroyed.
+     * Callback is automatically bound to this GameObject (preserves 'this' context).
+     * @param {Function} callback - The function to execute.
+     * @param {number} delay - Delay in seconds before execution.
+     * @returns {Timer} The timer instance (can be used with CancelInvoke).
+     * @example
+     * // Both work (arrow function or direct method reference):
+     * this.Invoke(() => this.Explode(), 2.0);
+     * this.Invoke(this.Explode, 2.0);
+     */
+    Invoke(callback, delay) {
+        return game.Invoke(callback, delay, this);
+    }
+
+    /**
+     * Executes a callback repeatedly at an interval. Automatically cancelled when this GameObject is destroyed.
+     * Callback is automatically bound to this GameObject (preserves 'this' context).
+     * @param {Function} callback - The function to execute.
+     * @param {number} delay - Delay in seconds before first execution.
+     * @param {number} interval - Interval in seconds between repetitions.
+     * @returns {Timer} The timer instance (can be used with CancelInvoke).
+     * @example
+     * // Both work (arrow function or direct method reference):
+     * this.InvokeRepeating(() => this.Shoot(), 1.0, 0.5);
+     * this.InvokeRepeating(this.Shoot, 1.0, 0.5);
+     */
+    InvokeRepeating(callback, delay, interval) {
+        return game.InvokeRepeating(callback, delay, interval, this);
+    }
+
+    /**
+     * Cancels a specific timer.
+     * @param {Timer} timer - The timer instance returned by Invoke or InvokeRepeating.
+     */
+    CancelInvoke(timer) {
+        game.CancelInvoke(timer);
+    }
+
+    /**
+     * Cancels all timers owned by this GameObject.
+     */
+    CancelAllInvokes() {
+        game.CancelAllInvokes(this);
+    }
+
+    // #endregion
+
     /**
      * Called when this object's collider first touches another collider.
      * @param {Collider} myCollider - This object's collider.

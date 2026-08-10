@@ -3,6 +3,7 @@
 - [Core Concepts](core-concepts.md)
 - [Rendering](rendering.md)
 - [Input System](input-system.md)
+- [Timers](timers.md)
 - [Physics (Box2D)](physics.md)
 - [Audio Manager](audio.md)
 - [UI & Menus](ui.md)

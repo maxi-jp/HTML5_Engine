@@ -103,6 +103,10 @@ class Game {
         this.lastCollisions = new Set(); // ids of colliding pairs detected the last frame
         this.detectedCollisions = new Set(); // collisions detected on this frame
         this._objectsToDestroy = new Set(); // gameObjects queued to be destroyed
+        
+        /** @type {Timer[]} Active timers managed by the game. */
+        this._timers = [];
+        this._timersById = new Map(); // Maps timer.id to Timer instance for quick lookups
     }
 
     /** @returns {number} Current canvas width in pixels. */
@@ -192,6 +196,8 @@ class Game {
         this.lastCollisions.clear();
         this.detectedCollisions.clear();
         this._objectsToDestroy.clear();
+        this._timers = [];
+        this._timersById.clear();
 
         this._setupFocusEvents();
     }
@@ -201,6 +207,11 @@ class Game {
      * @param {number} deltaTime - Elapsed time since the last frame, in seconds.
      */
     Update(deltaTime) {
+        // Update timers
+        if (this._timers.length > 0) {
+            this._updateTimers(deltaTime);
+        }
+
         // Update active game objects
         this.gameObjects.forEach((gameObject) => {
             if (gameObject.active)
@@ -292,6 +303,10 @@ class Game {
                     if (collider) {
                         this.RemoveCollider(collider);
                     }
+
+                    // Cancel all timers owned by this game object
+                    this.CancelAllInvokes(gameObject);
+                    
                     gameObject.Destroy();
                     this.gameObjects.splice(index, 1);
                 }
@@ -445,6 +460,101 @@ class Game {
      */
     OnFocusGained() {}
 
+    // #region Timer System
+
+    /**
+     * Executes a callback after a delay. Similar to Unity's Invoke.
+     * Callbacks are automatically bound to the owner if provided (preserves 'this' context).
+     * @param {Function} callback - The function to execute.
+     * @param {number} delay - Delay in seconds before execution.
+     * @param {GameObject} [owner=null] - Optional GameObject owner (for automatic cleanup and binding).
+     * @returns {Timer} The timer instance (can be used with CancelInvoke).
+     * @example
+     * // From GameObject (auto-bound to 'this'):
+     * this.Invoke(this.Attack, 2.0);
+     * // From non-GameObject:
+     * game.Invoke(this.method, 2.0, this);
+     */
+    Invoke(callback, delay, owner = null) {
+        // Auto-bind callback to owner if provided (Unity-style behavior)
+        if (owner && typeof callback === 'function') {
+            callback = callback.bind(owner);
+        }
+        const timer = new Timer(callback, delay, 0, owner);
+        this._timers.push(timer);
+        this._timersById.set(timer.id, timer);
+        return timer;
+    }
+
+    /**
+     * Executes a callback repeatedly at an interval. Similar to Unity's InvokeRepeating.
+     * Callbacks are automatically bound to the owner if provided (preserves 'this' context).
+     * @param {Function} callback - The function to execute.
+     * @param {number} delay - Delay in seconds before first execution.
+     * @param {number} interval - Interval in seconds between repetitions.
+     * @param {GameObject} [owner=null] - Optional GameObject owner (for automatic cleanup and binding).
+     * @returns {Timer} The timer instance (can be used with CancelInvoke).
+     * @example
+     * // From GameObject (auto-bound to 'this'):
+     * this.InvokeRepeating(this.Shoot, 0, 0.5);
+     * // From non-GameObject:
+     * game.InvokeRepeating(this.method, 2.0, 1.0, this);
+     */
+    InvokeRepeating(callback, delay, interval, owner = null) {
+        // Auto-bind callback to owner if provided (Unity-style behavior)
+        if (owner && typeof callback === 'function') {
+            callback = callback.bind(owner);
+        }
+        const timer = new Timer(callback, delay, interval, owner);
+        this._timers.push(timer);
+        this._timersById.set(timer.id, timer);
+        return timer;
+    }
+
+    /**
+     * Cancels a specific timer.
+     * @param {Timer} timer - The timer instance returned by Invoke or InvokeRepeating.
+     */
+    CancelInvoke(timer) {
+        if (timer && timer.active) {
+            timer.Cancel();
+        }
+    }
+
+    /**
+     * Cancels all timers owned by a specific GameObject.
+     * Called automatically when a GameObject is destroyed.
+     * @param {GameObject} owner - The GameObject whose timers should be cancelled.
+     */
+    CancelAllInvokes(owner) {
+        this._timers.forEach(timer => {
+            if (timer.owner === owner) {
+                timer.Cancel();
+            }
+        });
+    }
+
+    /**
+     * Updates all active timers. Called internally by Game.Update().
+     * @param {number} deltaTime - Time elapsed since last frame in seconds.
+     * @private
+     */
+    _updateTimers(deltaTime) {
+        // Update timers and remove completed/cancelled ones
+        // Using reverse iteration to safely remove during iteration
+        for (let i = this._timers.length - 1; i >= 0; i--) {
+            const timer = this._timers[i];
+            
+            // Update returns false when timer should be removed
+            if (!timer.Update(deltaTime)) {
+                this._timersById.delete(timer.id);
+                this._timers.splice(i, 1);
+            }
+        }
+    }
+
+    // #endregion
+
     // Sets up window blur/focus and visibilitychange listeners with a mobile touch guard.
     _setupFocusEvents() {
         // Android Chrome fires window.blur when the address bar toggles on first touch.
@@ -454,7 +564,9 @@ class Game {
         document.addEventListener('touchend',   () => { setTimeout(() => { touchInProgress = false; }, 300); }, { passive: true });
 
         window.addEventListener('blur', () => {
-            if (touchInProgress) return;
+            if (touchInProgress)
+                return;
+            
             this.OnFocusLost();
         });
         window.addEventListener('focus', () => {
