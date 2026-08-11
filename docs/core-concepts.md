@@ -134,6 +134,55 @@ this.Configure({
 });
 ```
 
+### Initialization and Canvas Resolution
+
+The `Init()` function (from `engine/main.js`) bootstraps the engine and automatically resolves which canvas element to use. Call it in your HTML's `window.onload` with your Game class:
+
+```javascript
+window.onload = () => {
+    Init(MyGame);  // Start the engine
+}
+```
+
+#### Canvas resolution strategy
+
+`Init()` accepts an optional second parameter to specify which canvas to use:
+
+```javascript
+// Option 1: Specify a canvas by ID
+Init(MyGame, "gameCanvas");  // uses <canvas id="gameCanvas">
+
+// Option 2: Auto-detect (uses the first canvas in the DOM)
+Init(MyGame);
+
+// Option 3: Create dynamically (if no canvas exists, one is created)
+Init(MyGame);
+```
+
+The resolution order is:
+
+1. **Explicit canvas ID** — If you pass a second argument and a canvas with that ID exists, it is used
+2. **First canvas in DOM** — If no ID was provided, the engine searches for any `<canvas>` element
+3. **Dynamic creation** — If neither is found, the engine creates a new canvas (640×480), gives it the ID `generatedCanvas`, centers it with `margin: 0 auto`, and appends it to `<body>`
+
+This means you can now write minimal HTML files that omit the canvas element entirely:
+
+```html
+<!-- Minimal HTML — no canvas element needed -->
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="engine/main.js"></script>
+    <script src="src/my-game.js"></script>
+</head>
+<body>
+    <script>window.onload = () => Init(MyGame);</script>
+</body>
+</html>
+```
+
+The engine will automatically create and append a canvas to the body.
+
 ### Key properties
 
 Some properties that the base `Game` class provides and can be used in your game:

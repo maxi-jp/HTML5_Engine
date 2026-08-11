@@ -58,10 +58,32 @@ Include the engine scripts in your `index.html`. The order of script inclusion i
     <script src="src/my-game.js"></script>
 </head>
 <body>
+    <!-- Canvas is optional — see "Canvas Resolution" section below -->
     <canvas width="640" height="480" id="myCanvas"></canvas>
 </body>
 </html>
 ```
+
+### Canvas Resolution
+
+The `Init()` function automatically resolves which canvas to use with the following priority:
+
+1. **Explicit canvas ID** — Pass a canvas ID as the second argument:
+   ```javascript
+   Init(MyGame, "gameCanvas");  // uses <canvas id="gameCanvas">
+   ```
+
+2. **First canvas in DOM** — If no ID is specified, the engine finds the first `<canvas>` element:
+   ```javascript
+   Init(MyGame);  // uses the first <canvas> found in the page
+   ```
+
+3. **Dynamic creation** — If no canvas exists in the DOM, the engine creates one automatically:
+   ```javascript
+   Init(MyGame);  // creates a canvas (640×480) and appends it to <body>
+   ```
+
+This means you can now omit the `<canvas>` element entirely from your HTML and let the engine create it for you.
 
 ## 4. Create your Game class
 

@@ -66,8 +66,43 @@ function LoadImages(assets, onloaded) {
     }
 }
 
-function Init(GameClass) {
-    canvas = /** @type {HTMLCanvasElement} */ (document.getElementById("myCanvas"));
+/**
+ * Initialize the game engine with a specific game class.
+ * @param {Function} GameClass - The game class to instantiate (extends Game)
+ * @param {string} [canvasId=null] - Optional canvas element ID. If not provided:
+ *   - First looks for any canvas element in the DOM
+ *   - If no canvas found, creates one dynamically and appends to body
+ */
+function Init(GameClass, canvasId = null) {
+    // Resolve canvas element
+    if (canvasId) {
+        // Use specified canvas ID
+        canvas = /** @type {HTMLCanvasElement} */ (document.getElementById(canvasId));
+        if (!canvas) {
+            console.warn(`Canvas with ID "${canvasId}" not found. Creating a new canvas.`);
+        }
+    }
+    
+    if (!canvas) {
+        // Try to find the first canvas in the DOM
+        const canvasElements = document.getElementsByTagName("canvas");
+        if (canvasElements.length > 0) {
+            canvas = canvasElements[0];
+        }
+    }
+    
+    if (!canvas) {
+        // No canvas found, create one dynamically
+        console.log("No canvas element found in DOM. Creating one dynamically.");
+        canvas = document.createElement("canvas");
+        canvas.id = "generatedCanvas";
+        canvas.width = 640;  // default width
+        canvas.height = 480; // default height
+        canvas.style.display = "block";
+        canvas.style.margin = "0 auto";
+        document.body.appendChild(canvas);
+        console.log("Canvas created and appended to body with default size 640x480");
+    }
 
     if (window.location.search.includes("webgl")) {
         let gl = canvas.getContext("webgl2");

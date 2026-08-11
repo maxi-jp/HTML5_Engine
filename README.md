@@ -167,9 +167,9 @@ class MyGame extends Game {
     }
 }
 
-// call Init (global function defined in the main.js script) with the class of your game as parameter once the document has been loaded 
+// call Init (global function defined in the main.js script) with the class of your game as parameter once the document has been loaded. The second parameter is the id of the canvas element (optional).
 window.onload = () => {
-    Init(MyGame);
+    Init(MyGame, "myCanvas");
 }
 ```
 
@@ -284,6 +284,28 @@ class MyPhysicsBox extends Box2DRectangleGO {
 ```
 
 ## Best Practices & Tips
+
+### Canvas Setup
+- **Canvas element is optional** — the engine uses three resolution strategies when `Init(GameClass)` is called:
+  1. **Explicit canvas ID** — Pass a second parameter: `Init(MyGame, "gameCanvas")` uses `<canvas id="gameCanvas">`
+  2. **Auto-detect** — `Init(MyGame)` uses the first `<canvas>` found in the DOM
+  3. **Auto-create** — If no canvas exists, the engine creates one (640×480), gives it the ID `generatedCanvas`, and appends it to `<body>`
+
+  This means you can write minimal HTML with no canvas element at all:
+  ```html
+  <!DOCTYPE html>
+  <html>
+  <head>
+      <script src="engine/main.js"></script>
+      ...
+      <script src="src/my-game.js"></script>
+  </head>
+  <body>
+      <script>window.onload = () => Init(MyGame);</script>
+  </body>
+  </html>
+  ```
+  The engine will automatically create and append a canvas for you.
 
 ### Mobile & Touch
 - **Enable mobile support** by passing `mobileSupport: true` in `Configure()`, or leave it unset — it auto-detects touch devices:
