@@ -67,6 +67,53 @@ function LoadImages(assets, onloaded) {
 }
 
 /**
+ * Load JSON assets (e.g., Tiled maps) from the game's tiledAssets object.
+ * @param {Object} assets - Object with entries like { mapName: { path: "...", data: null } }
+ * @param {Function} onloaded - Callback when all JSON files are loaded
+ */
+function LoadJSON(assets, onloaded) {
+    if (assets === null || Object.keys(assets).length === 0) {
+        onloaded();
+        return;
+    }
+    
+    let jsonToLoad = Object.keys(assets).length;
+    let loadedCount = 0;
+
+    const onload = function(assetKey, data) {
+        assets[assetKey].data = data;
+        loadedCount++;
+        if (loadedCount === jsonToLoad) {
+            onloaded();
+        }
+    };
+
+    const onerror = function(assetKey, error) {
+        console.error(`Failed to load JSON asset "${assetKey}":`, error);
+        loadedCount++;
+        if (loadedCount === jsonToLoad) {
+            onloaded();
+        }
+    };
+
+    // Load each JSON file
+    for (let assetKey in assets) {
+        if (assets.hasOwnProperty(assetKey)) {
+            const entry = assets[assetKey];
+            fetch(entry.path)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => onload(assetKey, data))
+                .catch(error => onerror(assetKey, error));
+        }
+    }
+}
+
+/**
  * Initialize the game engine with a specific game class.
  * @param {Function} GameClass - The game class to instantiate (extends Game)
  * @param {string} [canvasId=null] - Optional canvas element ID. If not provided:
@@ -131,17 +178,21 @@ function Init(GameClass, canvasId = null) {
     LoadImages(game.graphicAssets, () => {
         console.log(`All image files loaded.`);
         
-        if (game.config.audioAnalyzer) {
-            audioPlayer = new AudioPlayer(true, game.config.analyzerfftSize, game.config.analyzerSmoothing);
-        }
-        else {
-            audioPlayer = new AudioPlayer();
-        }
-        audioPlayer.LoadAudio(game.audioAssets, () => {
-            console.log("All audio files loaded.");
-            console.log("Starting the game...");
-            Start();
-            Loop();
+        LoadJSON(game.tiledAssets, () => {
+            console.log(`All Tiled JSON files loaded.`);
+            
+            if (game.config.audioAnalyzer) {
+                audioPlayer = new AudioPlayer(true, game.config.analyzerfftSize, game.config.analyzerSmoothing);
+            }
+            else {
+                audioPlayer = new AudioPlayer();
+            }
+            audioPlayer.LoadAudio(game.audioAssets, () => {
+                console.log("All audio files loaded.");
+                console.log("Starting the game...");
+                Start();
+                Loop();
+            });
         });
     });
 }

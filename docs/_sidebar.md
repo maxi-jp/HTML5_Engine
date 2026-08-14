@@ -7,6 +7,7 @@
 - [Physics (Box2D)](physics.md)
 - [Audio Manager](audio.md)
 - [UI & Menus](ui.md)
+- [Tiled Map Editor](tiled-integration.md)
 - [Utilities](utilities.md)
 - [Particle System](particles.md)
 - [Debugging Tools](debugging.md)

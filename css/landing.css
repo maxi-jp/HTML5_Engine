@@ -130,13 +130,20 @@ nav {
     display: flex; align-items: center; justify-content: center;
     text-align: center; padding: 5rem 2rem;
     position: relative; overflow: hidden;
+    perspective: 1000px;
 }
 .hero::before {
-    content: ''; position: absolute; inset: 0;
+    content: '';
+    position: absolute; 
+    top: 0; bottom: -150%; left: -100%; right: -100%;
     background-image:
         linear-gradient(rgba(99,102,241,0.045) 1px, transparent 1px),
         linear-gradient(90deg, rgba(99,102,241,0.045) 1px, transparent 1px);
-    background-size: 52px 52px;
+    background-size: 30px 30px;
+    transform: rotateX(56deg);
+    transform-origin: top center;
+    animation: 40s linear infinite slanted-pattern;
+    background-position-y: top;
 }
 .hero::after {
     content: ''; position: absolute; top: 50%; left: 50%;
@@ -170,6 +177,12 @@ nav {
     89.9%     { text-shadow: 0 0 100px rgba(249,115,22,0.88), 0 0 170px rgba(249,115,22,0.48); opacity: 0.86; }
     90.5%     { text-shadow: 0 0 70px rgba(249,115,22,0.65), 0 0 140px rgba(249,115,22,0.30); opacity: 1; }
     100%      { text-shadow: 0 0 70px rgba(249,115,22,0.65), 0 0 140px rgba(249,115,22,0.30); opacity: 1; }
+}
+
+@keyframes slanted-pattern {
+    100% {
+        background-position-y: bottom;
+    }
 }
 
 .hero h1 {

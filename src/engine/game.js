@@ -347,6 +347,18 @@ class Game {
     }
 
     /**
+     * Moves a game object to the end of the gameObjects array so it is drawn last (on top).
+     * @param {GameObject} gameObject - The game object to move.
+     */
+    MoveGameObjectToEnd(gameObject) {
+        const index = this.gameObjects.indexOf(gameObject);
+        if (index !== -1)
+            this.gameObjects.push(this.gameObjects.splice(index, 1)[0]);
+        else
+            console.warn("Error when moving the gameObjet to the end: GO not found in the gameObjects array.");
+    }
+
+    /**
      * Removes all game objects from the game, safely destroying them and clearing colliders.
      * Uses deferred deletion to queue all objects for safe removal at the end of the frame.
      */

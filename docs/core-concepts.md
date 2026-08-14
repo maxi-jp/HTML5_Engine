@@ -203,6 +203,7 @@ Some methods that the base `Game` class provides and can be used in your game:
 |---|---|
 | `Destroy(gameObject)` | Defers deletion to the end of the frame: instantly marks the object as inactive, then safely removes it from `gameObjects`, fires its `Destroy()` hook, and cleans up its collider |
 | `DestroyAllGameObjects()` | Defers deletion of all current game objects by routing them through `Destroy()` |
+| `MoveGameObjectToEnd(gameObject)` | Moves a game object to the end of the `gameObjects` array so it is drawn last (rendered on top) |
 | `AddCollider(collider)` | Registers a collider with the collision detection system |
 | `RemoveCollider(collider)` | Unregisters a collider and cleans up any pending collision pairs |
 | `SetScreenSize(width, height)` | Resize the canvas at runtime |
@@ -250,9 +251,11 @@ Override these in your subclass to inject logic:
 | `RectangleGO` | `(position, width, height, color, stroke, lineWidth)` | Solid or outlined rectangles |
 | `CircleGO` | `(position, radius, color, stroke, lineWidth)` | Solid or outlined circles |
 | `SpriteObject` | `(position, rotation, scale, img, alpha)` | Single image with `flipX` / `flipY` support |
+| `SpriteSectionObject` | `(position, rotation, scale, img, sectionRect, alpha)` | A rectangular section of a sprite sheet or image (cropped region) |
 | `SSAnimationObjectBasic` | `(position, rotation, scale, img, frameWidth, frameHeight, frameCount[], framesDuration)` | Regular grid sprite-sheet (all frames same size) |
 | `SSAnimationObjectComplex` | `(position, rotation, scale, img, animationsRectangles[][], framesDurations[])` | Packed-atlas sprite-sheet (arbitrary frame rects per animation) |
 | `Tileset` | `(img, position, scale, tilesetConfig, tilesetMap, tileWidth, tileHeight)` | Tile-map rendering |
+| `GameObjectsBackgroundLayer` | `(position, gameObjects[], speed)` | A parallax background layer that manages a group of game objects and updates their positions with the camera |
 
 ### Minimal example
 
@@ -424,3 +427,36 @@ The `speed` parameter on each layer is a `Vector2` parallax factor (0–1 per ax
 | `SpriteBackgroundLayer` | Single sprite or sprite-sheet section with parallax |
 | `MultispritesBackgroundLayer` | Group of sprites moving together with parallax |
 | `TilesetBackgroundLayer` | Full tile map with parallax |
+
+## Tiled Map Editor Integration
+
+For complex tile-based levels, the engine includes **`TiledLoader`** — a utility that reads maps exported from the free **[Tiled Map Editor](https://www.mapeditor.org/)** and converts them into spark.js compatible `Tileset` objects.
+
+```javascript
+Start() {
+    super.Start();
+    
+    this.tiledAssets = {
+        forestMap: { path: "assets/forest/forest.json", data: null }
+    };
+}
+
+// After assets load:
+Update(deltaTime) {
+    super.Update(deltaTime);
+    
+    // Parse and create tilesets from the loaded JSON
+    const tilesets = TiledLoader.Parse(this.tiledAssets.forestMap.data, this.graphicAssets);
+    tilesets.forEach(ts => this.gameObjects.push(ts));
+}
+```
+
+The `TiledLoader` handles:
+- **Multiple tile layers** from a single map
+- **Multiple tilesets** per map
+- **Grid-based** and **Collection of Images** tileset formats
+- **Embedded tilesets** (required — export with "Embed tilesets" checked)
+- **Animated tiles** via frame data extraction
+- **Object layers** for sprites and game object placement
+
+> See the [Tiled integration guide](./tiled-integration.md) for full setup instructions and the [Tileset example](../tileset.html) for a complete working demo.

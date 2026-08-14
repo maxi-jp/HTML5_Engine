@@ -22,6 +22,7 @@ Documentation can be consulted [here](https://maxi-jp.github.io/spark.js/docs/).
 - **Background Layers**: Create rich backgrounds with solid colors, gradients, parallax scrolling layers, and tilemaps.
 - **Object Pooling**: An efficient pooling system for reusing objects like bullets or particles to improve performance.
 - **Particle System**: A configurable particle emitter supporting point and area sources, with per-particle control over velocity, direction, opacity, scale, and rotation. Based on [HTML5_ParticleSystem](https://github.com/maxi-jp/HTML5_ParticleSystem).
+- **Tiled Map Editor Integration**: Load maps created in Tiled Map Editor via the `TiledLoader` utility. Export your maps to JSON with embedded tilesets and render them instantly with automatic coordinate calculation.
 - **Utilities**: A collection of helpers for vector math, collision detection, color manipulation, and more.
 - **Debugging Tools**: Optional debug drawing for physics bodies and an FPS/stats overlay.
 - **Mode 7 Renderer**: Simulate SNES-style pseudo-3D backgrounds (as in F-Zero or Mario Kart).
@@ -383,21 +384,21 @@ MIT License
 
 ## Contributing
 
-Contributions are welcome! If you want to help improve HTML5_Engine:
+Contributions are welcome! If you want to help improve spark.js:
 
 1. **Fork** this repository and create your branch from `main`.
 2. **Commit** your changes with clear messages.
 3. **Push** your branch and open a **pull request**.
-4. For bug reports or feature requests, please [open an issue](https://github.com/maxi-jp/HTML5_Engine/issues).
+4. For bug reports or feature requests, please [open an issue](https://github.com/maxi-jp/spark.js/issues).
 
 **Guidelines:**
 - Please keep code style consistent with the existing codebase.
 - Add comments and documentation where appropriate.
 - If you add new features, consider including an example or test.
 
-Thank you for helping make HTML5_Engine better!
+Thank you for helping make spark.js better!
 
 
 ---
 
-**Enjoy building games with HTML5_Engine!**
+**Enjoy building games with spark.js!**

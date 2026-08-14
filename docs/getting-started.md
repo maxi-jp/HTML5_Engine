@@ -1,10 +1,10 @@
 # Getting Started
 
-Follow these steps to set up your first game with HTML5_Engine.
+Follow these steps to set up your first game with spark.js.
 
 ## 1. Get the engine scripts
 
-Clone or download the HTML5_Engine repository from [GitHub](https://github.com/maxi-jp/HTML5_Engine).
+Clone or download the spark.js repository from [GitHub](https://github.com/maxi-jp/spark.js).
 
 ## 2. Set up your project folder
 

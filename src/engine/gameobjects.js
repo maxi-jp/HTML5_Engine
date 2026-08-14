@@ -330,6 +330,29 @@ class SpriteObject extends GameObject {
 }
 
 /**
+ * A sprite object that renders a specific rectangular section of an image.
+ */
+class SpriteSectionObject extends SpriteObject {
+    /**
+     * @param {Vector2} position - World position (center of sprite).
+     * @param {number} rotation - Initial rotation in radians.
+     * @param {number|Vector2} scale - Uniform scale (number) or per-axis scale (Vector2).
+     * @param {HTMLImageElement} img - The image to display.
+     * @param {Rect} sectionRect - The rectangular section of the image to draw.
+     * @param {number} [alpha=1.0] - Opacity (0 = invisible, 1 = fully opaque).
+     */
+    constructor(position, rotation, scale, img, sectionRect, alpha=1.0) {
+        super(position, rotation, scale, img, alpha);
+        this.sectionRect = sectionRect;
+    }
+
+    Draw(renderer) {
+        // Overrides the standard Sprite draw to only draw the specified section
+        this.sprite.DrawSection(renderer, this.sectionRect.x, this.sectionRect.y, this.sectionRect.w, this.sectionRect.h);
+    }
+}
+
+/**
  * A sprite object with simple sprite-sheet animation. All frames are the same size,
  * arranged in a grid (columns = frames per animation, rows = animation index).
  */
@@ -450,6 +473,19 @@ class SSAnimationObjectComplex extends SpriteObject {
     }
 
     /**
+     * Creates a new SSAnimationObjectComplex from an AnimationData object.
+     * @param {number|Vector2} scale - Scale factor.
+     * @param {Object} animData - The AnimationData object.
+     * @returns {SSAnimationObjectComplex}
+     */
+    static FromAnimationData(scale, animData) {
+        const animObj = new SSAnimationObjectComplex(animData.position, animData.rotation || 0, scale, animData);
+        animObj.flipX = animData.flipX || false;
+        animObj.flipY = animData.flipY || false;
+        return animObj;
+    }
+
+    /**
      * Switches to the given animation.
      * @param {number} animationId - Index into `animationsRectangles`.
      * @param {boolean} [resetToFrame0=true] - Whether to restart from frame 0.
@@ -519,8 +555,8 @@ class Tileset extends GameObject {
                 const drawX = basePosX + (colIndex * this.tileWidth * scaleX);
                 const drawY = basePosY + (rowIndex * this.tileHeight * scaleY);
 
-                // Use the sprite's method to draw the specific tile section at the calculated position.
-                this.sprite.DrawSectionBasicAt(renderer, sourceRect.x, sourceRect.y, sourceRect.w, sourceRect.h, drawX, drawY);
+                // Draw using the specific image for this tile (critical for multi-tileset maps)
+                renderer.DrawImageSectionBasic(tileConfig.image, drawX, drawY, sourceRect.x, sourceRect.y, sourceRect.w, sourceRect.h, scaleX, scaleY, this.sprite.alpha);
             });
         });
     }
@@ -977,13 +1013,60 @@ class MultispritesBackgroundLayer extends BackgroundLayer {
         super.Update(deltaTime);
 
         this.sprites.forEach(sprite => {
-            sprite.position.Set(sprite.initialPosition.x + this.position.x, sprite.initialPosition.y + this.position.y);
+            if (game.config.imageSmoothingEnabled)
+                sprite.position.Set(sprite.initialPosition.x + this.position.x, sprite.initialPosition.y + this.position.y);
+            else // Round positions to prevent sub-pixel floating-point seams between adjacent sprites
+                sprite.position.Set(
+                    Math.round(sprite.initialPosition.x + this.position.x), 
+                    Math.round(sprite.initialPosition.y + this.position.y)
+                );
         });
     }
 
     Draw(renderer) {
         this.sprites.forEach(sprite => {
             sprite.DrawBasic(renderer);
+        });
+    }
+}
+
+/** Parallax background layer that renders multiple GameObjects (like animated sprites) moving together. */
+class GameObjectsBackgroundLayer extends BackgroundLayer {
+    constructor(position, gameObjects, speed=Vector2.Zero()) {
+        super(position, speed);
+        
+        this.gameObjects = gameObjects;
+    }
+
+    Start() {
+        this.gameObjects.forEach(go => {
+            go.initialPosition = new Vector2(go.x, go.y);
+            if (go.Start)
+                go.Start();
+        });
+    }
+
+    Update(deltaTime) {
+        super.Update(deltaTime);
+
+        this.gameObjects.forEach(go => {
+            if (game.config.imageSmoothingEnabled)
+                go.position.Set(go.initialPosition.x + this.position.x, go.initialPosition.y + this.position.y);
+            else // Round positions to prevent sub-pixel floating-point seams between adjacent sprites
+                go.position.Set(
+                    Math.round(go.initialPosition.x + this.position.x), 
+                    Math.round(go.initialPosition.y + this.position.y)
+                );
+
+            if (go.active)
+                go.Update(deltaTime);
+        });
+    }
+
+    Draw(renderer) {
+        this.gameObjects.forEach(go => {
+            if (go.active)
+                go.Draw(renderer);
         });
     }
 }

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="40" height="16" tilewidth="16" tileheight="16" infinite="0" parallaxoriginx="320" parallaxoriginy="128" nextlayerid="11" nextobjectid="42">
+ <editorsettings>
+  <export target="forest.json" format="json"/>
+ </editorsettings>
+ <tileset firstgid="1" name="forest" tilewidth="160" tileheight="208" tilecount="7" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="0" x="1" y="1" width="16" height="16">
+   <image source="squirrel.png" width="1024" height="1024"/>
+  </tile>
+  <tile id="6" x="521" y="114" width="160" height="208">
+   <image source="squirrel.png" width="1024" height="1024"/>
+  </tile>
+  <tile id="8" x="682" y="1" width="160" height="112">
+   <image source="squirrel.png" width="1024" height="1024"/>
+  </tile>
+  <tile id="9" x="521" y="1" width="160" height="112">
+   <image source="squirrel.png" width="1024" height="1024"/>
+  </tile>
+  <tile id="10" x="116" y="824" width="25" height="25">
+   <image source="squirrel.png" width="1024" height="1024"/>
+  </tile>
+  <tile id="11" x="116" y="850" width="25" height="25">
+   <image source="squirrel.png" width="1024" height="1024"/>
+  </tile>
+  <tile id="13" x="116" y="824" width="25" height="25">
+   <image source="squirrel.png" width="1024" height="1024"/>
+   <animation>
+    <frame tileid="10" duration="150"/>
+    <frame tileid="11" duration="150"/>
+   </animation>
+  </tile>
+ </tileset>
+ <objectgroup id="7" name="bg0" parallaxx="0.12" parallaxy="0.12">
+  <object id="35" gid="7" x="0" y="176" width="160" height="208"/>
+  <object id="36" gid="7" x="160" y="176" width="160" height="208"/>
+  <object id="37" gid="7" x="320" y="176" width="160" height="208"/>
+  <object id="38" gid="7" x="480" y="176" width="160" height="208"/>
+ </objectgroup>
+ <objectgroup id="9" name="bg1" parallaxx="0.25" parallaxy="0.25">
+  <object id="27" gid="9" x="0" y="192" width="160" height="112"/>
+  <object id="28" gid="9" x="160" y="192" width="160" height="112"/>
+  <object id="29" gid="9" x="320" y="192" width="160" height="112"/>
+  <object id="30" gid="9" x="480" y="192" width="160" height="112"/>
+ </objectgroup>
+ <objectgroup id="8" name="bg2" parallaxx="0.5" parallaxy="0.5">
+  <object id="21" gid="10" x="0" y="256" width="160" height="112"/>
+  <object id="22" gid="10" x="160" y="256" width="160" height="112"/>
+  <object id="23" gid="10" x="320" y="256" width="160" height="112"/>
+  <object id="24" gid="10" x="480" y="256" width="160" height="112"/>
+ </objectgroup>
+ <layer id="1" name="platforms" width="40" height="16">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <objectgroup id="10" name="characters">
+  <object id="39" name="squirrel" gid="14" x="192" y="160" width="25" height="25"/>
+ </objectgroup>
+</map>

@@ -23,7 +23,7 @@ Explore the `src/examples/` directory for practical demonstrations of the engine
 - [Timer System test](../timer-test.html ':ignore :target=_blank') — one-shot and repeating timers, GameObject-owned timers, and automatic cleanup on destruction
 - [Object pooling](../object_pooling.html ':ignore :target=_blank')
 - [Particle System](../particles.html ':ignore :target=_blank') — smoke (area and point emitters), rain, and snow presets
-- [Tileset](../tileset.html ':ignore :target=_blank') *(WIP)*
+- [Tileset (Tiled Map Loader)](../tileset.html ':ignore :target=_blank') — Load and render maps created in the Tiled Map Editor with the `TiledLoader` utility. See [tiled-integration.md](tiled-integration.md) for full documentation.
 - [Parallax](../parallax.html ':ignore :target=_blank') *(WIP)*
 
 ---
