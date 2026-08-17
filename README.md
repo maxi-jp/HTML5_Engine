@@ -120,6 +120,8 @@ Documentation can be consulted [here](https://maxi-jp.github.io/spark.js/docs/).
     <script src="engine/virtualcontrols.js"></script>
     <!-- add this to use particle systems -->
     <script src="engine/particlesystem.js"></script>
+    <!-- add this to use Tiled exported maps -->
+    <script src="engine/tiled_loader.js"></script>
     <!-- add these only if you want to use box2d physics -->
     <script src="lib/Box2D.js"></script>
     <script src="engine/box2d_helper.js"></script>
@@ -375,12 +377,13 @@ MIT License
 ## TODO list
 - [ ] Example for a Tileset.
 - [x] ~~Create an action system for the input (i.e. `Input.Action("move_left")` instead of `Input.IsKeyDown(KEY_LEFT) || Input.IsKeyDown(KEY_A) || Input.IsGamepadButtonDown(0, "DPAD_LEFT") || Input.IsGamepadButtonDown(0, "LS_LEFT")`).~~ ✅DONE
-- [ ] Improve the webgl renderer (draw batching).
+- [-] Improve the webgl renderer (draw batching).❎DONE (sort of, for tilesets).
 - [ ] Implement other physic engines.
 - [x] ~~Create a documentation page/wiki.~~ ✅DONE (see [the documentation page](https://maxi-jp.github.io/spark.js/docs/).)
 - [ ] Multiplayer with nodejs.
 - [x] ~~Think on a great name for the engine (like **`wat.js`** or something like that).~~ ✅DONE (engine renamed as "spark.js"!!! ✨)
 - [x] ~~Add mobile / touch-screen support with virtual on-screen controls.~~ ✅DONE
+- [ ] Implement a global Event/Signal system (EventBus) for decoupled cross-system communication.
 
 ## Contributing
 

@@ -20,8 +20,9 @@ Each example HTML file must load engine scripts in this order before any game co
 8. `src/engine/htmlmenu.js` — HTMLMenu overlay/layer system
 9. `src/engine/virtualcontrols.js` — VirtualJoystick, VirtualDPad
 10. `src/engine/game.js` — Game base class
-11. `src/lib/Box2D.js` + `src/engine/box2d_helper.js` + `src/engine/box2d_game.js` + `src/engine/box2d_gameobjects.js` *(optional — only for physics games; load `Box2D.js` first)*
-12. `src/engine/main.js` — engine bootstrap (LoadImages, StartGame)
+11. `src/engine/tiled_loader.js` — TiledLoader *(optional — only if using Tiled maps)*
+12. `src/lib/Box2D.js` + `src/engine/box2d_helper.js` + `src/engine/box2d_game.js` + `src/engine/box2d_gameobjects.js` *(optional — only for physics games; load `Box2D.js` first)*
+13. `src/engine/main.js` — engine bootstrap (LoadImages, StartGame)
 
 ---
 
@@ -55,6 +56,16 @@ Renderer
 Collider
 ├── CircleCollider
 └── RectCollider
+
+BackgroundLayer (and subclasses — see gameobjects.js)
+├── StaticColorLayer
+├── StaticGradientLayer
+├── ColorRectangleLayer
+├── GradientRectangleLayer
+├── SpriteBackgroundLayer
+├── MultispritesBackgroundLayer
+├── TilesetBackgroundLayer
+└── GameObjectsBackgroundLayer
 
 Box2DGameObject (extends GameObject)
 ├── Box2DRectangleGO
@@ -214,6 +225,53 @@ Remove with `game.RemoveCollider(this.collider)` or `game.RemoveGameObject(this)
 
 ---
 
+## Tiled Map Editor Integration
+
+The optional `TiledLoader` utility loads maps created in **[Tiled Map Editor](https://www.mapeditor.org/)** (v1.11+) and converts them to engine format.
+
+### Requirements
+- **Tile Layer Format**: Must be set to **CSV** in Map → Map Properties
+- **Embed tilesets**: Must be **checked** when exporting JSON from Tiled
+- Supported tileset formats: Grid-based and Collection of Images
+- Maps are exported to JSON with embedded tilesets and tile data
+
+### Basic usage
+```javascript
+Start() {
+    super.Start();
+    
+    // Declare Tiled map assets (JSON files with embedded tilesets)
+    this.tiledAssets = {
+        forestMap: { path: "assets/forest/forest.json", data: null }
+    };
+}
+
+// After assets load, parse and create tilesets:
+const mapData = TiledLoader.Parse(this.tiledAssets.forestMap.data, this.graphicAssets);
+const tilesets = TiledLoader.CreateTilesets(mapData, new Vector2(0, 0), 1);
+tilesets.forEach(ts => this.gameObjects.push(ts));
+
+// Create sprites from object layers:
+const sprites = TiledLoader.CreateSpriteObjects(this.tiledAssets.forestMap.data, mapData, Vector2.Zero());
+sprites.forEach(sprite => this.gameObjects.push(sprite));
+```
+
+### Key TiledLoader methods
+| Method | Purpose |
+|---|---|
+| `Parse(tiledJSON, graphicAssets)` | Parse Tiled JSON and return map data with tileset config |
+| `CreateTilesets(mapData, position, scale)` | Create Tileset GameObjects from parsed map |
+| `GetObjectsByName(tiledJSON, name, layerName)` | Query objects by name |
+| `GetObjectsByType(tiledJSON, type, layerName)` | Query objects by type |
+| `CreateSpriteObjects(tiledJSON, mapData, position, scale, layerName)` | Create sprites from object layer |
+| `CreateGameObjectsBackgroundLayer(tiledJSON, mapData, layerName, position, scale)` | Create parallax layer from objects |
+
+### See also
+- Complete working example: `src/examples/tileset/tileset.js` and `tileset.html`
+- Full integration guide: `docs/tiled-integration.md`
+
+---
+
 ## Minimal HTML template
 ```html
 <!DOCTYPE html>
@@ -229,6 +287,9 @@ Remove with `game.RemoveCollider(this.collider)` or `game.RemoveGameObject(this)
     <script src="src/engine/input.js"></script>
     <script src="src/engine/audioplayer.js"></script>
     <script src="src/engine/particlesystem.js"></script>
+    <!-- Tiled map loader (optional):
+    <script src="src/engine/tiled_loader.js"></script>
+     -->
     <script src="src/engine/htmlmenu.js"></script>
     <script src="src/engine/virtualcontrols.js"></script>
     <script src="src/engine/game.js"></script>

@@ -150,7 +150,7 @@ declare class Renderer {
     DrawBasicRectangle(x: number, y: number, w: number, h: number, color?: Color, stroke?: boolean, lineWidth?: number): void;
     DrawStrokeBasicRectangle(x: number, y: number, w: number, h: number, color?: Color, lineWidth?: number): void;
     DrawFillBasicRectangle(x: number, y: number, w: number, h: number, color?: Color): void;
-    
+
     // Circles
     DrawCircle(x: number, y: number, radius: number, color?: Color, stroke?: boolean, lineWidth?: number): void;
     DrawFillCircle(x: number, y: number, radius: number, color?: Color): void;
@@ -169,4 +169,37 @@ declare class Renderer {
     
     // Other
     DrawGradientRectangle(x: number, y: number, w: number, h: number, gradient: any): void;
+}
+
+// ── TiledLoader utility ──────────────────────────────────────────────────────
+
+/**
+ * Utility for loading and parsing Tiled Map Editor JSON exports.
+ * Converts Tiled JSON format into engine-compatible Tileset data structures.
+ * Requires tilesets to be embedded in the JSON export (check "Embed tilesets" when exporting from Tiled).
+ */
+declare class TiledLoader {
+    // Parse a Tiled JSON map and convert it to engine format.
+    static Parse(tiledJSON: any, graphicAssets: {[key: string]: {path: string, img: HTMLImageElement | null}}): any;
+    
+    // Load a Tiled JSON file asynchronously.
+    static LoadJSON(url: string): Promise<any>;
+    
+    // Create Tileset game objects from parsed map data.
+    static CreateTilesets(mapData: any, position: Vector2, scale?: number): Tileset[];
+    
+    // Get all object layers from the Tiled JSON.
+    static GetObjectLayers(tiledJSON: any): any[];
+    
+    // Get objects from a specific layer by name.
+    static GetObjectsByName(tiledJSON: any, name: string, layerName?: string): any[];
+    
+    // Get objects from a specific layer by type.
+    static GetObjectsByType(tiledJSON: any, type: string, layerName?: string): any[];
+    
+    // Create SpriteObject instances from animated objects in object layers.
+    static CreateSpriteObjects(tiledJSON: any, mapData: any, position: Vector2, scale?: number, layerName?: string): SpriteObject[];
+    
+    // Create a GameObjectsBackgroundLayer from an object layer with parallax support.
+    static CreateGameObjectsBackgroundLayer(tiledJSON: any, mapData: any, layerName: string, position?: Vector2, scale?: number): GameObjectsBackgroundLayer;
 }

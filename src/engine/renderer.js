@@ -711,7 +711,8 @@ class Canvas2DRenderer extends Renderer {
         this.ctx.translate(this._halfWidth, this._halfHeight);
         this.ctx.scale(camera.scale, camera.scale);
         this.ctx.rotate(camera.rotation);
-        this.ctx.translate(-camera.x - this._halfWidth, -camera.y - this._halfHeight);
+        // Pixel snapping: round camera position to prevent tile seams
+        this.ctx.translate(-Math.round(camera.x) - this._halfWidth, -Math.round(camera.y) - this._halfHeight);
     }
 
     RestoreCameraTransform() {
@@ -1194,6 +1195,59 @@ class WebGLRenderer extends Renderer {
     DrawImageSectionBasic(img, x, y, sx, sy, sw, sh, scaleX, scaleY, alpha=1.0) {
         this.DrawImageSection(img, x, y, sx, sy, sw, sh, scaleX, scaleY, 0, { x: -sw/2, y: -sh/2 }, alpha);
     }
+
+    /**
+     * Draw multiple sprites from the same texture in a single batched call.
+     * @param {HTMLImageElement} img - The shared texture atlas
+     * @param {Float32Array} vertices - Interleaved vertex data: [x, y, u, v, x, y, u, v, ...]
+     * @param {number} count - Number of vertices (must be multiple of 6 for triangles)
+     * @param {number} alpha - Global alpha for all sprites
+     */
+    DrawBatchedSprites(img, vertices, count, alpha = 1.0) {
+        if (count === 0)
+            return;
+        
+        const gl = this.gl;
+        const shader = this.spriteShader;
+        
+        shader.Use(gl);
+        
+        // Create batch buffer on first use
+        if (!this._batchBuffer) {
+            this._batchBuffer = gl.createBuffer();
+        }
+        
+        // Upload interleaved vertex data (position + texcoord)
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._batchBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STREAM_DRAW);
+        
+        // Setup vertex attributes (interleaved: x, y, u, v per vertex)
+        const stride = 4 * 4; // 4 floats per vertex
+        gl.vertexAttribPointer(shader.texPositionLoc, 2, gl.FLOAT, false, stride, 0);
+        gl.vertexAttribPointer(shader.texTexcoordLoc, 2, gl.FLOAT, false, stride, 2 * 4);
+        
+        // Set uniforms for identity transform (vertices are already in world space)
+        gl.uniform2f(shader.texResolutionLoc, this.canvas.width, this.canvas.height);
+        gl.uniform2f(shader.texTranslationLoc, 0, 0);
+        gl.uniform1f(shader.texRotationLoc, 0);
+        gl.uniform2f(shader.texSizeLoc, 1, 1);
+        gl.uniform2f(shader.pivotLoc, 0, 0);
+        gl.uniform1f(shader.texAlphaLoc, alpha);
+        gl.uniformMatrix3fv(shader.viewMatrixLoc, false, this.viewMatrix);
+        
+        // Bind texture
+        shader.BindTexture(gl, this.GetTexture(img));
+        
+        // Single draw call for all sprites in the batch
+        gl.drawArrays(gl.TRIANGLES, 0, count);
+        
+        // Restore default buffers for non-batched draws
+        gl.bindBuffer(gl.ARRAY_BUFFER, shader.texBuffer);
+        gl.vertexAttribPointer(shader.texPositionLoc, 2, gl.FLOAT, false, 0, 0);
+        
+        gl.bindBuffer(gl.ARRAY_BUFFER, shader.texcoordBuffer);
+        gl.vertexAttribPointer(shader.texTexcoordLoc, 2, gl.FLOAT, false, 0, 0);
+    }
     
     DrawGradientRectangle(x, y, w, h, gradient) {
         // TODO this would be far more optimal if instead of using a texture, it'll use vertex color
@@ -1233,8 +1287,9 @@ class WebGLRenderer extends Renderer {
         const cy   = this._halfHeight;
         const cos  = Math.cos(camera.rotation) * camera.scale;
         const sin  = Math.sin(camera.rotation) * camera.scale;
-        const camX = camera.x + cx;
-        const camY = camera.y + cy;
+        // Pixel snapping: round camera position to nearest pixel to prevent tile seams
+        const camX = Math.round(camera.x) + cx;
+        const camY = Math.round(camera.y) + cy;
 
         this.viewMatrix[0] =  cos;
         this.viewMatrix[1] =  sin;

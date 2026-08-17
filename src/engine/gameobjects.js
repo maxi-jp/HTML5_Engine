@@ -529,11 +529,115 @@ class Tileset extends GameObject {
     }
 
     Draw(renderer) {
-        // The base position of the layer is updated by the Update method for parallax
+        // Use batched rendering for WebGL, fallback to per-tile for Canvas2D
+        if (renderer.DrawBatchedSprites) {
+            this._DrawBatchedWebGL(renderer);
+        } else {
+            this._DrawPerTile(renderer);
+        }
+    }
+
+    _DrawBatchedWebGL(renderer) {
+        // Build batch buffer if not exists or map changed
+        if (!this._batchVertices || this._batchDirty) {
+            this._buildBatchBuffer();
+            this._batchDirty = false;
+        }
+        
+        if (this._batchCount === 0) return;
+        
+        // Single draw call for entire tileset
+        renderer.DrawBatchedSprites(
+            this.sprite.img,
+            this._batchVertices,
+            this._batchCount,
+            this.sprite.alpha
+        );
+    }
+
+    _buildBatchBuffer() {
+        const scaleX = this.sprite.scale.x;
+        const scaleY = this.sprite.scale.y;
         const basePosX = this.position.x;
         const basePosY = this.position.y;
+        const img = this.sprite.img;
         
-        // The sprite's scale is used for drawing
+        // Count non-empty tiles
+        let tileCount = 0;
+        this.tilesetMap.forEach(row => {
+            row.forEach(tileId => {
+                if (tileId && this.tilesetConfig[tileId]) tileCount++;
+            });
+        });
+        
+        // Allocate buffer: 6 vertices per tile, 4 floats per vertex (x, y, u, v)
+        const vertexCount = tileCount * 6;
+        this._batchVertices = new Float32Array(vertexCount * 4);
+        this._batchCount = vertexCount;
+        
+        let bufferIndex = 0;
+        
+        this.tilesetMap.forEach((row, rowIndex) => {
+            row.forEach((tileId, colIndex) => {
+                if (!tileId) return;
+                
+                const tileConfig = this.tilesetConfig[tileId];
+                if (!tileConfig) return;
+                
+                const sourceRect = tileConfig.rect;
+                
+                // Calculate tile position (top-left corner)
+                const x = basePosX + (colIndex * this.tileWidth * scaleX);
+                const y = basePosY + (rowIndex * this.tileHeight * scaleY);
+                const w = sourceRect.w * scaleX;
+                const h = sourceRect.h * scaleY;
+                
+                // Texture coordinates (normalized 0-1) with half-pixel inset to prevent bleeding
+                const u0 = (sourceRect.x + 0.5) / img.width;
+                const v0 = (sourceRect.y + 0.5) / img.height;
+                const u1 = (sourceRect.x + sourceRect.w - 0.5) / img.width;
+                const v1 = (sourceRect.y + sourceRect.h - 0.5) / img.height;
+                
+                // Two triangles (6 vertices) for this tile
+                // Triangle 1: top-left, top-right, bottom-left
+                this._batchVertices[bufferIndex++] = x;
+                this._batchVertices[bufferIndex++] = y;
+                this._batchVertices[bufferIndex++] = u0;
+                this._batchVertices[bufferIndex++] = v0;
+                
+                this._batchVertices[bufferIndex++] = x + w;
+                this._batchVertices[bufferIndex++] = y;
+                this._batchVertices[bufferIndex++] = u1;
+                this._batchVertices[bufferIndex++] = v0;
+                
+                this._batchVertices[bufferIndex++] = x;
+                this._batchVertices[bufferIndex++] = y + h;
+                this._batchVertices[bufferIndex++] = u0;
+                this._batchVertices[bufferIndex++] = v1;
+                
+                // Triangle 2: bottom-left, top-right, bottom-right
+                this._batchVertices[bufferIndex++] = x;
+                this._batchVertices[bufferIndex++] = y + h;
+                this._batchVertices[bufferIndex++] = u0;
+                this._batchVertices[bufferIndex++] = v1;
+                
+                this._batchVertices[bufferIndex++] = x + w;
+                this._batchVertices[bufferIndex++] = y;
+                this._batchVertices[bufferIndex++] = u1;
+                this._batchVertices[bufferIndex++] = v0;
+                
+                this._batchVertices[bufferIndex++] = x + w;
+                this._batchVertices[bufferIndex++] = y + h;
+                this._batchVertices[bufferIndex++] = u1;
+                this._batchVertices[bufferIndex++] = v1;
+            });
+        });
+    }
+
+    _DrawPerTile(renderer) {
+        // Original per-tile drawing (Canvas2D or fallback)
+        const basePosX = this.position.x;
+        const basePosY = this.position.y;
         const scaleX = this.sprite.scale.x;
         const scaleY = this.sprite.scale.y;
 
