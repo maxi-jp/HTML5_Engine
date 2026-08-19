@@ -93,6 +93,12 @@ class Game {
          */
         this.audioAssets = null;
 
+        /**
+         * Tled's JSON assets to preload. Assign in the constructor before the engine calls `Start()`.
+         * Format: `{ key: { path: 'path/to/map.json', data: null } }`
+         */
+        this.tiledAssets = null;
+
         /** @type {Renderer} The active renderer (Canvas2D or WebGL). */
         this.renderer = renderer;
 
