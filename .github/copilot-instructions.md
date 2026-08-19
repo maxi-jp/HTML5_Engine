@@ -55,7 +55,7 @@ Renderer
 
 Collider
 ├── CircleCollider
-└── RectCollider
+└── RectangleCollider
 
 BackgroundLayer (and subclasses — see gameobjects.js)
 ├── StaticColorLayer
