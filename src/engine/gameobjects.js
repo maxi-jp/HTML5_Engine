@@ -873,8 +873,8 @@ class FollowCamera extends Camera {
         const smoothStep = this.smoothingSpeed * deltaTime;
 
         // TODO apply offset
-        this.position.x += ((this.targetPosition.x - this.position.x) * smoothStep) + this.shakingValue.x;
-        this.position.y += ((this.targetPosition.y - this.position.y) * smoothStep) + this.shakingValue.y;
+        this.position.x += ((this.targetPosition.x - this.position.x + this.offset.x) * smoothStep) + this.shakingValue.x;
+        this.position.y += ((this.targetPosition.y - this.position.y + this.offset.y) * smoothStep) + this.shakingValue.y;
 
         super.Update(deltaTime); // handles zoom animation
     }
