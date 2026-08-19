@@ -14,12 +14,14 @@ class RTSGame extends Game {
 
         // Map and tileset assets
         this.tiledAssets = {
-            map: { path: "assets/rts_map.json", data: null }
+            map: { path: "assets/rts_terrain.json", data: null }
         };
 
         this.graphicAssets = {
-            tileset: { path: "assets/rts_tileset.png", img: null }
+            tileset: { path: "assets/world_map/world_map_tiles.png", img: null }
         };
+
+        this.blueBGColor = Color.FromHex("#3d4480");
     }
 
     Start() {
@@ -28,7 +30,7 @@ class RTSGame extends Game {
 
         // Parse the Tiled map and create the tilesets
         const mapData = TiledLoader.Parse(this.tiledAssets.map.data, this.graphicAssets);
-        this.tilesets = TiledLoader.CreateTilesets(mapData, Vector2.Zero(), 1);
+        this.tilesets = TiledLoader.CreateTilesets(mapData, Vector2.Zero(), 4);
         
         this.tilesets.forEach(tileset => {
             this.gameObjects.push(tileset);
@@ -49,14 +51,14 @@ class RTSGame extends Game {
 
     Draw() {
         // Draw a base background color before rendering the map
-        this.renderer.DrawFillBasicRectangle(0, 0, this.screenWidth, this.screenHeight, Color.black);
+        this.renderer.DrawFillBasicRectangle(0, 0, this.screenWidth, this.screenHeight, this.blueBGColor);
         
         // Apply camera transform for world-space rendering
-        this.camera.PreDraw(this.renderer);
+        // this.camera.PreDraw(this.renderer);
         
         super.Draw();
         
         // Restore screen-space transform for UI
-        this.camera.PostDraw(this.renderer);
+        // this.camera.PostDraw(this.renderer);
     }
 }

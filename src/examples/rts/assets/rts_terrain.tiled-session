@@ -1,0 +1,57 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "world_map.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "file.lastUsedOpenFilter": "Todos los archivos (*)",
+    "fileStates": {
+        "": {
+            "scaleInDock": 1
+        },
+        "world_map-tiles.tsx": {
+            "scaleInDock": 4,
+            "scaleInEditor": 11
+        },
+        "world_map.tmx": {
+            "scale": 3,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 464.33333333333337,
+                "y": 282.5
+            }
+        },
+        "world_map.tmx#world_map-tiles": {
+            "scaleInDock": 1
+        },
+        "world_map_tiles.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 5.5,
+            "scaleInEditor": 16
+        }
+    },
+    "last.exportedFilePath": "C:/Users/maximiliano.miranda/Proyectos/otros/HTML5_Engine/src/examples/rts/assets",
+    "last.imagePath": "C:/Users/maximiliano.miranda/Proyectos/otros/HTML5_Engine/src/examples/rts/assets/world_map",
+    "map.lastUsedExportFilter": "Todos los archivos (*)",
+    "map.lastUsedFormat": "tmx",
+    "openFiles": [
+        "world_map.tmx",
+        "world_map-tiles.tsx"
+    ],
+    "project": "rts_terrain.tiled-project",
+    "recentFiles": [
+        "world_map-tiles.tsx",
+        "world_map.tmx",
+        "world_map_tiles.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.margin": 1,
+    "tileset.spacing": 1,
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}
