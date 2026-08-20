@@ -65,6 +65,7 @@ BackgroundLayer (and subclasses — see gameobjects.js)
 ├── SpriteBackgroundLayer
 ├── MultispritesBackgroundLayer
 ├── TilesetBackgroundLayer
+├── GameObjectBackgroundLayer
 └── GameObjectsBackgroundLayer
 
 Box2DGameObject (extends GameObject)
@@ -115,10 +116,10 @@ window.onload = () => { Init(MyGame); }
 | Key just pressed | `Input.IsKeyPressed(KEY_SPACE)` |
 | Mouse button | `Input.IsMouseButtonDown(0)` |
 | Gamepad raw | `Input.GetGamepad(0)` |
-| Register action | `Input.RegisterAction('Fire', [{type:'key', keyCode:KEY_SPACE}])` |
+| Register action | `Input.RegisterAction('Fire', [{type:'key', code:KEY_SPACE}])` |
 | Action held | `Input.GetAction('Fire')` |
 | Action just pressed | `Input.GetActionDown('Fire')` |
-| Register axis | `Input.RegisterAxis('MoveX', [{type:'key', keyCode:KEY_LEFT, value:-1}, …])` |
+| Register axis | `Input.RegisterAxis('MoveX', [{type:'key', code:KEY_LEFT, value:-1}, …])` |
 | Read axis | `Input.GetAxis('MoveX')` — returns –1..1 |
 | Any input | `Input.Anything()` — true if any device triggered anything |
 | Any gamepad face btn | `Input.IsAnyGamepadFaceButtonDown()` |

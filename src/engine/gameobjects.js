@@ -1134,6 +1134,34 @@ class MultispritesBackgroundLayer extends BackgroundLayer {
     }
 }
 
+/** Parallax background layer that renders one GameObject (like an animated sprites). */
+class GameObjectBackgroundLayer extends BackgroundLayer {
+    constructor(position, gameObject, speed=Vector2.Zero()) {
+        super(position, speed);
+        
+        this.gameObject = gameObject;
+    }
+
+    Start() {
+        this.gameObject.initialPosition = new Vector2(this.gameObject.x, this.gameObject.y);
+        this.gameObject.Start();
+    }
+
+    Update(deltaTime) {
+        super.Update(deltaTime);
+
+        this.gameObject.position.Set(this.gameObject.initialPosition.x + this.position.x, this.gameObject.initialPosition.y + this.position.y);
+
+        if (this.gameObject.active)
+            this.gameObject.Update(deltaTime);
+    }
+
+    Draw(renderer) {
+        if (this.gameObject.active)
+            this.gameObject.Draw(renderer);
+    }
+}
+
 /** Parallax background layer that renders multiple GameObjects (like animated sprites) moving together. */
 class GameObjectsBackgroundLayer extends BackgroundLayer {
     constructor(position, gameObjects, speed=Vector2.Zero()) {
@@ -1145,8 +1173,7 @@ class GameObjectsBackgroundLayer extends BackgroundLayer {
     Start() {
         this.gameObjects.forEach(go => {
             go.initialPosition = new Vector2(go.x, go.y);
-            if (go.Start)
-                go.Start();
+            go.Start();
         });
     }
 
