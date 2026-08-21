@@ -387,6 +387,7 @@ class SSAnimationObjectBasic extends SpriteObject {
         this.actualAnimation = 0;
         this.actualFrame = 0;
         this.actualFrameCountTime = 0;
+        this.loop = true;
 
         this.spritePosition = new Vector2(0, 0); // only used if debugMode
     }
@@ -397,7 +398,8 @@ class SSAnimationObjectBasic extends SpriteObject {
         this.actualFrameCountTime += deltaTime;
         if (this.actualFrameCountTime >= this.framesDuration) {
             // update the animation with the new frame
-            this.actualFrame = (this.actualFrame + 1) % this.frameCount[this.actualAnimation];
+            if (this.loop)
+                this.actualFrame = (this.actualFrame + 1) % this.frameCount[this.actualAnimation];
 
             this.actualFrameCountTime = 0;
         }
@@ -415,9 +417,10 @@ class SSAnimationObjectBasic extends SpriteObject {
     /**
      * Switches to the given animation row.
      * @param {number} animationId - Row index in the sprite sheet.
+     * @param {boolean} [loop=true] - Whether to loop the animation or play it once.
      * @param {boolean} [resetToFrame0=true] - Whether to restart from frame 0.
      */
-    PlayAnimationLoop(animationId, resetToFrame0=true) {
+    PlayAnimation(animationId, loop=true, resetToFrame0=true) {
         this.actualAnimation = animationId;
 
         if (resetToFrame0 || this.actualFrame >= this.frameCount[this.actualAnimation].length) {
@@ -425,6 +428,26 @@ class SSAnimationObjectBasic extends SpriteObject {
             this.actualFrame = 0;
             this.actualFrameCountTime = 0;
         }
+
+        this.loop = loop;     
+    }
+
+    /**
+     * Switches to the given animation row and play it once.
+     * @param {number} animationId - Row index in the sprite sheet.
+     * @param {boolean} [resetToFrame0=true] - Whether to restart from frame 0.
+     */
+    PlayAnimationOnce(animationId, resetToFrame0=true) {
+        this.PlayAnimation(animationId, false, resetToFrame0);
+    }
+
+    /**
+     * Switches to the given animation row and play it in loop.
+     * @param {number} animationId - Row index in the sprite sheet.
+     * @param {boolean} [resetToFrame0=true] - Whether to restart from frame 0.
+     */
+    PlayAnimationLoop(animationId, resetToFrame0=true) {
+        this.PlayAnimation(animationId, true, resetToFrame0);
     }
 }
 
@@ -452,6 +475,7 @@ class SSAnimationObjectComplex extends SpriteObject {
         this.actualFrame = 0;
         this.actualRectFrame = this.animationsRectangles[this.actualAnimationIndex][this.actualFrame];
         this.actualFrameCountTime = 0;
+        this.loop = true;
 
         this.spritePosition = new Vector2(0, 0);
     }
@@ -462,8 +486,10 @@ class SSAnimationObjectComplex extends SpriteObject {
         this.actualFrameCountTime += deltaTime;
         if (this.actualFrameCountTime >= this.framesDurations[this.actualAnimationIndex]) {
             // update the animation with the new frame
-            this.actualFrame = (this.actualFrame + 1) % this.animationsRectangles[this.actualAnimationIndex].length;
-            this.actualRectFrame = this.animationsRectangles[this.actualAnimationIndex][this.actualFrame];
+            if (this.loop) {
+                this.actualFrame = (this.actualFrame + 1) % this.animationsRectangles[this.actualAnimationIndex].length;
+                this.actualRectFrame = this.animationsRectangles[this.actualAnimationIndex][this.actualFrame];
+            }
 
             this.actualFrameCountTime = 0;
         }
@@ -497,10 +523,11 @@ class SSAnimationObjectComplex extends SpriteObject {
 
     /**
      * Switches to the given animation.
-     * @param {number} animationId - Index into `animationsRectangles`.
+     * @param {number} animationId - Row index in the sprite sheet.
+     * @param {boolean} [loop=true] - Whether to loop the animation or play it once.
      * @param {boolean} [resetToFrame0=true] - Whether to restart from frame 0.
      */
-    PlayAnimationLoop(animationId, resetToFrame0=true) {
+    PlayAnimation(animationId, loop=true, resetToFrame0=true) {
         this.actualAnimationIndex = animationId;
 
         if (resetToFrame0 || this.actualFrame >= this.animationsRectangles[this.actualAnimationIndex].length) {
@@ -510,6 +537,26 @@ class SSAnimationObjectComplex extends SpriteObject {
         }
 
         this.actualRectFrame = this.animationsRectangles[this.actualAnimationIndex][this.actualFrame];
+        
+        this.loop = loop;
+    }
+
+    /**
+     * Switches to the given animation row and play it once.
+     * @param {number} animationId - Row index in the sprite sheet.
+     * @param {boolean} [resetToFrame0=true] - Whether to restart from frame 0.
+     */
+    PlayAnimationOnce(animationId, resetToFrame0=true) {
+        this.PlayAnimation(animationId, false, resetToFrame0);
+    }
+
+    /**
+     * Switches to the given animation and play it in loop.
+     * @param {number} animationId - Index into `animationsRectangles`.
+     * @param {boolean} [resetToFrame0=true] - Whether to restart from frame 0.
+     */
+    PlayAnimationLoop(animationId, resetToFrame0=true) {
+        this.PlayAnimation(animationId, true, resetToFrame0);
     }
 }
 

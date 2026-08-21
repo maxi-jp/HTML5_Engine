@@ -514,7 +514,7 @@ class FloppyDerpPlayer extends SSAnimationObjectBasic {
     Die() {
         this.state = 2;
 
-        this.PlayAnimationLoop(1);
+        this.PlayAnimationOnce(1);
         this.framesDuration = this.animationT2;
     }
 }

@@ -301,6 +301,14 @@ class Box2DSSAnimationObjectBasic extends Box2DGameObject {
         this.animation.Draw(renderer);
     }
 
+    PlayAnimation(animationId, loop=true, resetToFrame0=true) {
+        this.animation.PlayAnimation(animationId, loop, resetToFrame0);
+    }
+
+    PlayAnimationOnce(animationId, resetToFrame0=true) {
+        this.animation.PlayAnimationOnce(animationId, resetToFrame0);
+    }
+
     PlayAnimationLoop(animationId, resetToFrame0=true) {
         this.animation.PlayAnimationLoop(animationId, resetToFrame0);
     }
@@ -337,6 +345,14 @@ class Box2DSSAnimationObjectComplex extends Box2DGameObject {
 
     Draw(renderer) {
         this.animation.Draw(renderer);
+    }
+
+    PlayAnimation(animationId, loop=true, resetToFrame0=true) {
+        this.animation.PlayAnimation(animationId, loop, resetToFrame0);
+    }
+
+    PlayAnimationOnce(animationId, resetToFrame0=true) {
+        this.animation.PlayAnimationOnce(animationId, resetToFrame0);
     }
 
     PlayAnimationLoop(animationId, resetToFrame0=true) {
