@@ -46,7 +46,17 @@ class GameObject {
     }
 
     set active(value) {
+        const wasActive = this._active;
         this._active = value;
+        
+        // When deactivating a game object, also disable its collider
+        if (wasActive && !value && this._collider) {
+            this._collider.enabled = false;
+        }
+        // When reactivating a game object, re-enable its collider
+        else if (!wasActive && value && this._collider) {
+            this._collider.enabled = true;
+        }
     }
     set position(value) {
         this._position = Vector2.Copy(value);

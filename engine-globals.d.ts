@@ -83,6 +83,63 @@ declare namespace Input {
     function Anything(): boolean;
 }
 
+// ── Collider classes ─────────────────────────────────────────────────────────
+
+/**
+ * Base collider class for non-physics collision detection.
+ * Register with game.AddCollider(collider) to participate in collision detection.
+ */
+declare class Collider {
+    /** Unique collider ID assigned by the engine. */
+    id: number;
+    /** World position of the collider. */
+    position: Vector2;
+    /** Bounding radius for broad-phase collision detection. */
+    boundingRadius: number;
+    /** True if this collider is currently overlapping another. */
+    isColliding: boolean;
+    /** When false, this collider is skipped in collision detection and click events. */
+    enabled: boolean;
+    /** The GameObject this collider is attached to (if any). */
+    go: GameObject | null;
+    /** Callback fired when collision starts. */
+    onCollisionEnterCallback: ((otherCollider: Collider) => void) | null;
+    /** Callback fired when collision ends. */
+    onCollisionExitCallback: ((otherCollider: Collider) => void) | null;
+    /** Callback fired when the collider is clicked. */
+    onClickCallback: (() => void) | null;
+
+    /** Update collider position to match attached GameObject. */
+    UpdateFromGO(): void;
+    /** Update collider position manually. */
+    UpdatePosition(newPosition: Vector2): void;
+    /** Check if a point is inside this collider. */
+    IsPointInside(x: number, y: number): boolean;
+}
+
+/** Axis-aligned rectangular collider. Position is the center. */
+declare class RectangleCollider extends Collider {
+    rect: Rect;
+    width: number;
+    height: number;
+    constructor(position: Vector2, width: number, height: number, gameObject?: GameObject);
+}
+
+/** Circular collider. */
+declare class CircleCollider extends Collider {
+    radius: number;
+    constructor(position: Vector2, radius: number, gameObject?: GameObject);
+}
+
+/** Convex polygon collider with rotation support. */
+declare class PolygonCollider extends Collider {
+    rotation: number;
+    points: {x: number, y: number}[];
+    transformedPoints: Vector2[];
+    constructor(position: Vector2, rotation: number, points: {x: number, y: number}[], gameObject?: GameObject);
+    UpdatePositionAndRotation(newPosition: Vector2, newRotation: number): void;
+}
+
 // ── Timer class ──────────────────────────────────────────────────────────────
 
 /**

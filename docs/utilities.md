@@ -250,6 +250,31 @@ button.onClickCallback = () => { this.StartGame(); };
 this.AddCollider(button);
 ```
 
+### Enabling and disabling colliders
+
+All colliders have an `enabled` property (default `true`). Disabled colliders:
+- Are skipped in collision detection (performance benefit)
+- Do not respond to mouse clicks
+- Do not trigger `OnCollisionEnter` / `OnCollisionExit` events
+
+```javascript
+// Temporarily disable collision detection (e.g. invincibility frames)
+player.collider.enabled = false;
+game.Invoke(() => { player.collider.enabled = true; }, 3.0);
+
+// Animation-based hitbox control
+if (this.attackFrame === 5) {
+    this.swordCollider.enabled = true;
+} else {
+    this.swordCollider.enabled = false;
+}
+
+// Object pooling — deactivated bullets shouldn't collide
+bullet.active = false; // also disables bullet.collider automatically
+```
+
+> **Important:** When you set `gameObject.active = false`, the engine automatically disables the attached collider. When you reactivate the GameObject (`active = true`), the collider is re-enabled.
+
 ### Updating standalone colliders manually
 
 | Method | Description |

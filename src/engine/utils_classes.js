@@ -773,6 +773,7 @@ class Collider {
     static nextColliderId = 0; // for unique IDs
 
     _go;
+    _enabled = true; // Collider is active by default
 
     constructor(position, boundingRadius, gameObject=null) {
         this.boundingRadius = boundingRadius;
@@ -797,6 +798,9 @@ class Collider {
         this.onClickCallback = null;
     }
 
+    get enabled() {
+        return this._enabled;
+    }
     get go() {
         return this._go;
     }
@@ -818,6 +822,10 @@ class Collider {
 
     set y(value) {
         this.position.y = value;
+    }
+
+    set enabled(value) {
+        this._enabled = value;
     }
 
     set go(value) {

@@ -28,7 +28,8 @@ class CollidersTest extends Game {
 
         // text labels
         this.textLabel1 = new TextLabel("Press numbers to change the moving item (now moving 0)", new Vector2(10, this.screenHeight - 40), "14px Arial", Color.black, "left", "bottom"); 
-        this.textLabel2 = new TextLabel("Move the selected object with WASD rotate with QE", new Vector2(10, this.screenHeight - 20), "14px Arial", Color.black, "left", "bottom"); 
+        this.textLabel2 = new TextLabel("Move the selected object with WASD rotate with QE", new Vector2(10, this.screenHeight - 20), "14px Arial", Color.black, "left", "bottom");
+        this.textLabel3 = new TextLabel("Press SPACE to toggle collider enabled/disabled", new Vector2(10, this.screenHeight - 60), "14px Arial", Color.black, "left", "bottom"); 
     }
 
     Start() {
@@ -128,6 +129,16 @@ class CollidersTest extends Game {
             this.movingObject.object.rotation += 2 * deltaTime;
         }
 
+        // toggle collider enabled/disabled with SPACE
+        if (Input.IsKeyDown(KEY_SPACE)) {
+            // Get the collider - handle both standalone colliders and game objects with colliders
+            const collider = this.movingObject.object.collider || this.movingObject.object;
+            if (collider) {
+                collider.enabled = !collider.enabled;
+                console.log(`Collider for '${this.movingObject.name}' is now ${collider.enabled ? 'ENABLED' : 'DISABLED'}`);
+            }
+        }
+
         this.polygonRotation += 1 * deltaTime;
         this.polygon.UpdatePositionAndRotation(this.polygonPosition, this.polygonRotation);
 
@@ -140,5 +151,6 @@ class CollidersTest extends Game {
 
         this.textLabel1.Draw(this.renderer);
         this.textLabel2.Draw(this.renderer);
+        this.textLabel3.Draw(this.renderer);
     }
 }

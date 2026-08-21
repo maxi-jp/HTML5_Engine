@@ -224,6 +224,16 @@ OnCollisionEnter(myCollider, otherCollider) {
 ```
 Remove with `game.RemoveCollider(this.collider)` or `game.RemoveGameObject(this)` (auto-removes its collider).
 
+**Enabling/disabling colliders:**
+```javascript
+// All colliders have an 'enabled' property (default true)
+player.collider.enabled = false; // skip collision detection
+game.Invoke(() => { player.collider.enabled = true; }, 3.0);
+
+// Setting GameObject.active automatically toggles collider.enabled
+enemy.active = false; // enemy.collider.enabled is now false too
+```
+
 ---
 
 ## Tiled Map Editor Integration

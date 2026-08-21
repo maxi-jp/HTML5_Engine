@@ -226,9 +226,10 @@ class Game {
 
         // Colliders onClick events
         this.colliders.forEach((collider) => {
-            if (Input.mouse.down)
+            if (collider.enabled && Input.mouse.down) {
                 if (collider.IsPointInside(Input.mouse.x, Input.mouse.y)) {
-                collider.OnClick();
+                    collider.OnClick();
+                }
             }
         });
 
@@ -236,9 +237,16 @@ class Game {
         this.detectedCollisions.clear();
 
         for (let i = 0; i < this.colliders.length; i++) {
+            const colliderA = this.colliders[i];
+            // Skip disabled colliders
+            if (!colliderA.enabled)
+                continue;
+            
             for (let j = i + 1; j < this.colliders.length; j++) {
-                const colliderA = this.colliders[i];
                 const colliderB = this.colliders[j];
+                // Skip disabled colliders
+                if (!colliderB.enabled)
+                    continue;
 
                 // Ensure consistent pair ID regardless of order
                 const pairId = colliderA.id < colliderB.id ?
