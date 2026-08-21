@@ -291,7 +291,7 @@ class FloppyDerpPlayer extends SSAnimationObjectBasic {
 
     Die() {
         this.state = 2;
-        this.PlayAnimationLoop(1);             // row 1 — death animation
+        this.PlayAnimationOnce(1);             // row 1 — death animation
         this.framesDuration = this.animationSpeedDying;
     }
 }
@@ -300,7 +300,7 @@ class FloppyDerpPlayer extends SSAnimationObjectBasic {
 Key points:
 - The `frameCount` parameter is an **array** — one entry per animation row. `[10, 10]` means two animations, each with 10 frames.
 - Frames are read left-to-right on each row; row 0 is animation 0, row 1 is animation 1, etc.
-- Call `PlayAnimationLoop(animationId)` to switch between rows.
+- Call `PlayAnimation(animationId)` to switch between rows.
 - `framesDuration` can be changed at any time to speed up or slow down the current animation.
 
 > Live demo: [Floppy Derp](https://maxi-jp.github.io/spark.js/floppyderp.html)
@@ -343,7 +343,7 @@ class Pacman extends SSAnimationObjectComplex {
 
         // Switch animation based on game state
         if (this.isDying) {
-            this.PlayAnimationLoop(1); // switch to death animation
+            this.PlayAnimationOnce(1); // switch to death animation and play it only once
         }
         else {
             this.PlayAnimationLoop(0, false); // play walk/chomp animation
@@ -357,7 +357,7 @@ class Pacman extends SSAnimationObjectComplex {
 Key points:
 - `animationsRectangles` is an **array of arrays** — the outer index is the animation ID, the inner array lists each frame's source `Rect`.
 - `framesDurations` is a flat array with one duration (seconds per frame) for each animation.
-- Call `PlayAnimationLoop(animationId)` to switch the active animation at any time. Pass `false` as the second argument to *not* reset to frame 0 when re-selecting the same animation.
+- Call `PlayAnimation(animationId)` to switch the active animation at any time. Pass `false` to the second argument not to reset (loop) the animation. Pass `false` as the third argument to *not* reset to frame 0 when re-selecting the same animation.
 - `flipX` / `flipY` and `rotation` work the same as on any other `SpriteObject`, so you can mirror the sprite to face different directions without needing extra frames.
 
 ### Important tips
