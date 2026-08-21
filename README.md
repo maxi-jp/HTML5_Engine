@@ -64,7 +64,7 @@ Documentation can be consulted [here](https://maxi-jp.github.io/spark.js/docs/).
   - tts/                  # Twin-stick shooter advanced implementation
   - tts_basic/            # Basic Twin-stick shooter game
   - watermelon/           # Watermelon Game (Suika Game clone, extension of the box2d_watermelon example project)
-  - fighting_game/        # 1v1 Fighting Game with camera system, multi-layer parallax, and collision-based combat
+  - fighting_game/        # 1v1 Fighting Game with camera system, multi-layer parallax, and collision-based combat (port of [chriscourses/fighting-game](https://github.com/chriscourses/fighting-game)).
   - canvas_resizing.js    # Canvas fullscreen and display configuration demo
   - coliders_test.js      # Collision detection testing
   - columns.js            # Columns-style puzzle game
