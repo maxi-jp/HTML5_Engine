@@ -61,6 +61,7 @@ canvas {
     bottom: 0;
     height: 100%;
     width: 100%;
+    transition: width 0.5s ease-in-out;
 }
 
 #playerHealth {
@@ -98,7 +99,7 @@ canvas {
     bottom: 0;
     left: 0;
     display: none;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.66);
     font-size: 32px;
     z-index: 200;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);

@@ -85,9 +85,12 @@ class FightingGame extends Game {
         
         // Game state
         this.gameOver = false;
+        this.uiShown = false;
         this.gameWinner = null;
         this.matchTime = 600;
         this.matchTimeDisplay = 60;
+
+        this.ui = null;
 
         // Background objects
         this.bgLayer = null;
@@ -106,6 +109,10 @@ class FightingGame extends Game {
     
     Start() {
         super.Start();
+
+        // Initialize our UI manager
+        this.ui = new FightingUI(this, canvas);
+        this.ui.Start();
 
         // Setup input system
         this.SetupInput();
@@ -147,7 +154,7 @@ class FightingGame extends Game {
         this.enemy.Start();
         
         // Start match timer
-        this.startMatchTimer();
+        this.StartMatchTimer();
     }
     
     Update(deltaTime) {
@@ -175,8 +182,12 @@ class FightingGame extends Game {
 
         this.camera.Update(deltaTime);
         
-        if (!this.gameOver) {
-
+        if (this.gameOver && !this.uiShown) {
+            // If a player was defeated, wait for their death animation to finish before showing the UI
+            if ((this.player.health <= 0 && this.player.dead) || 
+                (this.enemy.health <= 0 && this.enemy.dead)) {
+                this.EndMatch();
+            }
         }
     }
 
@@ -191,11 +202,11 @@ class FightingGame extends Game {
     }
 
     OnFighterHit(defender) {
-        this.updateHealthBars();
+        this.ui.UpdateHealthBars(this.player.health, this.enemy.health);
         
         // Check win conditions
         if (defender.health <= 0) {
-            this.endMatch();
+            this.gameOver = true; // Stop the timer and inputs immediately
         }
     }
 
@@ -216,63 +227,37 @@ class FightingGame extends Game {
     /**
      * Start the 60-second match timer using engine timers
      */
-    startMatchTimer() {
+    StartMatchTimer() {
         const tickTimer = () => {
             if (this.matchTime > 0 && !this.gameOver) {
                 this.matchTime--;
                 this.matchTimeDisplay = this.matchTime;
-                this.updateTimerDisplay();
+                this.ui.UpdateTimerDisplay(this.matchTimeDisplay);
                 this.Invoke(tickTimer, 1.0);
-            } else if (!this.gameOver) {
-                this.endMatch();
+            }
+            else if (!this.gameOver) {
+                this.EndMatch();
             }
         };
         tickTimer();
     }
     
     /**
-     * Update timer display in DOM
-     */
-    updateTimerDisplay() {
-        const timerEl = document.querySelector('#timer');
-        if (timerEl) {
-            timerEl.textContent = this.matchTimeDisplay;
-        }
-    }
-    
-    /**
-     * Update health bars in DOM
-     */
-    updateHealthBars() {
-        const playerHealth = document.querySelector('#playerHealth .health-bar');
-        const enemyHealth = document.querySelector('#enemyHealth .health-bar');
-        
-        if (playerHealth) {
-            playerHealth.style.width = this.player.health + '%';
-        }
-        if (enemyHealth) {
-            enemyHealth.style.width = this.enemy.health + '%';
-        }
-    }
-    
-    /**
      * End the match and determine winner
      */
-    endMatch() {
+    EndMatch() {
         this.gameOver = true;
+        this.uiShown = true;
         
         let message = 'Tie';
         if (this.player.health > this.enemy.health) {
             message = 'Player 1 Wins';
-        } else if (this.enemy.health > this.player.health) {
+        }
+        else if (this.enemy.health > this.player.health) {
             message = 'Player 2 Wins';
         }
         
-        const displayEl = document.querySelector('#displayText');
-        if (displayEl) {
-            displayEl.textContent = message;
-            displayEl.style.display = 'flex';
-        }
+        this.ui.ShowEndMatchText(message);
     }
 }
 

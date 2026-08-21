@@ -51,6 +51,9 @@ class Fighter extends GameObject {
             this
         );
         game.AddCollider(this.attackCollider);
+        
+        // Start with the attack collider disabled
+        this.attackCollider.enabled = false;
     }
     
     /**
@@ -119,6 +122,10 @@ class Fighter extends GameObject {
         this.currentAnimation.position.Set(this.position.x, this.position.y);
         this.currentAnimation.Update(deltaTime);
         
+        // Manage attack collider state: 
+        // Only enable it exactly on the attack frame if a hit hasn't landed yet
+        this.attackCollider.enabled = this.isAttacking && !this.hitLanded && this.animationObjects[this.currentAnimationName].actualFrame === this.attackFrame;
+
         // Check if death animation completed
         if (this.currentAnimationName === 'death' &&
                 this.currentAnimation.actualFrame >= this.currentAnimation.frameCount[0] - 1) {
@@ -142,9 +149,7 @@ class Fighter extends GameObject {
         
         // Check if our attack box hit the enemy's body collider
         if (myCollider === this.attackCollider && otherCollider === enemy.collider) {
-            // Check if we are attacking, haven't already landed this hit, and are on the exact damage frame
-            console.log(`OnCollisionEnter: this.isAttacking=${this.isAttacking}, this.hitLanded=${this.hitLanded}, this.getCurrentFrame()=${this.getCurrentFrame()}`);
-            if (this.isAttacking && !this.hitLanded && this.getCurrentFrame() === this.attackFrame) {
+            if (this.isAttacking && !this.hitLanded) {
                 console.log("Hit!");
                 this.hitLanded = true;
                 enemy.TakeHit();
@@ -217,19 +222,13 @@ class Fighter extends GameObject {
         this.currentAnimation = this.animationObjects[animName];
         if (animName === 'idle')
             this.currentAnimation.PlayAnimationLoop(0, false); // play row 0, not reset frame
+        else if (animName === 'death')
+            this.currentAnimation.PlayAnimationOnce(0, true); // play row 0 with no loop, reset frame
         else
             this.currentAnimation.PlayAnimationLoop(0, true); // Always play row 0, reset to frame 0
 
         // force an update of the animation object position
         this.currentAnimation.position.Set(this.position.x, this.position.y);
-    }
-    
-    /**
-     * Get current animation frame for collision detection
-     */
-    getCurrentFrame() {
-        const anim = this.animationObjects[this.currentAnimationName];
-        return anim ? anim.actualFrame : 0;
     }
     
     Attack() {

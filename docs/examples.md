@@ -47,6 +47,9 @@ Explore the `src/examples/` directory for practical demonstrations of the engine
   - **World Manifold extraction:** Capturing the exact world coordinates of an impact (`contactPoint`) to spawn the merged fruit exactly where the collision happened.
   - **Safe destruction:** Relying on the object's `active` flag to safely destroy colliding pairs of Box2D bodies, utilizing the engine's deferred deletion queue to prevent array-mutation bugs during physics steps.
   - **Scale translations:** Converting canvas pixel coordinates to Box2D meters and back using `Box2DToCanvasPosition`.
+- [Fighting Game](../fighting-game.html ':ignore :target=_blank') *(WIP)* — 1vs1 fighting game based on a project by [Christopher Lis](https://github.com/chriscourses/fighting-game ':ignore :target=_blank').
+  **Key features demonstrated:**
+  - TODO
 
 ---
 
