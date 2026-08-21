@@ -363,8 +363,9 @@ Key points:
 ### Important tips
 
 - Add objects to `this.gameObjects` in `Start()` — the base `Game.Update` and `Game.Draw` will call `Update`/`Draw` on every active entry automatically.
-- Set `this.active = false` on an object to stop it being updated and drawn (useful for pooling or death states).
+- Set `this.active = false` on an object to stop it being updated and drawn (useful for pooling or death states). This also automatically disables the object's collider if one is attached.
 - Override `OnCollisionEnter(myCollider, otherCollider)` on a `GameObject` to react to collider intersections (see [Utilities](utilities.md) for the collider API).
+- Use `collider.enabled = false` to temporarily disable collision detection without deactivating the entire GameObject (useful for invincibility frames, phasing, etc.).
 
 See the full examples in `src/examples/` — [BrokeOut](../brokeout.html ':ignore :target=_blank'), [Snake](../snake.html ':ignore :target=_blank'), and [Floppy Derp](../floppyderp.html ':ignore :target=_blank') are good starting points.
 

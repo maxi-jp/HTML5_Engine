@@ -236,7 +236,7 @@ Override these in your subclass to inject logic:
 
 | Property | Description |
 |---|---|
-| `active` | `boolean` — when `false` the object is skipped by `Update` and `Draw` |
+| `active` | `boolean` — when `false` the object is skipped by `Update` and `Draw`. Setting this also enables/disables the attached `collider` automatically. |
 | `position` | `Vector2` — world position |
 | `x` / `y` | Shorthand for `position.x` / `position.y` |
 | `rotation` | Rotation in radians |
