@@ -400,6 +400,8 @@ class SSAnimationObjectBasic extends SpriteObject {
             // update the animation with the new frame
             if (this.loop)
                 this.actualFrame = (this.actualFrame + 1) % this.frameCount[this.actualAnimation];
+            else if (this.actualFrame < this.frameCount[this.actualAnimation] - 1)
+                this.actualFrame++;
 
             this.actualFrameCountTime = 0;
         }
@@ -490,6 +492,8 @@ class SSAnimationObjectComplex extends SpriteObject {
                 this.actualFrame = (this.actualFrame + 1) % this.animationsRectangles[this.actualAnimationIndex].length;
                 this.actualRectFrame = this.animationsRectangles[this.actualAnimationIndex][this.actualFrame];
             }
+            else if (this.actualFrame < this.animationsRectangles[this.actualAnimationIndex].length - 1)
+                this.actualFrame++;
 
             this.actualFrameCountTime = 0;
         }
@@ -930,8 +934,8 @@ class FollowCamera extends Camera {
         const smoothStep = this.smoothingSpeed * deltaTime;
 
         // TODO apply offset
-        this.position.x += ((this.targetPosition.x - this.position.x) * smoothStep) + this.shakingValue.x;
-        this.position.y += ((this.targetPosition.y - this.position.y) * smoothStep) + this.shakingValue.y;
+        this.position.x += ((this.targetPosition.x - this.position.x + this.offset.x) * smoothStep) + this.shakingValue.x;
+        this.position.y += ((this.targetPosition.y - this.position.y + this.offset.y) * smoothStep) + this.shakingValue.y;
 
         super.Update(deltaTime); // handles zoom animation
     }
