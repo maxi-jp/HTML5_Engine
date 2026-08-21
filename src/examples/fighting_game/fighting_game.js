@@ -70,7 +70,7 @@ class FightingGame extends Game {
             kenji_fall:    { path: './src/examples/fighting_game/assets/kenji/Fall.png',     img: null },
             kenji_attack1: { path: './src/examples/fighting_game/assets/kenji/Attack1.png',  img: null },
             kenji_attack2: { path: './src/examples/fighting_game/assets/kenji/Attack2.png',  img: null },
-            kenji_takeHit: { path: './src/examples/fighting_game/assets/kenji/Take hit.png', img: null },
+            kenji_takeHit: { path: './src/examples/fighting_game/assets/kenji/TakeHit.png', img: null },
             kenji_death:   { path: './src/examples/fighting_game/assets/kenji/Death.png',    img: null },
             
             mack_idle:    { path: './src/examples/fighting_game/assets/samuraiMack/Idle.png',    img: null },
@@ -79,7 +79,7 @@ class FightingGame extends Game {
             mack_fall:    { path: './src/examples/fighting_game/assets/samuraiMack/Fall.png',    img: null },
             mack_attack1: { path: './src/examples/fighting_game/assets/samuraiMack/Attack1.png', img: null },
             mack_attack2: { path: './src/examples/fighting_game/assets/samuraiMack/Attack2.png', img: null },
-            mack_takeHit: { path: './src/examples/fighting_game/assets/samuraiMack/Take hit - white silhouette.png', img: null },
+            mack_takeHit: { path: './src/examples/fighting_game/assets/samuraiMack/TakeHit-whitesilhouette.png', img: null },
             mack_death:   { path: './src/examples/fighting_game/assets/samuraiMack/Death.png',   img: null },
         }
         
