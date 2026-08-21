@@ -4,6 +4,48 @@
  * Original project: https://github.com/chriscourses/fighting-game
  */
 
+// ── Fighter Configurations ───────────────────────────────────────────────────
+
+const MACK_CONFIG = {
+    scale: 2.5,
+    spriteData: {
+        idle:    { assetKey: 'mack_idle',    framesMax: 8, pivot: {x: 0, y: 20 } },
+        run:     { assetKey: 'mack_run',     framesMax: 8, pivot: {x: 0, y: 20 } },
+        jump:    { assetKey: 'mack_jump',    framesMax: 2, pivot: {x: 0, y: 20 } },
+        fall:    { assetKey: 'mack_fall',    framesMax: 2, pivot: {x: 0, y: 20 } },
+        attack1: { assetKey: 'mack_attack1', framesMax: 6, pivot: {x: 0, y: 20 } },
+        attack2: { assetKey: 'mack_attack2', framesMax: 6, pivot: {x: 0, y: 20 } },
+        takeHit: { assetKey: 'mack_takeHit', framesMax: 4, pivot: {x: 0, y: 20 } },
+        death:   { assetKey: 'mack_death',   framesMax: 6, pivot: {x: 0, y: 20 } }
+    },
+    bodyCollider: { w: 50, h: 150 },
+    attackBox: { offset: { x: 100, y: -50 }, width: 160, height: 50 },
+    attackFrame: 4,
+    speed: 300,
+    jumpSpeed: 1200,
+    actions: { left: 'P1_MoveLeft', right: 'P1_MoveRight', jump: 'P1_Jump', attack: 'P1_Attack' }
+};
+
+const KENJI_CONFIG = {
+    scale: 2.5,
+    spriteData: {
+        idle:    { assetKey: 'kenji_idle',    framesMax: 4, pivot: {x: 0, y: 26 } },
+        run:     { assetKey: 'kenji_run',     framesMax: 8, pivot: {x: 0, y: 26 } },
+        jump:    { assetKey: 'kenji_jump',    framesMax: 2, pivot: {x: 0, y: 26 } },
+        fall:    { assetKey: 'kenji_fall',    framesMax: 2, pivot: {x: 0, y: 26 } },
+        attack1: { assetKey: 'kenji_attack1', framesMax: 4, pivot: {x: 0, y: 26 } },
+        attack2: { assetKey: 'kenji_attack2', framesMax: 4, pivot: {x: 0, y: 26 } },
+        takeHit: { assetKey: 'kenji_takeHit', framesMax: 3, pivot: {x: 0, y: 26 } },
+        death:   { assetKey: 'kenji_death',   framesMax: 7, pivot: {x: 0, y: 26 } }
+    },
+    bodyCollider: { w: 50, h: 150 },
+    attackBox: { offset: { x: -170, y: -50 }, width: 170, height: 50 },
+    attackFrame: 2,
+    speed: 300,
+    jumpSpeed: 1200,
+    actions: { left: 'P2_MoveLeft', right: 'P2_MoveRight', jump: 'P2_Jump', attack: 'P2_Attack' }
+};
+
 // ── FightingGame Class ───────────────────────────────────────────────────────
 
 class FightingGame extends Game {
@@ -14,7 +56,8 @@ class FightingGame extends Game {
             screenWidth: 1024,
             screenHeight: 576,
             imageSmoothingEnabled: false,
-            drawColliders: true
+            drawColliders: true,
+            // collidersOnly: true
         });
 
         this.graphicAssets = {
@@ -30,20 +73,20 @@ class FightingGame extends Game {
             kenji_takeHit: { path: 'src/examples/fighting_game/assets/kenji/Take hit.png', img: null },
             kenji_death:   { path: 'src/examples/fighting_game/assets/kenji/Death.png',    img: null },
             
-            mack_idle:    { path: 'src/examples/fighting_game/assets/samuraiMack/Idle.png',     img: null },
-            mack_run:     { path: 'src/examples/fighting_game/assets/samuraiMack/Run.png',      img: null },
-            mack_jump:    { path: 'src/examples/fighting_game/assets/samuraiMack/Jump.png',     img: null },
-            mack_fall:    { path: 'src/examples/fighting_game/assets/samuraiMack/Fall.png',     img: null },
-            mack_attack1: { path: 'src/examples/fighting_game/assets/samuraiMack/Attack1.png',  img: null },
-            mack_attack2: { path: 'src/examples/fighting_game/assets/samuraiMack/Attack2.png',  img: null },
+            mack_idle:    { path: 'src/examples/fighting_game/assets/samuraiMack/Idle.png',    img: null },
+            mack_run:     { path: 'src/examples/fighting_game/assets/samuraiMack/Run.png',     img: null },
+            mack_jump:    { path: 'src/examples/fighting_game/assets/samuraiMack/Jump.png',    img: null },
+            mack_fall:    { path: 'src/examples/fighting_game/assets/samuraiMack/Fall.png',    img: null },
+            mack_attack1: { path: 'src/examples/fighting_game/assets/samuraiMack/Attack1.png', img: null },
+            mack_attack2: { path: 'src/examples/fighting_game/assets/samuraiMack/Attack2.png', img: null },
             mack_takeHit: { path: 'src/examples/fighting_game/assets/samuraiMack/Take hit - white silhouette.png', img: null },
-            mack_death:   { path: 'src/examples/fighting_game/assets/samuraiMack/Death.png',    img: null },
+            mack_death:   { path: 'src/examples/fighting_game/assets/samuraiMack/Death.png',   img: null },
         }
         
         // Game state
         this.gameOver = false;
         this.gameWinner = null;
-        this.matchTime = 60;
+        this.matchTime = 600;
         this.matchTimeDisplay = 60;
 
         // Background objects
@@ -55,7 +98,8 @@ class FightingGame extends Game {
         this.enemy  = null;
         this.rect = null; // a red rectangle to test the camera
 
-        this.floorY = 0;this.screenHeight - 140
+        this.floorY = 0;// this.screenHeight - 96
+        this.gravity = 2500;
 
         this.camera = null;
     }
@@ -73,110 +117,57 @@ class FightingGame extends Game {
         this.gameObjects.push(this.rect);
 
         this.camera = new FollowCamera(Vector2.Copy(this.rect.position), this.rect, -100, 100, 160, 200, 5, new Vector2(0, -this.screenHalfHeight + 96));
+        this.camera.Start();
         
         // Initialize background
+        const colorLayer = new ColorRectangleLayer(Color.FromHex('#61536d'), Vector2.Zero(), this.screenWidth, this.screenHeight);
         this.bgLayer = new SpriteBackgroundLayer(this.graphicAssets.background.img, Vector2.Zero(), 0, 1, new Vector2(1, 1));
-        this.shopLayer = new SpriteBackgroundLayer(this.graphicAssets.shop.img, new Vector2(600, 128), 0, 2.75, new Vector2(0.95, 0.98));
-        this.bgLayers = new BackgroundLayers(this.camera, [this.bgLayer, this.shopLayer]);
+        // this.shopLayer = new SpriteBackgroundLayer(this.graphicAssets.shop.img, new Vector2(600, 128), 0, 2.75, new Vector2(0.95, 0.98));
+        this.shopLayer = new GameObjectBackgroundLayer(
+            new Vector2(600 + 176, 128 + 176),
+            new SSAnimationObjectBasic(
+                Vector2.Zero(),
+                0, 2.75,
+                this.graphicAssets.shop.img,
+                118, 128, [6], 1/12
+            ),
+            new Vector2(0.95, 0.98)
+        );
+        this.bgLayers = new BackgroundLayers(this.camera, [colorLayer, this.bgLayer, this.shopLayer]);
         this.bgLayers.Start();
 
         // Create Player 1 - Samurai Mack
-        this.player = new Fighter(
-            new Vector2(50, 330),
-            {
-                scale: 2.5,
-                sprites: {
-                    idle:    { img: this.graphicAssets.mack_idle.img,    framesMax: 8 },
-                    run:     { img: this.graphicAssets.mack_run.img,     framesMax: 8 },
-                    jump:    { img: this.graphicAssets.mack_jump.img,    framesMax: 2 },
-                    fall:    { img: this.graphicAssets.mack_fall.img,    framesMax: 2 },
-                    attack1: { img: this.graphicAssets.mack_attack1.img, framesMax: 6 },
-                    attack2: { img: this.graphicAssets.mack_attack2.img, framesMax: 6 },
-                    takeHit: { img: this.graphicAssets.mack_takeHit.img, framesMax: 4 },
-                    death:   { img: this.graphicAssets.mack_death.img,   framesMax: 6 }
-                },
-                bodyCollider: { w: 50, h: 150 },
-                attackBox: {
-                    offset: { x: 100, y: 50 },
-                    width: 160,
-                    height: 50
-                }
-            }
-        );
+        this.player = new Fighter(new Vector2(50, 330), MACK_CONFIG);
         this.gameObjects.push(this.player);
         this.player.Start();
 
-        // Create attack box collider for Player 1
-        // const p1AttackPos = new Vector2(
-        //     this.player.position.x + this.player.attackBoxOffset.x + this.player.attackBoxWidth / 2,
-        //     this.player.position.y + this.player.attackBoxOffset.y + this.player.attackBoxHeight / 2
-        // );
-        // this.player.attackCollider = new RectangleCollider(
-        //     p1AttackPos,
-        //     this.player.attackBoxWidth,
-        //     this.player.attackBoxHeight,
-        //     this.player
-        // );
-        // this.player.attackCollider.fighter = this.player;
-        // this.player.attackCollider.isAttackBox = true;
-        // this.AddCollider(this.player.attackCollider);
-
         // Create Player 2 - Kenji
-        this.enemy = new Fighter(
-            new Vector2(900, 330),
-            {
-                scale: 2.5,
-                sprites: {
-                    idle:    { img: this.graphicAssets.kenji_idle.img,    framesMax: 4 },
-                    run:     { img: this.graphicAssets.kenji_run.img,     framesMax: 8 },
-                    jump:    { img: this.graphicAssets.kenji_jump.img,    framesMax: 2 },
-                    fall:    { img: this.graphicAssets.kenji_fall.img,    framesMax: 2 },
-                    attack1: { img: this.graphicAssets.kenji_attack1.img, framesMax: 4 },
-                    attack2: { img: this.graphicAssets.kenji_attack2.img, framesMax: 4 },
-                    takeHit: { img: this.graphicAssets.kenji_takeHit.img, framesMax: 3 },
-                    death:   { img: this.graphicAssets.kenji_death.img,   framesMax: 7 }
-                },
-                bodyCollider: { w: 50, h: 150 },
-                attackBox: {
-                    offset: { x: -170, y: 50 },
-                    width: 170,
-                    height: 50
-                }
-            }
-        );
+        this.enemy = new Fighter(new Vector2(900, 330), KENJI_CONFIG);
         this.gameObjects.push(this.enemy);
         this.enemy.Start();
-        
-        // // Create attack box collider for Player 2
-        // const p2AttackPos = new Vector2(
-        //     this.enemy.position.x + this.enemy.attackBoxOffset.x + this.enemy.attackBoxWidth / 2,
-        //     this.enemy.position.y + this.enemy.attackBoxOffset.y + this.enemy.attackBoxHeight / 2
-        // );
-        // this.enemy.attackCollider = new RectangleCollider(
-        //     p2AttackPos,
-        //     this.enemy.attackBoxWidth,
-        //     this.enemy.attackBoxHeight,
-        //     this.enemy
-        // );
-        // this.enemy.attackCollider.fighter = this.enemy;
-        // this.enemy.attackCollider.isAttackBox = true;
-        // this.AddCollider(this.enemy.attackCollider);
         
         // Start match timer
         this.startMatchTimer();
     }
     
     Update(deltaTime) {
+
+        // move the red rectangle to the middle between both players
+        this.rect.position.Set(
+            (this.player.position.x + this.enemy.position.x) / 2,
+            (this.player.position.y + this.enemy.position.y) / 2
+        );
+
         // debug move the red rectangle
-        const rectSpeed = 200;
-        if (Input.IsKeyPressed(KEY_A))
-            this.rect.position.x -= rectSpeed * deltaTime;
-        if (Input.IsKeyPressed(KEY_D))
-            this.rect.position.x += rectSpeed * deltaTime;
-        if (Input.IsKeyPressed(KEY_W))
-            this.rect.position.y -= rectSpeed * deltaTime;
-        if (Input.IsKeyPressed(KEY_S))
-            this.rect.position.y += rectSpeed * deltaTime;
+        // const rectSpeed = 200;
+        // if (Input.IsKeyPressed(KEY_A))
+        //     this.rect.position.x -= rectSpeed * deltaTime;
+        // if (Input.IsKeyPressed(KEY_D))
+        //     this.rect.position.x += rectSpeed * deltaTime;
+        // if (Input.IsKeyPressed(KEY_W))
+        //     this.rect.position.y -= rectSpeed * deltaTime;
+        // if (Input.IsKeyPressed(KEY_S))
+        //     this.rect.position.y += rectSpeed * deltaTime;
 
         super.Update(deltaTime);
 
@@ -184,70 +175,9 @@ class FightingGame extends Game {
 
         this.camera.Update(deltaTime);
         
-        // Reset velocity each frame
-        // this.player.velocity.x = 0;
-        // this.enemy.velocity.x = 0;
-        
-        // if (!this.gameOver) {
-        //     // Player 1 controls using Input API
-        //     if (Input.GetAction('P1_MoveLeft')) {
-        //         this.player.velocity.x = -5;
-        //         this.player.switchAnimation('run');
-        //     } else if (Input.GetAction('P1_MoveRight')) {
-        //         this.player.velocity.x = 5;
-        //         this.player.switchAnimation('run');
-        //     } else {
-        //         this.player.switchAnimation('idle');
-        //     }
-            
-        //     // Player 1 jump
-        //     if (Input.GetActionDown('P1_Jump') && this.player.position.y >= 330) {
-        //         this.player.velocity.y = -20;
-        //     }
-            
-        //     // Player 1 attack
-        //     if (Input.GetActionDown('P1_Attack')) {
-        //         this.player.attack();
-        //     }
-            
-        //     // Player 1 air animation
-        //     if (this.player.velocity.y < 0 && this.player.currentAnimationName !== 'attack1') {
-        //         this.player.switchAnimation('jump');
-        //     } else if (this.player.velocity.y > 0 && this.player.currentAnimationName !== 'attack1') {
-        //         this.player.switchAnimation('fall');
-        //     }
-            
-        //     // Player 2 controls using Input API
-        //     if (Input.GetAction('P2_MoveLeft')) {
-        //         this.enemy.velocity.x = -5;
-        //         this.enemy.switchAnimation('run');
-        //     } else if (Input.GetAction('P2_MoveRight')) {
-        //         this.enemy.velocity.x = 5;
-        //         this.enemy.switchAnimation('run');
-        //     } else {
-        //         this.enemy.switchAnimation('idle');
-        //     }
-            
-        //     // Player 2 jump
-        //     if (Input.GetActionDown('P2_Jump') && this.enemy.position.y >= 330) {
-        //         this.enemy.velocity.y = -20;
-        //     }
-            
-        //     // Player 2 attack
-        //     if (Input.GetActionDown('P2_Attack')) {
-        //         this.enemy.attack();
-        //     }
-            
-        //     // Player 2 air animation
-        //     if (this.enemy.velocity.y < 0 && this.enemy.currentAnimationName !== 'attack1') {
-        //         this.enemy.switchAnimation('jump');
-        //     } else if (this.enemy.velocity.y > 0 && this.enemy.currentAnimationName !== 'attack1') {
-        //         this.enemy.switchAnimation('fall');
-        //     }
-            
-        //     // Reset attack states when animations complete
-        //     this.resetAttackStates();
-        // }
+        if (!this.gameOver) {
+
+        }
     }
 
     Draw() {
@@ -260,63 +190,27 @@ class FightingGame extends Game {
         this.camera.PostDraw(this.renderer);
     }
 
-    /**
-     * Handle collision detection callback from engine
-     * Called when any registered collider collides with another
-     */
-    OnCollisionEnter(myCollider, otherCollider) {
-        // Check if an attack box hit a body collider
-        if (myCollider.isAttackBox && otherCollider.isBody) {
-            const attacker = myCollider.fighter;
-            const defender = otherCollider.fighter;
-            
-            // Don't let fighter hit themselves
-            if (attacker === defender) return;
-            
-            // Check if attacker is attacking and on the right frame
-            if (!attacker.isAttacking || attacker.hitLanded) return;
-            
-            const currentFrame = attacker.getCurrentFrame();
-            
-            // Player 1 hits on frame 4, Player 2 hits on frame 2
-            const hitFrame = (attacker === this.player) ? 4 : 2;
-            
-            if (currentFrame === hitFrame) {
-                defender.takeHit();
-                attacker.hitLanded = true; // Prevent multiple hits from same attack
-                this.updateHealthBars();
-                
-                // Check win conditions
-                if (defender.health <= 0) {
-                    this.endMatch();
-                }
-            }
+    OnFighterHit(defender) {
+        this.updateHealthBars();
+        
+        // Check win conditions
+        if (defender.health <= 0) {
+            this.endMatch();
         }
     }
 
     SetupInput() {
         // Player 1 actions: WASD + Space
-        Input.RegisterAction('P1_MoveLeft', [{ type: 'key', keyCode: KEY_A }]);
-        Input.RegisterAction('P1_MoveRight', [{ type: 'key', keyCode: KEY_D }]);
-        Input.RegisterAction('P1_Jump', [{ type: 'key', keyCode: KEY_W }]);
-        Input.RegisterAction('P1_Attack', [{ type: 'key', keyCode: KEY_SPACE }]);
+        Input.RegisterAction('P1_MoveLeft', [{ type: 'key', code: KEY_A }]);
+        Input.RegisterAction('P1_MoveRight', [{ type: 'key', code: KEY_D }]);
+        Input.RegisterAction('P1_Jump', [{ type: 'key', code: KEY_W }]);
+        Input.RegisterAction('P1_Attack', [{ type: 'key', code: KEY_SPACE }]);
         
         // Player 2 actions: Arrow Keys + down to attack
-        Input.RegisterAction('P2_MoveLeft', [{ type: 'key', keyCode: KEY_LEFT }]);
-        Input.RegisterAction('P2_MoveRight', [{ type: 'key', keyCode: KEY_RIGHT }]);
-        Input.RegisterAction('P2_Jump', [{ type: 'key', keyCode: KEY_UP }]);
-        Input.RegisterAction('P2_Attack', [{ type: 'key', keyCode: KEY_DOWN }]);
-    }
-    
-    /**
-     * Add collider to the game
-     */
-    addCollider(collider) {
-        // Manual collider tracking since we handle custom collision
-        if (!this.customColliders) {
-            this.customColliders = [];
-        }
-        this.customColliders.push(collider);
+        Input.RegisterAction('P2_MoveLeft', [{ type: 'key', code: KEY_LEFT }]);
+        Input.RegisterAction('P2_MoveRight', [{ type: 'key', code: KEY_RIGHT }]);
+        Input.RegisterAction('P2_Jump', [{ type: 'key', code: KEY_UP }]);
+        Input.RegisterAction('P2_Attack', [{ type: 'key', code: KEY_DOWN }]);
     }
     
     /**
@@ -358,29 +252,6 @@ class FightingGame extends Game {
         }
         if (enemyHealth) {
             enemyHealth.style.width = this.enemy.health + '%';
-        }
-    }
-    
-    /**
-     * Reset attack state when animation completes
-     */
-    resetAttackStates() {
-        // Reset player attack flag when attack animation completes
-        if (this.player.isAttacking && this.player.currentAnimationName === 'attack1') {
-            const attackAnim = this.player.animationObjects['attack1'];
-            if (attackAnim && this.player.getCurrentFrame() >= attackAnim.frameCount[0] - 1) {
-                this.player.isAttacking = false;
-                this.player.hitLanded = false;
-            }
-        }
-        
-        // Reset enemy attack flag when attack animation completes
-        if (this.enemy.isAttacking && this.enemy.currentAnimationName === 'attack1') {
-            const attackAnim = this.enemy.animationObjects['attack1'];
-            if (attackAnim && this.enemy.getCurrentFrame() >= attackAnim.frameCount[0] - 1) {
-                this.enemy.isAttacking = false;
-                this.enemy.hitLanded = false;
-            }
         }
     }
     

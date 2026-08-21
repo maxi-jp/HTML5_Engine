@@ -10,9 +10,14 @@ class Fighter extends GameObject {
         this.health = 100;
         this.dead = false;
         this.scale = config.scale;
+        this.actions = config.actions;
+        this.speed = config.speed;
+        this.jumpSpeed = config.jumpSpeed;
+        this.attackFrame = config.attackFrame;
         
         // Animation system - uses SSAnimationObjectBasic for each animation state
         this.animationObjects = {};
+        this.currentAnimation = null;
         this.currentAnimationName = 'idle';
         
         // Combat system
@@ -26,31 +31,128 @@ class Fighter extends GameObject {
         this.attackBoxHeight = config.attackBox.height;
         
         // Load all animation sprite sheets
-        this.CreateAnimations(config.sprites);
+        this.CreateAnimations(config.spriteData);
     }
 
     Start() {
         // initialize body collider
-        this.collider = new RectangleCollider(Vector2.Zero(), this.config.bodyCollider.w, this.config.bodyCollider.h, this);
+        this.collider = new RectangleCollider(new Vector2(0, -70), this.config.bodyCollider.w, this.config.bodyCollider.h, this);
         game.AddCollider(this.collider);
 
         // initialize attack collider
-        // TODO doing this...
-        this.attackCollider = new RectangleCollider(Vector2.Zero(), this.attackBoxWidth, this.attackBoxHeight);
-
-        // const p1AttackPos = new Vector2(
-        //     this.player.position.x + this.player.attackBoxOffset.x + this.player.attackBoxWidth / 2,
-        //     this.player.position.y + this.player.attackBoxOffset.y + this.player.attackBoxHeight / 2
-        // );
-        // this.player.attackCollider = new RectangleCollider(
-        //     p1AttackPos,
-        //     this.player.attackBoxWidth,
-        //     this.player.attackBoxHeight,
-        //     this.player
-        // );
-        // this.player.attackCollider.fighter = this.player;
-        // this.player.attackCollider.isAttackBox = true;
+        const p1AttackPos = new Vector2(
+            this.position.x + this.attackBoxOffset.x,
+            this.position.y + this.attackBoxOffset.y
+        );
+        this.attackCollider = new RectangleCollider(
+            p1AttackPos,
+            this.attackBoxWidth,
+            this.attackBoxHeight,
+            this
+        );
         game.AddCollider(this.attackCollider);
+    }
+    
+    /**
+     * Update physics and animation
+     */
+    Update(deltaTime) {
+        super.Update(deltaTime);
+
+        this.velocity.x = 0;
+
+        // Input
+        if (!game.gameOver) {
+            // Player controls using Input API
+            if (Input.GetAction(this.actions.left)) {
+                this.velocity.x = -this.speed;
+            }
+            if (Input.GetAction(this.actions.right)) {
+                this.velocity.x = this.speed;
+            }
+
+            // Player jump
+            if (Input.GetActionDown(this.actions.jump) && this.position.y >= game.floorY) {
+                this.velocity.y = -this.jumpSpeed;
+            }
+            
+            // Player attack
+            if (Input.GetActionDown(this.actions.attack)) {
+                this.Attack();
+            }
+        }
+        
+        // Apply Gravity
+        this.velocity.y += game.gravity * deltaTime;
+        
+        // Apply velocity to position
+        this.position.x += this.velocity.x * deltaTime;
+        this.position.y += this.velocity.y * deltaTime;
+        
+        // Floor collision (after moving)
+        if (this.position.y >= game.floorY) {
+            this.position.y = game.floorY;
+            this.velocity.y = 0;
+        }
+        
+        // Handle Air/Ground Animations
+        if (this.velocity.y < 0) {
+            this.SwitchAnimation('jump');
+        }
+        else if (this.velocity.y > 0 && this.position.y < game.floorY) {
+            this.SwitchAnimation('fall');
+        }
+        else if (this.velocity.x !== 0) {
+            this.SwitchAnimation('run');
+        }
+        else {
+            this.SwitchAnimation('idle');
+        }
+        
+        // Update attack box collider position relative to fighter
+        this.attackCollider.position.Set(
+            this.position.x + this.attackBoxOffset.x,
+            this.position.y + this.attackBoxOffset.y
+        );
+        
+        // Update current animation object
+        this.currentAnimation.position.Set(this.position.x, this.position.y);
+        this.currentAnimation.Update(deltaTime);
+        
+        // Check if death animation completed
+        if (this.currentAnimationName === 'death' &&
+                this.currentAnimation.actualFrame >= this.currentAnimation.frameCount[0] - 1) {
+            this.dead = true;
+        }
+
+        // Reset attack state when attack animation completes
+        if (this.isAttacking && this.currentAnimationName === 'attack1' &&
+            this.currentAnimation.actualFrame >= this.currentAnimation.frameCount[0] - 1) {
+            this.isAttacking = false;
+        }
+    }
+    
+    Draw(renderer) {
+        this.animationObjects[this.currentAnimationName].Draw(renderer);
+    }
+
+    OnCollisionEnter(myCollider, otherCollider) {
+        // Determine who the enemy is
+        const enemy = (this === game.player) ? game.enemy : game.player;
+        
+        // Check if our attack box hit the enemy's body collider
+        if (myCollider === this.attackCollider && otherCollider === enemy.collider) {
+            // Check if we are attacking, haven't already landed this hit, and are on the exact damage frame
+            console.log(`OnCollisionEnter: this.isAttacking=${this.isAttacking}, this.hitLanded=${this.hitLanded}, this.getCurrentFrame()=${this.getCurrentFrame()}`);
+            if (this.isAttacking && !this.hitLanded && this.getCurrentFrame() === this.attackFrame) {
+                console.log("Hit!");
+                this.hitLanded = true;
+                enemy.TakeHit();
+                
+                // Notify the game to update UI and check win conditions
+                game.OnFighterHit(enemy);
+            }
+        }
     }
     
     /**
@@ -63,53 +165,63 @@ class Fighter extends GameObject {
         
         for (const [name, spriteData] of Object.entries(spritesConfig)) {
             // Calculate frame dimensions from the sprite sheet
-            const frameW = spriteData.img.width / spriteData.framesMax;
-            const frameH = spriteData.img.height;
+            const frameW = game.graphicAssets[spriteData.assetKey].img.width / spriteData.framesMax;
+            const frameH = game.graphicAssets[spriteData.assetKey].img.height;
                 
-            // Create SSAnimationObjectBasic for this animation
+            // Create SSAnimationObjectBasic objects for each animation
             // Since each PNG is a single-row sprite sheet, we use frameCount = [framesMax]
             this.animationObjects[name] = new SSAnimationObjectBasic(
                 this.position,
                 0, // rotation
                 this.scale,
-                spriteData.img,
+                game.graphicAssets[spriteData.assetKey].img,
                 frameW,
                 frameH,
                 [spriteData.framesMax], // Single animation (row 0)
                 frameDuration
             );
+            this.animationObjects[name].pivot = spriteData.pivot;
         }
+
+        this.currentAnimationName = 'idle';
+        this.currentAnimation = this.animationObjects[this.currentAnimationName];
+        this.currentAnimation.PlayAnimationLoop(0, true);
     }
     
     /**
      * Switch to a different animation
      * Respects animation priority (death > attack > takeHit)
      */
-    switchAnimation(animName) {
-        if (!this.animationObjects[animName]) return;
-        if (this.currentAnimationName === animName) return;
+    SwitchAnimation(animName) {
+        if (this.currentAnimationName === animName)
+            return;
         
         // Death animation cannot be interrupted
-        if (this.currentAnimationName === 'death') return;
+        if (this.currentAnimationName === 'death')
+            return;
         
         // Attack animation cannot be interrupted until complete
         if (this.currentAnimationName === 'attack1') {
-            const anim = this.animationObjects['attack1'];
-            if (anim && anim.actualFrame < anim.frameCount[0] - 1) return;
+            if (this.currentAnimation.actualFrame < this.currentAnimation.frameCount[0] - 1)
+                return;
         }
         
         // TakeHit animation cannot be interrupted until complete
         if (this.currentAnimationName === 'takeHit') {
-            const anim = this.animationObjects['takeHit'];
-            if (anim && anim.actualFrame < anim.frameCount[0] - 1) return;
+            if (this.currentAnimation.actualFrame < this.currentAnimation.frameCount[0] - 1)
+                return;
         }
         
         // Switch to new animation and reset it
         this.currentAnimationName = animName;
-        const newAnim = this.animationObjects[animName];
-        if (newAnim) {
-            newAnim.PlayAnimationLoop(0, true); // Always play row 0, reset to frame 0
-        }
+        this.currentAnimation = this.animationObjects[animName];
+        if (animName === 'idle')
+            this.currentAnimation.PlayAnimationLoop(0, false); // play row 0, not reset frame
+        else
+            this.currentAnimation.PlayAnimationLoop(0, true); // Always play row 0, reset to frame 0
+
+        // force an update of the animation object position
+        this.currentAnimation.position.Set(this.position.x, this.position.y);
     }
     
     /**
@@ -120,81 +232,24 @@ class Fighter extends GameObject {
         return anim ? anim.actualFrame : 0;
     }
     
-    /**
-     * Perform attack action
-     */
-    attack() {
-        this.switchAnimation('attack1');
+    Attack() {
+        this.SwitchAnimation('attack1');
         this.isAttacking = true;
         this.hitLanded = false; // Reset hit flag for new attack
     }
     
-    /**
-     * Take damage from opponent
-     */
-    takeHit() {
+    TakeHit() {
+        console.log("Damage received!");
+
+        this.isAttacking = false;
         this.health -= 20;
+
         if (this.health <= 0) {
             this.health = 0;
-            this.switchAnimation('death');
-        } else {
-            this.switchAnimation('takeHit');
+            this.SwitchAnimation('death');
         }
-    }
-    
-    /**
-     * Update physics and animation
-     */
-    Update(deltaTime) {
-        super.Update(deltaTime);
-        
-        // Apply velocity
-        this.position.x += this.velocity.x;
-        this.position.y += this.velocity.y;
-        
-        // Gravity
-        const GROUND_Y = 330;
-        const GRAVITY = 0.7;
-        
-        if (this.position.y >= GROUND_Y) {
-            this.position.y = GROUND_Y;
-            this.velocity.y = 0;
-        } else {
-            this.velocity.y += GRAVITY;
+        else {
+            this.SwitchAnimation('takeHit');
         }
-        
-        // Update attack box collider position relative to fighter
-        if (this.attackCollider) {
-            const attackPos = new Vector2(
-                this.position.x + this.attackBoxOffset.x + this.attackBoxWidth / 2,
-                this.position.y + this.attackBoxOffset.y + this.attackBoxHeight / 2
-            );
-            this.attackCollider.position.Set(attackPos);
-        }
-        
-        // Update current animation object
-        const currentAnim = this.animationObjects[this.currentAnimationName];
-        if (currentAnim) {
-            currentAnim.position = this.position;
-            currentAnim.Update(deltaTime);
-            
-            // Check if death animation completed
-            if (this.currentAnimationName === 'death' &&
-                    currentAnim.actualFrame >= currentAnim.frameCount[0] - 1) {
-                this.dead = true;
-            }
-        }
-        
-        // Update body collider
-        if (this.bodyCollider) {
-            this.bodyCollider.position.Set(this.position);
-        }
-    }
-    
-    /**
-     * Draw the current animation
-     */
-    Draw(renderer) {
-        this.animationObjects[this.currentAnimationName].Draw(renderer);
     }
 }
