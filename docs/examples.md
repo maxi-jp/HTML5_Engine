@@ -49,7 +49,11 @@ Explore the `src/examples/` directory for practical demonstrations of the engine
   - **Scale translations:** Converting canvas pixel coordinates to Box2D meters and back using `Box2DToCanvasPosition`.
 - [Fighting Game](../fighting-game.html ':ignore :target=_blank') *(WIP)* — 1vs1 fighting game based on a project by [Christopher Lis](https://github.com/chriscourses/fighting-game ':ignore :target=_blank').
   **Key features demonstrated:**
-  - TODO
+  - **Camera system with virtual pivot point:** Smooth multi-target following by positioning camera at the arithmetic mean of both fighters' locations
+  - **HTMLMenu overlay UI:** DOM-based HUD (health bars, timer, game-over display) positioned above the canvas using the engine's overlay system
+  - **Engine timer system:** Match countdown using `game.Invoke()` for frame-accurate, game-time-based timing (not wall-clock `setInterval`)
+  - **Multi-layer parallax backgrounds:** Layered rendering with `BackgroundLayers` (color base, static background, animated shop overlay) with camera-aware transformations
+  - **Collision system for combat:** Dual colliders per fighter (body collider for receiving hits, attack collider for delivering damage) with frame-accurate hit detection using `actualFrame` property
 
 ---
 
