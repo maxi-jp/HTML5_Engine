@@ -156,7 +156,7 @@ const boxCollider = new RectangleCollider(
 );
 box.collider = boxCollider;
 this.AddCollider(boxCollider);
-this.gameObjects.push(box);
+this.AddGameObject(box);
 ```
 
 ### `CircleCollider`
@@ -207,7 +207,7 @@ const rupeeCollider = new PolygonCollider(
 );
 rupee.collider = rupeeCollider;
 this.AddCollider(rupeeCollider);
-this.gameObjects.push(rupee);
+this.AddGameObject(rupee);
 ```
 
 ### Collision callbacks

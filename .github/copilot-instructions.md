@@ -99,9 +99,9 @@ class MyGame extends Game {
     this.Configure({ screenWidth: 800, screenHeight: 600 });
     this.graphicAssets = { ship: { path: 'assets/ship.png', img: null } };
   }
-  Start()            { this.ship = new SpriteObject(new Vector2(400,300), 0, 1, this.graphicAssets.ship.img); }
-  Update(deltaTime)  { this.ship.Update(deltaTime); }
-  Draw()             { this.ship.Draw(this.renderer); }
+  Start()            { this.ship = this.AddGameObject(new SpriteObject(new Vector2(400,300), 0, 1, this.graphicAssets.ship.img)); }
+  Update(deltaTime)  { super.Update(deltaTime); }
+  Draw()             { super.Draw(); }
 }
 // In the last game script (or inline in the HTML):
 window.onload = () => { Init(MyGame); }
@@ -325,6 +325,7 @@ sprites.forEach(sprite => this.gameObjects.push(sprite));
 ---
 
 ## Conventions
+- **Use `game.AddGameObject()`** to add GameObjects — it automatically calls `Start()` and adds to the game loop. Direct `gameObjects.push()` skips initialization.
 - **Color channels are 0–1**, not 0–255. Use `Color.FromRGB(r,g,b)` for 0-255 inputs.
 - **`deltaTime` is seconds.** Multiply all speeds/velocities by `deltaTime` for frame-rate independence.
 - **Object pooling** via `ObjectPool` is the standard pattern for bullets, particles, and other frequently created/destroyed objects.

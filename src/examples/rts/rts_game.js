@@ -31,7 +31,7 @@ class RTSGame extends Game {
         this.tilesets = TiledLoader.CreateTilesets(mapData, Vector2.Zero(), 1);
         
         this.tilesets.forEach(tileset => {
-            this.gameObjects.push(tileset);
+            this.AddGameObject(tileset);
         });
 
         // Initialize the camera in the top-left corner
