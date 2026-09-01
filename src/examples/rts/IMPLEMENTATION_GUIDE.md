@@ -15,10 +15,10 @@
 
 **See `PROGRESS.md` for detailed status tracking.**
 
-**Current Phase:** Not Started  
-**Last Completed Session:** None  
-**Next Session:** Phase 1, Session 1  
-**Known Blockers:** None  
+**Current Phase:** Phase 1 Session 1.4 - Selection System  
+**Last Completed Session:** Phase 1 Session 1.3 - Grid System & Unit Spawning  
+**Next Session:** Phase 1 Session 1.4  
+**Known Blockers:** None (Session 1.3 blockers resolved)  
 
 *(Brief status here; full details in PROGRESS.md)*
 
@@ -71,7 +71,7 @@ Reference: tileset.html and tileset.js for TiledLoader examples
 - [ ] Implement arrow key camera panning (800 px/second base speed)
 - [ ] Implement edge-panning (20px dead zone, acceleration curve)
 - [ ] Implement mouse wheel zoom (0.5x to 2.0x, zoom-to-cursor)
-- [ ] Add middle-mouse drag panning (optional for Session 1)
+- [ ] Add middle-mouse click + drag panning
 - [ ] Clamp camera to map bounds
 - [ ] Test: Can navigate entire map smoothly
 
@@ -79,6 +79,7 @@ Reference: tileset.html and tileset.js for TiledLoader examples
 - ✅ Arrow keys pan camera at consistent speed
 - ✅ Moving mouse to screen edges pans camera
 - ✅ Mouse wheel zooms in/out targeting cursor position
+- ✅ Middle-mouse click + drag pans camera smoothly
 - ✅ Cannot scroll beyond map edges
 - ✅ Camera movement feels smooth (no jitter)
 
@@ -108,7 +109,7 @@ class RTSGame extends Game {
 **Copilot Prompt Template:**
 ```
 Phase 1 Session 2: Implementing camera controls for RTS.
-I need edge-panning (with dead zone), arrow key panning, and zoom-to-cursor.
+I need edge-panning (with dead zone), arrow key panning, middle-mouse drag panning, and zoom-to-cursor.
 Reference the copilot-instructions.md Camera API section.
 Camera should be clamped to map bounds.
 ```
@@ -122,13 +123,13 @@ Camera should be clamped to map bounds.
 2. `src/examples/rts/entities.js` - Base Entity and Unit classes
 
 **Tasks:**
-- [ ] Create `GridMap` class: tracks `walkable`, `buildable`, `occupied` per cell
-- [ ] Parse Tiled map to populate grid (water = not walkable, grass = walkable)
-- [ ] Create `Entity extends SpriteObject` base class (health, ownerId, visionRadius)
-- [ ] Create `Unit extends Entity` (currentCommand, commandQueue, speed)
-- [ ] Spawn 5 test units at fixed positions (use simple sprite placeholder)
-- [ ] Render units with Y-sorting (sort gameObjects by y position before Draw)
-- [ ] Test: Units appear on map at correct positions
+- [x] Create `GridMap` class: tracks `walkable`, `buildable`, `occupied` per cell
+- [x] Parse Tiled map to populate grid (water = not walkable, grass = walkable)
+- [x] Create `Entity extends SpriteObject` base class (health, ownerId, visionRadius)
+- [x] Create `Unit extends Entity` (currentCommand, commandQueue, speed)
+- [x] Spawn 5 test units at fixed positions (use simple sprite placeholder)
+- [x] Render units with Y-sorting (sort gameObjects by y position before Draw)
+- [x] Test: Units appear on map at correct positions
 
 **Acceptance Criteria:**
 - ✅ GridMap correctly identifies walkable vs blocked cells

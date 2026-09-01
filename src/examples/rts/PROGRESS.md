@@ -1,14 +1,15 @@
 # RTS Project Progress Tracker
 
-**Last Updated:** 2026-09-01  
-**Current Phase:** Phase 1 Session 1.2 - In Progress  
-**Next Action:** Tune camera feel and validate Session 1.2 acceptance criteria
+**Last Updated:** 2026-09-02  
+**Current Phase:** Phase 1 Session 1.2 Follow-up + Session 1.4 Preparation  
+**Next Action:** Implement middle-mouse click + drag camera panning, then proceed to SelectionManager
 
 ## Quick Status
 - ✅ GDD Complete
 - ✅ Implementation Guide Created
 - ✅ Phase 1 Session 1.1: Project Structure & Map Loading
-- 🟡 Phase 1 Session 1.2: Camera Controls (implementation done, tuning/testing)
+- 🟡 Phase 1 Session 1.2: Camera Controls (follow-up pending)
+- ✅ Phase 1 Session 1.3: Grid System & Unit Spawning
 - ⬜ Phase 2: Economy Sandbox
 - ⬜ Phase 3: Base Construction
 - ⬜ Phase 4: Combat
@@ -16,10 +17,43 @@
 - ⬜ Phase 6: Vertical Slice
 - ⬜ Phase 7: Polish
 
+## Deferred / Carry-Over Items
+
+- [ ] Implement camera middle-mouse click + drag panning (`RTSCamera`)  
+	Owner/Target: Phase 1 Session 1.2 follow-up  
+	Reason: Requirement identified but not implemented during initial Session 1.2 pass.
+
 ## Session Log
 
+### 2026-09-02 - Phase 1 Session 1.3: Grid System & Unit Spawning
+**Status:** Complete
+
+**Completed:**
+- ✅ Created `GridMap` with `walkable`, `buildable`, `occupied`, and `occupant` per cell
+- ✅ Added world/grid conversion helpers (`WorldToGrid`, `GridToWorld`)
+- ✅ Parsed Tiled `Ground` layer into terrain types (`grass`, `shore`, `water`)
+- ✅ Created `Entity` and `Unit` base classes for RTS gameplay entities
+- ✅ Spawned 5 test units at fixed/preferred grid cells with occupancy registration
+- ✅ Added Y-sorting for world objects prior to draw
+- ✅ Added grid debug overlay (semi-transparent terrain colors + occupied cell outline)
+- ✅ Added `G` key toggle for live grid overlay debugging
+
+**Files Created/Modified:**
+- `src/examples/rts/grid_map.js` - Grid data model and conversion utilities
+- `src/examples/rts/entities.js` - Entity/Unit base classes and deterministic placeholder rendering
+- `src/examples/rts/rts_game.js` - Grid integration, unit spawn, Y-sort, grid debug overlay
+- `rts.html` - Added script includes for `grid_map.js` and `entities.js`
+
+**Next Steps:**
+1. Start Phase 1 Session 1.4 (Selection System)
+2. Add selection colliders/raycast handling for units
+3. Implement click and drag-box selection
+4. Draw selection rectangle and selected unit rings
+
+---
+
 ### 2026-09-01 - Phase 1 Session 1.2: Camera Controls
-**Status:** In Progress - Core Implementation Complete
+**Status:** In Progress (Follow-up Required)
 
 **Completed:**
 - ✅ Added dedicated `RTSCamera` class extending engine `Camera`
@@ -30,17 +64,18 @@
 - ✅ Added live camera debug overlay (x/y/zoom + clamp min/max)
 - ✅ Tuned keyboard panning to be slower than edge-panning
 
+**Pending Carry-Over:**
+- [ ] Implement middle-mouse click + drag panning
+
 **Files Created/Modified:**
 - `src/examples/rts/rts_camera.js` - RTS camera subclass with controls, clamp logic, debug overlay
 - `src/examples/rts/rts_game.js` - Integrated `RTSCamera` into game lifecycle
 - `rts.html` - Added script include for `rts_camera.js`
 - `src/engine/tiled_loader.js` - Added support for embedded base64 tileset images
 
-**Next Steps:**
-1. Playtest camera feel across full map at multiple zoom levels
-2. Verify all Session 1.2 acceptance criteria in IMPLEMENTATION_GUIDE.md
-3. Finalize pan-speed constants (keyboard vs edge)
-4. Mark Session 1.2 complete and move to Session 1.3
+**Validation Outcome:**
+- ✅ Current controls are stable and used as baseline for Session 1.3 integration.
+- 🟡 Session 1.2 remains open until middle-mouse drag panning is implemented.
 
 ---
 
@@ -82,7 +117,7 @@
 3. Load and render test map
 
 ## Known Issues
-- Camera controls need final feel tuning (speed/balance), but core behavior is implemented.
+- None currently blocking Phase 1 progression.
 
 ## Performance Baseline
 *To be established after Phase 1 Session 1*
@@ -101,5 +136,7 @@
 - `rts.html` - RTS example HTML entry point
 - `src/examples/rts/rts_game.js` - RTSGame bootstrap, map loading, draw/update loop
 - `src/examples/rts/rts_camera.js` - RTS camera controls and debug overlay
+- `src/examples/rts/grid_map.js` - Grid map model and terrain/cell state parsing
+- `src/examples/rts/entities.js` - RTS entity and unit base classes
 - `src/examples/rts/assets/rts_map.json` - Test map used for Session 1
 - `src/examples/rts/assets/rts_tileset.png` - Temporary tileset for map rendering

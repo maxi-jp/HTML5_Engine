@@ -14,6 +14,23 @@ Before starting work:
 4. ✅ Review `RTS_GDD.md` sections relevant to current phase
 5. ✅ Run the game to verify existing functionality
 
+## 🧠 Commonly Forgotten Items
+
+Keep this list short and update it whenever something gets missed twice.
+
+- [ ] Debug overlays still toggle correctly (`G` for grid, `D` for debug mode)
+- [ ] New gameplay objects are added with `game.AddGameObject()` (not direct push)
+- [ ] Grid occupancy is updated when spawning/despawning entities
+
+## 📌 Deferred / Carry-Over Items
+
+When a task is discovered but intentionally left undone:
+
+1. Add it immediately to `PROGRESS.md` under **Deferred / Carry-Over Items**.
+2. Add owner/session target (for example: `Phase 1 Session 1.2 follow-up`).
+3. Do not mark the original session as fully complete until the deferred item is done.
+4. At next session start, resolve carry-over items before new scope.
+
 ---
 
 ## 🎯 Current Session Info

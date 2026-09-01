@@ -211,6 +211,27 @@ Each entry includes: Date | Decision | Rationale | Alternatives Considered | Imp
 
 ---
 
+## ADR-011: Terrain Grid Overlay for Debugging (2026-09-02)
+
+**Decision:** Add a world-space, semi-transparent grid overlay color-coded by terrain type, toggleable at runtime with `G`.
+
+**Rationale:**
+- Session 1.3 introduces terrain semantics (`grass`, `shore`, `water`) and occupancy state that must be validated visually.
+- A live overlay makes pathfinding/blocking errors immediately visible without opening map data manually.
+- Runtime toggle keeps the debug view accessible while preserving normal visual inspection.
+
+**Alternatives:**
+- Console-only terrain dumps (slow to interpret spatially)
+- Permanent overlay always on (too noisy during regular playtests)
+- External debug tooling (unnecessary setup overhead)
+
+**Impact:**
+- `RTSGame` now includes a `DrawGridDebugOverlay()` pass in camera/world space.
+- Overlay colors are represented with in-engine `Color` objects for renderer consistency.
+- Occupied cells are outlined distinctly to validate spawn and future unit/building reservation logic.
+
+---
+
 ## Future Decisions
 
 *Add new architectural decisions here as they arise during implementation.*
