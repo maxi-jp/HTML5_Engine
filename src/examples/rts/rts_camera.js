@@ -48,7 +48,7 @@ class RTSCamera extends Camera {
 
         const oldScale = this.scale;
         const zoomFactor = wheel < 0 ? (1 + this.zoomStep) : (1 - this.zoomStep);
-        const newScale = this.Clamp(oldScale * zoomFactor, this.minZoom, this.maxZoom);
+        const newScale = Clamp(oldScale * zoomFactor, this.minZoom, this.maxZoom);
 
         if (Math.abs(newScale - oldScale) < 0.0001)
             return;
@@ -90,20 +90,20 @@ class RTSCamera extends Camera {
         let panY = 0;
 
         if (x < this.edgeMargin) {
-            const t = this.Clamp((this.edgeMargin - x) / this.edgeMargin, 0, 1);
+            const t = Clamp((this.edgeMargin - x) / this.edgeMargin, 0, 1);
             panX = -Math.pow(t, this.edgeExponent);
         }
         else if (x > screenW - this.edgeMargin) {
-            const t = this.Clamp((x - (screenW - this.edgeMargin)) / this.edgeMargin, 0, 1);
+            const t = Clamp((x - (screenW - this.edgeMargin)) / this.edgeMargin, 0, 1);
             panX = Math.pow(t, this.edgeExponent);
         }
 
         if (y < this.edgeMargin) {
-            const t = this.Clamp((this.edgeMargin - y) / this.edgeMargin, 0, 1);
+            const t = Clamp((this.edgeMargin - y) / this.edgeMargin, 0, 1);
             panY = -Math.pow(t, this.edgeExponent);
         }
         else if (y > screenH - this.edgeMargin) {
-            const t = this.Clamp((y - (screenH - this.edgeMargin)) / this.edgeMargin, 0, 1);
+            const t = Clamp((y - (screenH - this.edgeMargin)) / this.edgeMargin, 0, 1);
             panY = Math.pow(t, this.edgeExponent);
         }
 
@@ -140,8 +140,8 @@ class RTSCamera extends Camera {
         this.debugBounds.minY = minY;
         this.debugBounds.maxY = maxY;
 
-        this.x = this.Clamp(this.x, minX, maxX);
-        this.y = this.Clamp(this.y, minY, maxY);
+        this.x = Clamp(this.x, minX, maxX);
+        this.y = Clamp(this.y, minY, maxY);
     }
 
     DrawDebug(renderer) {
@@ -178,9 +178,5 @@ class RTSCamera extends Camera {
 
         this.x += dir.x * speed * deltaTime;
         this.y += dir.y * speed * deltaTime;
-    }
-
-    Clamp(value, min, max) {
-        return Math.max(min, Math.min(max, value));
     }
 }

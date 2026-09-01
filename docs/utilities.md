@@ -347,6 +347,7 @@ Global functions available throughout the engine:
 |---|---|
 | `RandomBetweenInt(min, max)` | Random integer in `[min, max]` inclusive |
 | `RandomBetweenFloat(min, max)` | Random float in `[min, max)` |
+| `Clamp(value, min, max)` | Clamps `value` to the range `[min, max]` |
 | `Lerp(start, end, t)` | Linear interpolation |
 | `LerpRotation(current, target, t)` | Lerp between angles, wrapping correctly through `±π` |
 | `SmoothRotation(current, target, maxStep)` | Steps toward `target` by at most `maxStep` radians; call once per frame |

@@ -237,6 +237,17 @@ function NormalizeAngle(angle) {
 }
 
 /**
+ * Clamps a value to a range [min, max].
+ * @param {number} value - The value to clamp.
+ * @param {number} min - The minimum bound.
+ * @param {number} max - The maximum bound.
+ * @returns {number} The clamped value.
+ */
+function Clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+}
+
+/**
  * Steps `currentRotation` toward `targetRotation` by at most `speed` radians, taking the shortest arc.
  * Call once per frame. `speed` is the maximum rotation step per call (in radians), not a rate.
  * @param {number} currentRotation @param {number} targetRotation
