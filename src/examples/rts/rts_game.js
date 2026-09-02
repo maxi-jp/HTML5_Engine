@@ -23,6 +23,8 @@ class RTSGame extends Game {
 
         this.testUnits = [];
         this.gridMap = null;
+        this.pathfinder = null;
+        this.debugPath = [];         // Vector2[] — visualized when non-empty
         this.playerOwnerId = 1;
         this.selectionManager = null;
         this.showGridDebugOverlay = true;
@@ -65,6 +67,8 @@ class RTSGame extends Game {
         });
 
         this.SpawnTestUnits();
+
+        this.pathfinder = new AStarPathfinder(this.gridMap);
 
         this.selectionManager = new SelectionManager(this, {
             friendlyOwnerId: this.playerOwnerId,
@@ -190,12 +194,36 @@ class RTSGame extends Game {
         }
     }
 
+    DrawDebugPath() {
+        if (this.debugPath.length < 2) return;
+        const dotColor = Color.FromRGB(239, 68, 68);
+        const lineColor = Color.FromRGBA(239, 68, 68, 0.5);
+        for (let i = 0; i < this.debugPath.length; i++) {
+            const p = this.debugPath[i];
+            this.renderer.DrawFillCircle(p.x, p.y, 4, dotColor);
+            if (i > 0) {
+                const prev = this.debugPath[i - 1];
+                this.renderer.DrawLine(prev.x, prev.y, p.x, p.y, lineColor, 1.5);
+            }
+        }
+    }
+
     Update(deltaTime) {
         super.Update(deltaTime);
 
         if (Input.IsKeyDown(KEY_G)) {
             this.showGridDebugOverlay = !this.showGridDebugOverlay;
             console.log(`Grid debug overlay: ${this.showGridDebugOverlay ? "ON" : "OFF"}`);
+        }
+
+        // Press P to test A* from first unit to the opposite map corner
+        if (Input.IsKeyPressed(KEY_P) && this.pathfinder && this.testUnits.length > 0) {
+            const start = this.testUnits[0].position;
+            const end = new Vector2(this.mapWidth - 32, this.mapHeight - 32);
+            const t0 = performance.now();
+            this.debugPath = this.pathfinder.FindPath(start, end);
+            const ms = (performance.now() - t0).toFixed(2);
+            console.log(`A* path: ${this.debugPath.length} waypoints in ${ms}ms`);
         }
         
         // Update camera controls and zoom
@@ -217,10 +245,12 @@ class RTSGame extends Game {
         super.Draw();
         this.DrawGridDebugOverlay();
         
+        this.DrawDebugPath();
+
         // Restore screen-space transform for UI
         this.camera.PostDraw(this.renderer);
 
-            this.selectionManager.Draw(this.renderer);
+        this.selectionManager.Draw(this.renderer);
 
         if (this.camera.DrawDebug) {
             this.camera.DrawDebug(this.renderer);

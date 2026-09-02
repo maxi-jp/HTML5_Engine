@@ -15,9 +15,9 @@
 
 **See `PROGRESS.md` for detailed status tracking.**
 
-**Current Phase:** Phase 1 Session 1.5 - A* Pathfinding Implementation  
-**Last Completed Session:** Phase 1 Session 1.4 - Selection System  
-**Next Session:** Phase 1 Session 1.5  
+**Current Phase:** Phase 1 Session 1.6 - Unit Movement & Commands  
+**Last Completed Session:** Phase 1 Session 1.5 - A* Pathfinding Implementation  
+**Next Session:** Phase 1 Session 1.6  
 **Known Blockers:** None  
 
 *(Brief status here; full details in PROGRESS.md)*
@@ -236,13 +236,13 @@ Reference AoE2-style selection (GDD Section 3.1).
 1. `src/examples/rts/pathfinder.js` - A* algorithm implementation
 
 **Tasks:**
-- [ ] Implement A* pathfinding class with `FindPath(startPos, endPos)` method
-- [ ] Use Manhattan distance heuristic for RTS movement
-- [ ] Return array of Vector2 waypoints
-- [ ] Handle unreachable destinations (return closest reachable cell)
-- [ ] Add basic path smoothing (optional: skip waypoints in straight lines)
-- [ ] Test: Calculate path from one corner of map to opposite corner
-- [ ] Verify paths avoid water/obstacles correctly
+- [x] Implement A* pathfinding class with `FindPath(startPos, endPos)` method
+- [x] Use Manhattan distance heuristic for RTS movement
+- [x] Return array of Vector2 waypoints
+- [x] Handle unreachable destinations (return closest reachable cell)
+- [x] Add basic path smoothing (optional: skip waypoints in straight lines)
+- [x] Test: Calculate path from one corner of map to opposite corner
+- [x] Verify paths avoid water/obstacles correctly
 
 **Acceptance Criteria:**
 - ✅ `Pathfinder.FindPath()` returns valid waypoint array

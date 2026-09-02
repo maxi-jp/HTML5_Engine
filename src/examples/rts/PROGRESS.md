@@ -1,8 +1,8 @@
 # RTS Project Progress Tracker
 
 **Last Updated:** 2026-09-02  
-**Current Phase:** Phase 1 Session 1.5 - A* Pathfinding (Next)  
-**Next Action:** Implement Pathfinder.FindPath() and validate obstacle avoidance
+**Current Phase:** Phase 1 Session 1.6 - Unit Movement & Commands (Next)  
+**Next Action:** Implement MoveCommand + Unit FSM so right-click terrain moves selected units
 
 ## Quick Status
 - ✅ GDD Complete
@@ -11,6 +11,7 @@
 - ✅ Phase 1 Session 1.2: Camera Controls
 - ✅ Phase 1 Session 1.3: Grid System & Unit Spawning
 - ✅ Phase 1 Session 1.4: Selection System
+- ✅ Phase 1 Session 1.5: A* Pathfinding Implementation
 - ⬜ Phase 2: Economy Sandbox
 - ⬜ Phase 3: Base Construction
 - ⬜ Phase 4: Combat
@@ -25,6 +26,37 @@
 	Resolution: Implemented in `RTSCamera.UpdateMiddleMouseDrag()` with zoom-aware movement and edge-pan suppression while dragging.
 
 ## Session Log
+
+### 2026-09-02 - Phase 1 Session 1.5: A* Pathfinding Implementation
+**Status:** Complete
+
+**Completed:**
+- ✅ Created `src/engine/ai.js` — reusable engine-level AI utility module
+- ✅ Implemented `AStarPathfinder` class with `FindPath(startWorld, endWorld)` → `Vector2[]`
+- ✅ 8-directional movement with corner-cut prevention; Chebyshev heuristic
+- ✅ Line-of-sight path smoothing via Bresenham's line (removes redundant waypoints)
+- ✅ Nearest-walkable BFS fallback for blocked target cells
+- ✅ Iteration cap (20 000) prevents runaway searches on unreachable targets
+- ✅ `FindPathGrid(sc, sr, ec, er)` for grid-coordinate callers
+- ✅ Wired into `RTSGame`: `this.pathfinder = new AStarPathfinder(this.gridMap)`
+- ✅ Debug visualization: press **P** to path from first unit → far map corner, draws red dots + lines
+
+**Files Created/Modified:**
+- `src/engine/ai.js` — `AStarPathfinder` + `_MinHeap` (new engine module)
+- `src/examples/rts/rts_game.js` — pathfinder instantiation, `DrawDebugPath()`, P-key test
+- `rts.html` — added `<script src="src/engine/ai.js"></script>` after `tiled_loader.js`
+
+**Key Design Decisions:**
+- Placed in `src/engine/` (not `src/examples/rts/`) so any future game can reuse it
+- Grid interface is duck-typed (`IsWalkable`, `IsInBounds`, `WorldToGrid`, `GridToWorld`) — works with any compatible grid
+- `_MinHeap` is a private internal class (prefixed `_`) not intended for direct use
+
+**Next Steps:**
+1. Start Phase 1 Session 1.6 (Unit Movement & Commands)
+2. Create `MoveCommand` that stores the A* path and drives unit movement
+3. Wire right-click → `MoveCommand` assignment on selected units
+
+---
 
 ### 2026-09-02 - Phase 1 Session 1.2 Follow-up: Middle-Mouse Drag Panning
 **Status:** Complete
