@@ -11,8 +11,7 @@ Documentation can be consulted [here](https://maxi-jp.github.io/spark.js/docs/).
 - **Modular Core**: A clean, object-oriented core that's easy to extend.
 - **Rendering Engine**: 2D rendering via HTML5 Canvas with an architecture that supports other renderers (like WebGL).
 - **Game Loop**: A classic, built-in main loop with fixed update and variable draw phases.
-- **Sprite & Animation**: Full support for static sprites, sprite sheets, and complex animations.
-- **Sprite & Animation Support**: Render static sprites, sprite sections, and both basic and complex sprite sheet animations.
+- **Sprite & Animation**: Full support static sprites, sprite sheets, and both basic and complex sprite sheet animations.
 - **Physics Integration**: Box2D physics support with easy-to-use Box2DGameObject classes for rectangles, sprites, and animated objects.
 - **Input Handling**: A powerful, abstract input system that maps actions (e.g., "Jump") and axes (e.g., "MoveHorizontal") to keyboard, mouse, gamepad, and **touch / virtual controls** (on-screen joysticks and buttons for mobile devices).
 - **Mobile Support**: Automatic touch input mirroring, viewport injection, and scroll-prevention — enabled with a single `mobileSupport` config flag (auto-detected on touch devices).
@@ -381,7 +380,7 @@ class MyGame extends Game {
 MIT License
 
 ## TODO list
-- [ ] Example for a Tileset.
+- [x] ~~Example for a Tileset.~~ ✅DONE (see the [tileset example project](https://maxi-jp.github.io/spark.js/tileset.html)).
 - [x] ~~Create an action system for the input (i.e. `Input.Action("move_left")` instead of `Input.IsKeyDown(KEY_LEFT) || Input.IsKeyDown(KEY_A) || Input.IsGamepadButtonDown(0, "DPAD_LEFT") || Input.IsGamepadButtonDown(0, "LS_LEFT")`).~~ ✅DONE
 - [-] Improve the webgl renderer (draw batching).❎DONE (sort of, for tilesets).
 - [ ] Implement other physic engines.
@@ -390,6 +389,8 @@ MIT License
 - [x] ~~Think on a great name for the engine (like **`wat.js`** or something like that).~~ ✅DONE (engine renamed as "spark.js"!!! ✨)
 - [x] ~~Add mobile / touch-screen support with virtual on-screen controls.~~ ✅DONE
 - [ ] Implement a global Event/Signal system (EventBus) for decoupled cross-system communication.
+- [ ] Add mor game-AI related tools and classes (like FSM, BTs and Fuzzy Logic).
+- [ ] Create a RTS game as a more comple example project. 🔜 working on it 👨🏻‍💻  
 
 ## Contributing
 

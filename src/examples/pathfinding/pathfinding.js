@@ -275,4 +275,4 @@ class PathfindingDemo extends Game {
 
 // #endregion
 
-window.onload = () => Init(PathfindingDemo);
+window.onload = () => Init(PathfindingDemo, "canvas");
