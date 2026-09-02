@@ -60,6 +60,17 @@ class Unit extends Entity {
         this.commandQueue = [];
         this.speed = options.speed || 60;
         this.state = "Idle";
+        this.selectionRadius = options.selectionRadius || Math.max(10, this.placeholderRadius + 2);
+    }
+
+    Start() {
+        this.collider = new CircleCollider(Vector2.Zero(), this.selectionRadius, this);
+        game.AddCollider(this.collider);
+    }
+
+    Destroy() {
+        game.RemoveCollider(this.collider);
+        this.collider = null;
     }
 
     AssignCommand(command) {

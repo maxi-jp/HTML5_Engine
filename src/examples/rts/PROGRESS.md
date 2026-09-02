@@ -1,8 +1,8 @@
 # RTS Project Progress Tracker
 
 **Last Updated:** 2026-09-02  
-**Current Phase:** Phase 1 Session 1.4 - Selection System (Next)  
-**Next Action:** Implement SelectionManager and unit selection visuals
+**Current Phase:** Phase 1 Session 1.5 - A* Pathfinding (Next)  
+**Next Action:** Implement Pathfinder.FindPath() and validate obstacle avoidance
 
 ## Quick Status
 - ✅ GDD Complete
@@ -10,6 +10,7 @@
 - ✅ Phase 1 Session 1.1: Project Structure & Map Loading
 - ✅ Phase 1 Session 1.2: Camera Controls
 - ✅ Phase 1 Session 1.3: Grid System & Unit Spawning
+- ✅ Phase 1 Session 1.4: Selection System
 - ⬜ Phase 2: Economy Sandbox
 - ⬜ Phase 3: Base Construction
 - ⬜ Phase 4: Combat
@@ -24,6 +25,51 @@
 	Resolution: Implemented in `RTSCamera.UpdateMiddleMouseDrag()` with zoom-aware movement and edge-pan suppression while dragging.
 
 ## Session Log
+
+### 2026-09-02 - Phase 1 Session 1.2 Follow-up: Middle-Mouse Drag Panning
+**Status:** Complete
+
+**Completed:**
+- ✅ Implemented middle-mouse click + drag panning in `RTSCamera`
+- ✅ Added zoom-aware drag movement (`delta / camera.scale`) for consistent feel across zoom levels
+- ✅ Disabled edge-panning while dragging to prevent control conflict
+- ✅ Added drag state visibility (`Drag: ON/OFF`) in camera debug overlay
+
+**Files Modified:**
+- `src/examples/rts/rts_camera.js` - Added drag state, `UpdateMiddleMouseDrag()`, and debug status line
+
+**Validation Outcome:**
+- ✅ Drag panning works with current camera controls (keyboard, edge-pan, zoom-to-cursor)
+- ✅ No diagnostics errors after integration
+
+---
+
+### 2026-09-02 - Phase 1 Session 1.4: Selection System
+**Status:** Complete
+
+**Completed:**
+- ✅ Created `SelectionManager` with `selectedEntities[]`, drag state, and max selection cap (60)
+- ✅ Implemented single-click selection via collider-based world hit testing
+- ✅ Implemented click-and-drag box selection finalized on left mouse release
+- ✅ Added selection rectangle rendering (green translucent fill + stroke)
+- ✅ Filtered selection to friendly units only (`ownerId === playerOwnerId`)
+- ✅ Added Unit colliders for raycast/selection support
+- ✅ Preserved selected visual rings on units
+- ✅ Clear selection on empty terrain click
+
+**Files Created/Modified:**
+- `src/examples/rts/selection_manager.js` - selection logic, box rendering, screen->world conversion
+- `src/examples/rts/rts_game.js` - SelectionManager integration in `Start`, `Update`, and `Draw`
+- `src/examples/rts/entities.js` - Unit collider lifecycle (`Start`/`Destroy`) for hit testing
+- `rts.html` - Added `selection_manager.js` script include
+
+**Next Steps:**
+1. Start Phase 1 Session 1.5 (A* Pathfinding)
+2. Implement `Pathfinder.FindPath(startWorld, endWorld)`
+3. Use Manhattan heuristic and return world-space waypoints
+4. Handle unreachable goals gracefully and benchmark on current map
+
+---
 
 ### 2026-09-02 - Phase 1 Session 1.3: Grid System & Unit Spawning
 **Status:** Complete

@@ -15,10 +15,10 @@
 
 **See `PROGRESS.md` for detailed status tracking.**
 
-**Current Phase:** Phase 1 Session 1.4 - Selection System  
-**Last Completed Session:** Phase 1 Session 1.3 - Grid System & Unit Spawning  
-**Next Session:** Phase 1 Session 1.4  
-**Known Blockers:** None (Session 1.3 blockers resolved)  
+**Current Phase:** Phase 1 Session 1.5 - A* Pathfinding Implementation  
+**Last Completed Session:** Phase 1 Session 1.4 - Selection System  
+**Next Session:** Phase 1 Session 1.5  
+**Known Blockers:** None  
 
 *(Brief status here; full details in PROGRESS.md)*
 
@@ -174,14 +174,14 @@ Grid should be 32x32 pixel cells.
 2. `src/examples/rts/entities.js` - Add selection visuals
 
 **Tasks:**
-- [ ] Create `SelectionManager` class with `selectedEntities[]` array
-- [ ] Implement single-click selection (raycast to units via colliders)
-- [ ] Implement click-and-drag box selection (track mouseDown -> mouseDrag -> mouseUp)
-- [ ] Draw selection rectangle during drag (green stroke)
-- [ ] Filter selection to only friendly units (ownerId === player's ID)
-- [ ] Draw selection rings under selected units (green circle, `DrawStrokeCircle`)
-- [ ] Clear selection on empty terrain click
-- [ ] Test: Can select individual units, can box-select multiple units
+- [x] Create `SelectionManager` class with `selectedEntities[]` array
+- [x] Implement single-click selection (raycast to units via colliders)
+- [x] Implement click-and-drag box selection (track mouseDown -> mouseDrag -> mouseUp)
+- [x] Draw selection rectangle during drag (green stroke)
+- [x] Filter selection to only friendly units (ownerId === player's ID)
+- [x] Draw selection rings under selected units (green circle, `DrawStrokeCircle`)
+- [x] Clear selection on empty terrain click
+- [x] Test: Can select individual units, can box-select multiple units
 
 **Acceptance Criteria:**
 - ✅ Left-click selects single unit, shows green ring

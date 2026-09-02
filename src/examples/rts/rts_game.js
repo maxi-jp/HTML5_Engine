@@ -23,6 +23,8 @@ class RTSGame extends Game {
 
         this.testUnits = [];
         this.gridMap = null;
+        this.playerOwnerId = 1;
+        this.selectionManager = null;
         this.showGridDebugOverlay = true;
         this.gridDebugColors = {
             grass: Color.FromRGBA(34, 197, 94, 0.22),
@@ -63,6 +65,11 @@ class RTSGame extends Game {
         });
 
         this.SpawnTestUnits();
+
+        this.selectionManager = new SelectionManager(this, {
+            friendlyOwnerId: this.playerOwnerId,
+            maxSelection: 60
+        });
         
         console.log(`Map loaded: ${mapData.width}x${mapData.height} tiles (${this.mapWidth}x${this.mapHeight} pixels)`);
 
@@ -194,7 +201,8 @@ class RTSGame extends Game {
         // Update camera controls and zoom
         this.camera.Update(deltaTime);
 
-        // TODO Phase 1 Session 1.4: SelectionManager updates
+        // SelectionManager updates
+        this.selectionManager.Update(deltaTime);
     }
 
     Draw() {
@@ -212,7 +220,9 @@ class RTSGame extends Game {
         // Restore screen-space transform for UI
         this.camera.PostDraw(this.renderer);
 
-        if (this.camera && this.camera.DrawDebug) {
+            this.selectionManager.Draw(this.renderer);
+
+        if (this.camera.DrawDebug) {
             this.camera.DrawDebug(this.renderer);
         }
     }
