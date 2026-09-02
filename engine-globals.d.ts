@@ -260,3 +260,66 @@ declare class TiledLoader {
     // Create a GameObjectsBackgroundLayer from an object layer with parallax support.
     static CreateGameObjectsBackgroundLayer(tiledJSON: any, mapData: any, layerName: string, position?: Vector2, scale?: number): GameObjectsBackgroundLayer;
 }
+
+// ── AStarPathfinder (ai.js) ──────────────────────────────────────────────────
+
+/** Heuristic function signature: (col, row, endCol, endRow) → estimated cost. */
+type HeuristicFn = (col: number, row: number, ec: number, er: number) => number;
+
+/**
+ * Duck-typed grid interface required by AStarPathfinder.
+ * Any object implementing these members can be used as a pathfinding grid.
+ */
+interface PathfinderGrid {
+    width: number;
+    height: number;
+    IsWalkable(col: number, row: number): boolean;
+    IsInBounds(col: number, row: number): boolean;
+    WorldToGrid(pos: Vector2): { col: number; row: number };
+    GridToWorld(col: number, row: number): Vector2;
+}
+
+/**
+ * General-purpose A* pathfinder. Load `src/engine/ai.js` to use it.
+ *
+ * @example
+ * const pathfinder = new AStarPathfinder(gridMap);
+ * const waypoints  = pathfinder.FindPath(unit.position, targetPos); // Vector2[]
+ */
+declare class AStarPathfinder {
+    grid: PathfinderGrid;
+    allowDiagonals: boolean;
+    maxIterations: number;
+    smoothPath: boolean;
+    heuristic: HeuristicFn;
+
+    /**
+     * @param grid - Any object satisfying the PathfinderGrid interface.
+     * @param options.allowDiagonals - Enable 8-directional movement (default: true).
+     * @param options.maxIterations  - Safety cap to avoid runaway searches (default: 20000).
+     * @param options.smoothPath     - Apply line-of-sight waypoint reduction (default: true).
+     * @param options.heuristic      - Override the distance function. Auto-selects Octile (8-dir) or Manhattan (4-dir).
+     */
+    constructor(grid: PathfinderGrid, options?: {
+        allowDiagonals?: boolean;
+        maxIterations?: number;
+        smoothPath?: boolean;
+        heuristic?: HeuristicFn;
+    });
+
+    /** Find a world-space path. Returns [] if the start cell is fully isolated. */
+    FindPath(startWorld: Vector2, endWorld: Vector2): Vector2[];
+
+    /** Find a path in grid coordinates. Returns [] if unreachable. */
+    FindPathGrid(sc: number, sr: number, ec: number, er: number): { col: number; row: number }[];
+
+    /** Named heuristic presets. */
+    static Heuristic: {
+        /** Optimal for 4-directional grids. */
+        Manhattan: HeuristicFn;
+        /** Optimal for 8-directional grids with diagonal cost √2 (default). */
+        Octile: HeuristicFn;
+        /** Admissible for any movement cost model. */
+        Euclidean: HeuristicFn;
+    };
+}

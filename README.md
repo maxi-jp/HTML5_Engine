@@ -23,6 +23,7 @@ Documentation can be consulted [here](https://maxi-jp.github.io/spark.js/docs/).
 - **Object Pooling**: An efficient pooling system for reusing objects like bullets or particles to improve performance.
 - **Particle System**: A configurable particle emitter supporting point and area sources, with per-particle control over velocity, direction, opacity, scale, and rotation. Based on [HTML5_ParticleSystem](https://github.com/maxi-jp/HTML5_ParticleSystem).
 - **Tiled Map Editor Integration**: Load maps created in Tiled Map Editor via the `TiledLoader` utility. Export your maps to JSON with embedded tilesets and render them instantly with automatic coordinate calculation.
+- **A\* Pathfinding**: General-purpose `AStarPathfinder` in `ai.js`. Supports 4- and 8-directional movement, swappable heuristics (Manhattan, Octile, Euclidean), line-of-sight path smoothing, and graceful fallbacks for blocked targets. Works with any grid object implementing the duck-typed grid interface.
 - **Utilities**: A collection of helpers for vector math, collision detection, color manipulation, and more.
 - **Debugging Tools**: Optional debug drawing for physics bodies and an FPS/stats overlay.
 - **Mode 7 Renderer**: Simulate SNES-style pseudo-3D backgrounds (as in F-Zero or Mario Kart).
@@ -43,6 +44,7 @@ Documentation can be consulted [here](https://maxi-jp.github.io/spark.js/docs/).
   - box2d_gameobjects.js  # Box2D-enabled game objects
   - box2d_helper.js       # Box2D utility functions
   - particlesystem.js     # Particle system (Particle, ParticleEmitter, ParticleSystem classes)
+  - ai.js                 # AI utilities: AStarPathfinder with swappable heuristics and path smoothing
 - examples/
   - audio_test/           # Audio system testing and examples
   - box2d/                # Box2D physics examples
@@ -78,6 +80,7 @@ Documentation can be consulted [here](https://maxi-jp.github.io/spark.js/docs/).
   - performance_test.js   # Performance benchmarking
   - puzzlebobble.js       # Puzzle Bobble clone
   - render_test.js        # Renderer feature testing
+  - pathfinding/          # Interactive A* pathfinding demo (paint walls, switch heuristics live)
   - snake.js              # Snake game implementation
   - timer_test.js         # Timer system demo (Invoke, InvokeRepeating, auto-cleanup)
 
@@ -123,6 +126,8 @@ Documentation can be consulted [here](https://maxi-jp.github.io/spark.js/docs/).
     <script src="engine/particlesystem.js"></script>
     <!-- add this to use Tiled exported maps -->
     <script src="engine/tiled_loader.js"></script>
+    <!-- add this to use game-AI tools like A* pathfinding -->
+    <script src="engine/engine/ai.js"></script>
     <!-- add these only if you want to use box2d physics -->
     <script src="lib/Box2D.js"></script>
     <script src="engine/box2d_helper.js"></script>

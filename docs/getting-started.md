@@ -43,6 +43,10 @@ Include the engine scripts in your `index.html`. The order of script inclusion i
     <script src="engine/audioplayer.js"></script>
     <!-- optional: particle system -->
     <script src="engine/particlesystem.js"></script>
+    <!-- optional: Tiled exported maps -->
+    <script src="engine/tiled_loader.js"></script>
+    <!-- optional: game-AI tools like A* pathfinding -->
+    <script src="engine/engine/ai.js"></script>
     <!-- optional: HTML menus and virtual controls -->
     <script src="engine/htmlmenu.js"></script>
     <script src="engine/virtualcontrols.js"></script>

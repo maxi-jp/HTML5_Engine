@@ -21,8 +21,9 @@ Each example HTML file must load engine scripts in this order before any game co
 9. `src/engine/virtualcontrols.js` — VirtualJoystick, VirtualDPad
 10. `src/engine/game.js` — Game base class
 11. `src/engine/tiled_loader.js` — TiledLoader *(optional — only if using Tiled maps)*
-12. `src/lib/Box2D.js` + `src/engine/box2d_helper.js` + `src/engine/box2d_game.js` + `src/engine/box2d_gameobjects.js` *(optional — only for physics games; load `Box2D.js` first)*
-13. `src/engine/main.js` — engine bootstrap (LoadImages, StartGame)
+12. `src/engine/ai.js` — AStarPathfinder *(optional — only if using pathfinding)*
+13. `src/lib/Box2D.js` + `src/engine/box2d_helper.js` + `src/engine/box2d_game.js` + `src/engine/box2d_gameobjects.js` *(optional — only for physics games; load `Box2D.js` first)*
+14. `src/engine/main.js` — engine bootstrap (LoadImages, StartGame)
 
 ---
 
@@ -80,7 +81,7 @@ Box2DGameObject (extends GameObject)
 
 ## Project layout
 ```
-src/engine/          ← engine source (14 files)
+src/engine/          ← engine source (15 files)
 src/examples/        ← example game implementations
   <name>/            ← one folder per example; each may have its own assets/
 src/lib/             ← third-party libs (Box2D)
@@ -280,6 +281,49 @@ sprites.forEach(sprite => this.gameObjects.push(sprite));
 ### See also
 - Complete working example: `src/examples/tileset/tileset.js` and `tileset.html`
 - Full integration guide: `docs/tiled-integration.md`
+
+---
+
+## A* Pathfinding (`ai.js`)
+
+The optional `AStarPathfinder` in `src/engine/ai.js` provides grid-based pathfinding for any game. Load `ai.js` after `game.js` and before `main.js`.
+
+### Grid interface (duck-typed)
+Any object with these members works as a grid:
+```javascript
+IsWalkable(col, row)   // → boolean
+IsInBounds(col, row)   // → boolean
+WorldToGrid(Vector2)   // → {col, row}
+GridToWorld(col, row)  // → Vector2
+width, height          // grid dimensions in cells
+```
+The RTS `GridMap` class satisfies this interface automatically.
+
+### Quick reference
+| Usage | Call |
+|---|---|
+| Create | `new AStarPathfinder(grid)` |
+| Create (4-dir) | `new AStarPathfinder(grid, { allowDiagonals: false })` |
+| Find path | `pathfinder.FindPath(startVec2, endVec2)` → `Vector2[]` |
+| Find path (grid coords) | `pathfinder.FindPathGrid(sc, sr, ec, er)` → `{col,row}[]` |
+| Override heuristic | `new AStarPathfinder(grid, { heuristic: AStarPathfinder.Heuristic.Euclidean })` |
+| Disable smoothing | `new AStarPathfinder(grid, { smoothPath: false })` |
+
+### Heuristics
+| Constant | Best for |
+|---|---|
+| `AStarPathfinder.Heuristic.Manhattan` | 4-directional grids |
+| `AStarPathfinder.Heuristic.Octile` | 8-directional grids — **auto-selected default** |
+| `AStarPathfinder.Heuristic.Euclidean` | Continuous / any-angle movement |
+
+### Notes
+- Returns `[]` if start is fully isolated; always returns the **closest reachable path** when the target is blocked — never throws or loops infinitely.
+- Iteration cap defaults to `20 000`; tune with `options.maxIterations`.
+- Line-of-sight path smoothing is on by default (`smoothPath: true`).
+
+### See also
+- Interactive demo: `pathfinding.html`
+- Full reference: `docs/ai.md`
 
 ---
 

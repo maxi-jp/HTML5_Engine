@@ -85,6 +85,9 @@ class AStarPathfinder {
         this.allowDiagonals = options.allowDiagonals !== false;
         this.maxIterations = options.maxIterations ?? 20000;
         this.smoothPath = options.smoothPath !== false;
+        // Auto-select admissible heuristic; caller may override with a custom function
+        this.heuristic = options.heuristic ??
+            (this.allowDiagonals ? AStarPathfinder.Heuristic.Octile : AStarPathfinder.Heuristic.Manhattan);
     }
 
     /**
@@ -187,9 +190,7 @@ class AStarPathfinder {
 
     /** Chebyshev distance — optimal heuristic for 8-directional grids. */
     _H(col, row, ec, er) {
-        const dx = Math.abs(col - ec);
-        const dy = Math.abs(row - er);
-        return Math.max(dx, dy) + (Math.SQRT2 - 1) * Math.min(dx, dy);
+        return this.heuristic(col, row, ec, er);
     }
 
     _Neighbors(node) {
@@ -294,5 +295,17 @@ class AStarPathfinder {
         return true;
     }
 }
+
+AStarPathfinder.Heuristic = {
+    /** 4-directional grids (no diagonals). */
+    Manhattan: (col, row, ec, er) => Math.abs(col - ec) + Math.abs(row - er),
+    /** 8-directional grids where diagonal cost = √2 (default). */
+    Octile: (col, row, ec, er) => {
+        const dx = Math.abs(col - ec), dy = Math.abs(row - er);
+        return Math.max(dx, dy) + (Math.SQRT2 - 1) * Math.min(dx, dy);
+    },
+    /** Always admissible; use when movement cost is true Euclidean distance. */
+    Euclidean: (col, row, ec, er) => Math.hypot(col - ec, row - er),
+};
 
 // #endregion
