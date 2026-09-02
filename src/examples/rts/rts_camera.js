@@ -15,6 +15,11 @@ class RTSCamera extends Camera {
         this.maxZoom = options.maxZoom || 2.0;
         this.zoomStep = options.zoomStep || 0.1;
 
+        this.dragPanEnabled = options.dragPanEnabled !== undefined ? options.dragPanEnabled : true;
+        this.isDragging = false;
+        this.lastDragMouseX = 0;
+        this.lastDragMouseY = 0;
+
         this.debugEnabled = options.debugEnabled !== undefined ? options.debugEnabled : true;
         this.debugTextColor = options.debugTextColor || Color.white;
         this.debugPanelColor = options.debugPanelColor || new Color(0, 0, 0, 0.65);
@@ -28,14 +33,46 @@ class RTSCamera extends Camera {
 
     Update(deltaTime) {
         super.Update(deltaTime);
+        this.UpdateMiddleMouseDrag();
         this.UpdatePanning(deltaTime);
         this.UpdateZoom();
         this.ClampToBounds();
     }
 
+    UpdateMiddleMouseDrag() {
+        if (!this.dragPanEnabled)
+            return;
+
+        if (Input.mouse.middle.down) {
+            this.isDragging = true;
+            this.lastDragMouseX = Input.mouse.x;
+            this.lastDragMouseY = Input.mouse.y;
+        }
+
+        if (Input.mouse.middle.up) {
+            this.isDragging = false;
+        }
+
+        if (!this.isDragging || !Input.mouse.middle.pressed)
+            return;
+
+        const dx = Input.mouse.x - this.lastDragMouseX;
+        const dy = Input.mouse.y - this.lastDragMouseY;
+
+        this.lastDragMouseX = Input.mouse.x;
+        this.lastDragMouseY = Input.mouse.y;
+
+        if (dx === 0 && dy === 0)
+            return;
+
+        // Screen-space drag converted to world-space movement under current zoom.
+        this.x -= dx / this.scale;
+        this.y -= dy / this.scale;
+    }
+
     UpdatePanning(deltaTime) {
         const keyboardDir = this.GetArrowDirection();
-        const edgeDir = this.GetEdgePanDirection();
+        const edgeDir = this.isDragging ? Vector2.Zero() : this.GetEdgePanDirection();
 
         this.ApplyDirectionalPan(keyboardDir, this.keyboardPanSpeed, deltaTime);
         this.ApplyDirectionalPan(edgeDir, this.edgePanSpeed, deltaTime);
@@ -150,6 +187,7 @@ class RTSCamera extends Camera {
 
         const lines = [
             `Cam x:${this.x.toFixed(1)} y:${this.y.toFixed(1)} z:${this.scale.toFixed(2)}`,
+            `Drag:${this.isDragging ? "ON" : "OFF"}`,
             `Clamp x:[${this.debugBounds.minX.toFixed(1)}, ${this.debugBounds.maxX.toFixed(1)}]`,
             `Clamp y:[${this.debugBounds.minY.toFixed(1)}, ${this.debugBounds.maxY.toFixed(1)}]`
         ];
@@ -157,13 +195,14 @@ class RTSCamera extends Camera {
         const panelX = 8;
         const panelY = 80;
         const panelW = 360;
-        const panelH = 54;
+        const panelH = 70;
 
         renderer.DrawFillBasicRectangle(panelX, panelY, panelW, panelH, this.debugPanelColor);
 
         renderer.DrawFillText(lines[0], panelX + 8, panelY + 16, "12px monospace", this.debugTextColor, "left", "middle");
         renderer.DrawFillText(lines[1], panelX + 8, panelY + 32, "12px monospace", this.debugTextColor, "left", "middle");
         renderer.DrawFillText(lines[2], panelX + 8, panelY + 48, "12px monospace", this.debugTextColor, "left", "middle");
+        renderer.DrawFillText(lines[3], panelX + 8, panelY + 64, "12px monospace", this.debugTextColor, "left", "middle");
     }
 
     ApplyDirectionalPan(dir, speed, deltaTime) {

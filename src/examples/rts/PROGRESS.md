@@ -1,14 +1,14 @@
 # RTS Project Progress Tracker
 
 **Last Updated:** 2026-09-02  
-**Current Phase:** Phase 1 Session 1.2 Follow-up + Session 1.4 Preparation  
-**Next Action:** Implement middle-mouse click + drag camera panning, then proceed to SelectionManager
+**Current Phase:** Phase 1 Session 1.4 - Selection System (Next)  
+**Next Action:** Implement SelectionManager and unit selection visuals
 
 ## Quick Status
 - ✅ GDD Complete
 - ✅ Implementation Guide Created
 - ✅ Phase 1 Session 1.1: Project Structure & Map Loading
-- 🟡 Phase 1 Session 1.2: Camera Controls (follow-up pending)
+- ✅ Phase 1 Session 1.2: Camera Controls
 - ✅ Phase 1 Session 1.3: Grid System & Unit Spawning
 - ⬜ Phase 2: Economy Sandbox
 - ⬜ Phase 3: Base Construction
@@ -19,9 +19,9 @@
 
 ## Deferred / Carry-Over Items
 
-- [ ] Implement camera middle-mouse click + drag panning (`RTSCamera`)  
+- [x] Implement camera middle-mouse click + drag panning (`RTSCamera`)  
 	Owner/Target: Phase 1 Session 1.2 follow-up  
-	Reason: Requirement identified but not implemented during initial Session 1.2 pass.
+	Resolution: Implemented in `RTSCamera.UpdateMiddleMouseDrag()` with zoom-aware movement and edge-pan suppression while dragging.
 
 ## Session Log
 
@@ -53,19 +53,17 @@
 ---
 
 ### 2026-09-01 - Phase 1 Session 1.2: Camera Controls
-**Status:** In Progress (Follow-up Required)
+**Status:** Complete
 
 **Completed:**
 - ✅ Added dedicated `RTSCamera` class extending engine `Camera`
 - ✅ Implemented keyboard panning (arrow keys + WASD)
 - ✅ Implemented edge-panning with 20px dead zone and acceleration curve
 - ✅ Implemented mouse wheel zoom-to-cursor (0.5x to 2.0x)
+- ✅ Implemented middle-mouse click + drag panning (zoom-aware)
 - ✅ Implemented map-bounds clamping compatible with centered camera zoom transform
 - ✅ Added live camera debug overlay (x/y/zoom + clamp min/max)
 - ✅ Tuned keyboard panning to be slower than edge-panning
-
-**Pending Carry-Over:**
-- [ ] Implement middle-mouse click + drag panning
 
 **Files Created/Modified:**
 - `src/examples/rts/rts_camera.js` - RTS camera subclass with controls, clamp logic, debug overlay
@@ -75,7 +73,7 @@
 
 **Validation Outcome:**
 - ✅ Current controls are stable and used as baseline for Session 1.3 integration.
-- 🟡 Session 1.2 remains open until middle-mouse drag panning is implemented.
+- ✅ Session 1.2 follow-up completed (middle-mouse drag panning implemented).
 
 ---
 
