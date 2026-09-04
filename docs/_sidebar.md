@@ -8,7 +8,7 @@
 - [Audio Manager](audio.md)
 - [UI & Menus](ui.md)
 - [Tiled Map Editor](tiled-integration.md)
-- [AI Utilities](ai.md)
+- [Game AI Tools](ai.md)
 - [Utilities](utilities.md)
 - [Particle System](particles.md)
 - [Debugging Tools](debugging.md)

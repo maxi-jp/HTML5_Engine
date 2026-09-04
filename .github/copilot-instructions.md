@@ -22,8 +22,9 @@ Each example HTML file must load engine scripts in this order before any game co
 10. `src/engine/game.js` — Game base class
 11. `src/engine/tiled_loader.js` — TiledLoader *(optional — only if using Tiled maps)*
 12. `src/engine/ai.js` — AStarPathfinder *(optional — only if using pathfinding)*
-13. `src/lib/Box2D.js` + `src/engine/box2d_helper.js` + `src/engine/box2d_game.js` + `src/engine/box2d_gameobjects.js` *(optional — only for physics games; load `Box2D.js` first)*
-14. `src/engine/main.js` — engine bootstrap (LoadImages, StartGame)
+13. `src/engine/fsm.js` — FSMState, FSM, FSMCompositeState *(optional — only if using FSM/HFSM)*
+14. `src/lib/Box2D.js` + `src/engine/box2d_helper.js` + `src/engine/box2d_game.js` + `src/engine/box2d_gameobjects.js` *(optional — only for physics games; load `Box2D.js` first)*
+15. `src/engine/main.js` — engine bootstrap (LoadImages, StartGame)
 
 ---
 
@@ -35,6 +36,42 @@ Each example HTML file must load engine scripts in this order before any game co
 | `audioPlayer` | `AudioPlayer` | Global audio manager |
 | `totalTime` | `number` | Elapsed seconds since game start |
 | `mobileWithTouchScreen` | `boolean` | True on touch-primary devices |
+
+---
+
+## Vector2 & utilities quick-reference
+
+### Vector2 (defined in `utils_math.js`)
+
+| Usage | Call |
+|---|---|
+| Create | `new Vector2(x, y)` |
+| Zero vector | `Vector2.Zero()` |
+| Copy | `Vector2.Copy(v)` |
+| Distance between two points | `Vector2.Magnitude(v1, v2)` — accepts any `{x,y}` object, including `Input.mouse` |
+| Squared distance (faster for comparisons) | `Vector2.SqrMagnitude(v1, v2)` |
+| Lerp between two vectors | `Vector2.Lerp(v1, v2, t)` |
+| Length of this vector | `v.Length()` / `v.SqrLength()` |
+| Normalize in-place | `v.Normalize()` — returns `this` |
+| Add / subtract in-place | `v.Add(other)` / `v.Sub(other)` |
+| Scale in-place | `v.MultiplyScalar(s)` — returns `this` |
+| Set both components | `v.Set(x, y)` |
+| Access components | `v.x` / `v.y` (setters fire onChange if set) |
+
+> `Add`, `Sub`, and `MultiplyScalar` mutate in place and do **not** return a new vector. Use `Vector2.Copy(v).Sub(other)` when you need a non-destructive version.
+
+### Key free functions (utils_math.js)
+
+| Call | Description |
+|---|---|
+| `Clamp(value, min, max)` | Clamp to range |
+| `Lerp(start, end, t)` | Linear interpolation |
+| `SmoothRotation(current, target, speed)` | Rotate toward target, shortest arc, max `speed` rad/call |
+| `LerpRotation(current, target, t)` | Lerp angle, shortest arc |
+| `RandomBetweenInt(min, max)` | Random integer in [min, max] inclusive |
+| `RandomBetweenFloat(min, max)` | Random float in [min, max) |
+| `Length(x, y)` | Magnitude from raw components |
+| `SqrLength(dx, dy)` | Squared magnitude (no sqrt) |
 
 ---
 
@@ -83,6 +120,11 @@ Box2DGameObject (extends GameObject)
 ├── Box2DSSAnimationObjectBasic
 ├── Box2DSSAnimationObjectComplex
 └── Box2DTrigger
+
+FSMState
+└── FSMCompositeState
+
+FSM
 ```
 
 ---
@@ -145,7 +187,7 @@ All methods are called on `renderer` (or `this.renderer` inside Game). Colors us
 ### Text rendering
 | Method | Usage |
 |---|---|
-| `DrawFillText(text, x, y, font, color?, align?, baseline?)` | Filled text. Font ex: `"16px Arial"`. Align: `"left"` / `"center"` / `"right"` |
+| `DrawFillText(text, x, y, font, color?, align?, baseline?)` | Filled text. Font ex: `"16px Arial"`. Align: `"center"` / `"left"` / `"right"` |
 | `DrawStrokeText(text, x, y, font, color?, align?, baseline?, lineWidth?)` | Outlined text |
 | `DrawText(text, x, y, font, color?, align?, baseline?, stroke?, lineWidth?)` | Text with optional stroke |
 
@@ -337,6 +379,40 @@ The RTS `GridMap` class satisfies this interface automatically.
 
 ---
 
+## FSM & HFSM (`fsm.js`)
+
+The optional `FSM` classes in `src/engine/fsm.js` provide Finite State Machines and Hierarchical FSMs. Load `fsm.js` after `game.js` and before `main.js`.
+
+### Quick reference
+| Usage | Call |
+|---|---|
+| Define a state | `class MyState extends FSMState { Enter(o,prev){} Update(dt,o,fsm){} Exit(o,next){} }` |
+| Declarative guard | `state.AddTransition('target', owner => condition)` — checked before Update() each frame |
+| Build & start | `new FSM(this, 'idle').AddState('idle', new IdleState()).AddState('run', new RunState()).Start()` |
+| Tick | `this.fsm.Update(dt)` — call from the owner's Update() every frame |
+| Imperative transition | `fsm.Transition('target')` — called from within a state's Update() |
+| Current state name | `this.fsm.currentStateName` |
+| Current state object | `this.fsm.currentState` |
+| Debug label | `this.fsm.DrawDebug(renderer, x, y)` — renders only when `debugMode` is true |
+| Composite state | extend `FSMCompositeState`, set `this.subFSM = new FSM(owner, 'sub-initial')...` in the constructor |
+
+### Transition model (Millington & Funge)
+1. Declarative guards (`AddTransition`) are evaluated every frame **before** `Update()`. If one fires, `Update()` is skipped.
+2. Imperative `fsm.Transition()` called from inside `Update()` is applied after `Update()` returns.
+
+### Notes
+- `owner` is the object passed to `new FSM(owner, ...)` — all state callbacks receive it as first argument.
+- `FSMCompositeState` starts/stops its `subFSM` automatically via `super.Enter()` / `super.Exit()`.
+- Parent-level guards on a composite state fire **before** the sub-FSM updates, overriding nested behaviour.
+- `DrawDebug` is gated on the global `debugMode` variable.
+
+### See also
+- Guard Patrol demo: `fsm-basic.html` — project [README](../src/examples/fsm_basic/README.md)
+- Sentry AI (HFSM) demo: `fsm-hfsm.html` — project [README](../src/examples/fsm_hfsm/README.md)
+- Full reference: `docs/ai.md`
+
+---
+
 ## Minimal HTML template
 ```html
 <!DOCTYPE html>
@@ -357,6 +433,7 @@ The RTS `GridMap` class satisfies this interface automatically.
      -->
     <!-- game-AI tools (optional):
     <script src="src/engine/ai.js"></script>
+    <script src="src/engine/fsm.js"></script>
      -->
     <script src="src/engine/htmlmenu.js"></script>
     <script src="src/engine/virtualcontrols.js"></script>
