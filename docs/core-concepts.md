@@ -253,8 +253,12 @@ Override these in your subclass to inject logic:
 | `SpriteSectionObject` | `(position, rotation, scale, img, sectionRect, alpha)` | A rectangular section of a sprite sheet or image (cropped region) |
 | `SSAnimationObjectBasic` | `(position, rotation, scale, img, frameWidth, frameHeight, frameCount[], framesDuration)` | Regular grid sprite-sheet (all frames same size) |
 | `SSAnimationObjectComplex` | `(position, rotation, scale, img, animationsRectangles[][], framesDurations[])` | Packed-atlas sprite-sheet (arbitrary frame rects per animation) |
-| `Tileset` | `(img, position, scale, tilesetConfig, tilesetMap, tileWidth, tileHeight)` | Tile-map rendering |
+| `Tileset` | `(img, position, scale, tilesetConfig, tilesetMap, tileWidth, tileHeight)` | Tile-map rendering. `img` is a fallback image; `tilesetConfig` tiles can optionally include their own `image` reference (for Tiled multi-image maps) |
 | `GameObjectsBackgroundLayer` | `(position, gameObjects[], speed)` | A parallax background layer that manages a group of game objects and updates their positions with the camera |
+
+**Tileset notes:**
+- **Single-image maps** (traditional): Pass `img` with the tile sheet; each `tilesetConfig[id]` contains only `{rect: {x, y, w, h}}`
+- **Multi-image maps** (Tiled): Each `tilesetConfig[id]` can include `{rect: {...}, image: HTMLImageElement}` to reference a different image per tile
 
 ### Minimal example
 

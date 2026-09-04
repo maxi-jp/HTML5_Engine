@@ -24,7 +24,7 @@ Explore the `src/examples/` directory for practical demonstrations of the engine
 - [Object pooling](../object_pooling.html ':ignore :target=_blank')
 - [Particle System](../particles.html ':ignore :target=_blank') — smoke (area and point emitters), rain, and snow presets
 - [Tileset (Tiled Map Loader)](../tileset.html ':ignore :target=_blank') — Load and render maps created in the Tiled Map Editor with the `TiledLoader` utility. See [tiled-integration.md](tiled-integration.md) for full documentation.
-- [A\* Pathfinding](../pathfinding.html ':ignore :target=_blank') — Interactive demo of `AStarPathfinder`. Paint walls, drag start/end markers, and switch between Manhattan, Octile, and Euclidean heuristics live. See [ai.md](ai.md) for full documentation.
+- [A\* Pathfinding](../pathfinding.html ':ignore :target=_blank') — Interactive demo of `AStarPathfinder`. Paint walls, drag start/end markers, and switch between Manhattan, Octile, and Euclidean heuristics live. See the project's [README](../src/examples/pathfinding/README.md ':ignore :target=_blank') for a comprenhensive description and [ai.md](ai.md) for full documentation.
 - [Parallax](../parallax.html ':ignore :target=_blank') *(WIP)*
 
 ---

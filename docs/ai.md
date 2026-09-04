@@ -161,6 +161,6 @@ const waypoints = pathfinder.FindPath(new Vector2(16, 16), new Vector2(944, 624)
 
 ### See also
 
-- [Interactive demo](../pathfinding.html ':ignore :target=_blank') — paint walls, move start/end markers, switch heuristics live
+- [Interactive demo](../pathfinding.html ':ignore :target=_blank') — paint walls, move start/end markers, switch heuristics live. See the project's [README](../src/examples/pathfinding/README.md ':ignore :target=_blank') for a comprenhensive description
 - [RTS example](../rts.html ':ignore :target=_blank') — production usage integrated with `GridMap` and unit movement
 - [Examples](examples.md) — full list of demos

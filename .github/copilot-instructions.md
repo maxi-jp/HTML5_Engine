@@ -47,8 +47,16 @@ GameObject
 ├── RectangleGO
 ├── CircleGO
 └── SpriteObject
+    ├── SpriteSectionObject
     ├── SSAnimationObjectBasic
-    └── SSAnimationObjectComplex
+    ├── SSAnimationObjectComplex
+    └── Tileset
+
+Camera
+├── FollowCameraBasic
+└── FollowCamera
+
+Pool
 
 Renderer
 ├── Canvas2DRenderer
@@ -113,13 +121,15 @@ window.onload = () => { Init(MyGame); }
 ## Input API quick-reference (Input namespace)
 | Usage | Call |
 |---|---|
-| Key held | `Input.IsKeyDown(KEY_SPACE)` |
-| Key just pressed | `Input.IsKeyPressed(KEY_SPACE)` |
+| Key held | `Input.IsKeyPressed(KEY_SPACE)` |
+| Key just pressed | `Input.IsKeyDown(KEY_SPACE)` |
+| Key just released | `Input.IsKeyUp(KEY_SPACE)` |
 | Mouse button | `Input.IsMouseButtonDown(0)` |
 | Gamepad raw | `Input.GetGamepad(0)` |
 | Register action | `Input.RegisterAction('Fire', [{type:'key', code:KEY_SPACE}])` |
 | Action held | `Input.GetAction('Fire')` |
 | Action just pressed | `Input.GetActionDown('Fire')` |
+| Action just released | `Input.GetActionUp('Fire')` |
 | Register axis | `Input.RegisterAxis('MoveX', [{type:'key', code:KEY_LEFT, value:-1}, …])` |
 | Read axis | `Input.GetAxis('MoveX')` — returns –1..1 |
 | Any input | `Input.Anything()` — true if any device triggered anything |
@@ -344,6 +354,9 @@ The RTS `GridMap` class satisfies this interface automatically.
     <script src="src/engine/particlesystem.js"></script>
     <!-- Tiled map loader (optional):
     <script src="src/engine/tiled_loader.js"></script>
+     -->
+    <!-- game-AI tools (optional):
+    <script src="src/engine/ai.js"></script>
      -->
     <script src="src/engine/htmlmenu.js"></script>
     <script src="src/engine/virtualcontrols.js"></script>
