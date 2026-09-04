@@ -153,6 +153,24 @@ class RTSGame extends Game {
         }
     }
 
+    ScreenToWorld(screenX, screenY) {
+        const halfW = this.screenHalfWidth;
+        const halfH = this.screenHalfHeight;
+        return new Vector2(
+            ((screenX - halfW) / this.camera.scale) + this.camera.x + halfW,
+            ((screenY - halfH) / this.camera.scale) + this.camera.y + halfH
+        );
+    }
+
+    IssueMoveCommand(targetPos) {
+        const units = this.selectionManager.selectedEntities;
+        for (let i = 0; i < units.length; i++) {
+            const unit = units[i];
+            unit.ClearCommands();
+            unit.AssignCommand(new MoveCommand(targetPos, this.pathfinder, unit.position));
+        }
+    }
+
     SortGameObjectsByY() {
         this.gameObjects.sort((a, b) => {
             const aY = a && a.position ? a.position.y : -Infinity;
@@ -208,12 +226,44 @@ class RTSGame extends Game {
         }
     }
 
+    DrawMovingUnitPaths() {
+        const dotColor = Color.FromRGB(239, 68, 68);
+        const lineColor = Color.FromRGBA(239, 68, 68, 0.5);
+        for (let i = 0; i < this.gameObjects.length; i++) {
+            const go = this.gameObjects[i];
+            if (!(go instanceof Unit) || !go.active || !go.isSelected) continue;
+            const cmd = go.currentCommand;
+            if (!(cmd instanceof MoveCommand) || !cmd.path || cmd.path.length === 0) continue;
+
+            const startIdx = cmd.waypointIndex;
+            if (startIdx >= cmd.path.length) continue;
+
+            const firstWp = cmd.path[startIdx];
+            this.renderer.DrawLine(go.position.x, go.position.y, firstWp.x, firstWp.y, lineColor, 1.5);
+
+            for (let j = startIdx; j < cmd.path.length; j++) {
+                const p = cmd.path[j];
+                this.renderer.DrawFillCircle(p.x, p.y, 3, dotColor);
+                if (j > startIdx) {
+                    const prev = cmd.path[j - 1];
+                    this.renderer.DrawLine(prev.x, prev.y, p.x, p.y, lineColor, 1.5);
+                }
+            }
+        }
+    }
+
     Update(deltaTime) {
         super.Update(deltaTime);
 
         if (Input.IsKeyDown(KEY_G)) {
             this.showGridDebugOverlay = !this.showGridDebugOverlay;
             console.log(`Grid debug overlay: ${this.showGridDebugOverlay ? "ON" : "OFF"}`);
+        }
+
+        // Right-click terrain to move selected units
+        if (Input.IsMouseDown(1) && this.selectionManager.selectedEntities.length > 0) {
+            const worldPos = this.ScreenToWorld(Input.mouse.x, Input.mouse.y);
+            this.IssueMoveCommand(worldPos);
         }
 
         // Press P to test A* from first unit to the opposite map corner
@@ -246,6 +296,7 @@ class RTSGame extends Game {
         this.DrawGridDebugOverlay();
         
         this.DrawDebugPath();
+        this.DrawMovingUnitPaths();
 
         // Restore screen-space transform for UI
         this.camera.PostDraw(this.renderer);

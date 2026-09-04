@@ -93,5 +93,20 @@ class Unit extends Entity {
         if (!this.currentCommand && this.commandQueue.length > 0) {
             this.currentCommand = this.commandQueue.shift();
         }
+
+        if (this.currentCommand) {
+            if (!this.currentCommand.Validate(this)) {
+                this.currentCommand = this.commandQueue.shift() || null;
+                if (!this.currentCommand) this.state = "Idle";
+            }
+            else {
+                this.state = "Moving";
+                const status = this.currentCommand.Execute(this, deltaTime);
+                if (status === CommandStatus.complete) {
+                    this.currentCommand = this.commandQueue.shift() || null;
+                    if (!this.currentCommand) this.state = "Idle";
+                }
+            }
+        }
     }
 }

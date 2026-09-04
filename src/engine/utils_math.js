@@ -35,7 +35,13 @@ function Length(x, y) {
     return Math.sqrt(x2 + y2);
 }
 
-function SqrLength(v) {
+function SqrLength(dx, dy) {
+    const x2 = dx * dx;
+    const y2 = dy * dy;
+    return x2 + y2;
+}
+
+function SqrLengthVector(v) {
     const x2 = v.x * v.x;
     const y2 = v.y * v.y;
     return x2 + y2;

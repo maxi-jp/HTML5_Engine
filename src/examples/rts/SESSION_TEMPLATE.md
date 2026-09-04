@@ -190,9 +190,9 @@ class NewCommand {
     
     Execute(unit, deltaTime) {
         // Execute command logic
-        // Return 'complete' when finished, null when in progress
+        // Return COMMAND.complete when finished, null when in progress
         if (conditionMet) {
-            return 'complete';
+            return COMMAND.complete;
         }
         return null;
     }

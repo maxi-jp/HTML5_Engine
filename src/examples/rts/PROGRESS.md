@@ -1,8 +1,8 @@
 # RTS Project Progress Tracker
 
-**Last Updated:** 2026-09-02  
-**Current Phase:** Phase 1 Session 1.6 - Unit Movement & Commands (Next)  
-**Next Action:** Implement MoveCommand + Unit FSM so right-click terrain moves selected units
+**Last Updated:** 2026-09-04  
+**Current Phase:** Phase 2 - Economy Sandbox  
+**Next Action:** Start Phase 2 Session 2.1 — Resource Nodes & Visual Assets
 
 ## Quick Status
 - ✅ GDD Complete
@@ -12,6 +12,7 @@
 - ✅ Phase 1 Session 1.3: Grid System & Unit Spawning
 - ✅ Phase 1 Session 1.4: Selection System
 - ✅ Phase 1 Session 1.5: A* Pathfinding Implementation
+- ✅ Phase 1 Session 1.6: Unit Movement & Commands
 - ⬜ Phase 2: Economy Sandbox
 - ⬜ Phase 3: Base Construction
 - ⬜ Phase 4: Combat
@@ -26,6 +27,37 @@
 	Resolution: Implemented in `RTSCamera.UpdateMiddleMouseDrag()` with zoom-aware movement and edge-pan suppression while dragging.
 
 ## Session Log
+
+### 2026-09-04 - Phase 1 Session 1.6: Unit Movement & Commands
+**Status:** Complete
+
+**Completed:**
+- ✅ Created `src/examples/rts/commands.js` — `Command` base class + `MoveCommand`
+- ✅ `CommandStatus` frozen enum (`running: 0`, `complete: 1`) replaces magic strings/null
+- ✅ `MoveCommand` computes A* path on construction, drives unit along waypoints at `unit.speed` px/s
+- ✅ `Unit.Update()` FSM: executes current command each frame, transitions `Idle` ↔ `Moving`
+- ✅ Right-click terrain → `IssueMoveCommand()` → each selected unit gets independent path
+- ✅ `RTSGame.ScreenToWorld()` handles camera zoom/pan offset for correct world coordinate conversion
+- ✅ `DrawMovingUnitPaths()` renders red dots + lines for selected moving units (world-space, inside camera transform)
+- ✅ `rts.html` updated with `commands.js` script include (between `grid_map.js` and `entities.js`)
+
+**Files Created/Modified:**
+- `src/examples/rts/commands.js` — new file: `CommandStatus`, `Command`, `MoveCommand`
+- `src/examples/rts/entities.js` — `Unit.Update()` extended with command execution FSM
+- `src/examples/rts/rts_game.js` — `ScreenToWorld`, `IssueMoveCommand`, `DrawMovingUnitPaths`, right-click handler
+- `rts.html` — added `commands.js` script include
+
+**Key Design Decisions:**
+- `CommandStatus = Object.freeze({running, complete})` — standard plain-JS enum idiom; integer values for fast comparison
+- Each unit computes its own independent A* path to the same target (no shared path)
+- `ClearCommands()` called before `AssignCommand()` on right-click — replaces queue immediately (AoE2 behavior)
+- `DrawMovingUnitPaths()` scoped to selected units only to avoid visual noise
+
+**Next Steps:**
+1. Start Phase 2 Session 2.1 (Resource Nodes & Visual Assets)
+2. Verify Phase 1 completion checklist before moving to Phase 2
+
+---
 
 ### 2026-09-02 - Phase 1 Session 1.5: A* Pathfinding Implementation
 **Status:** Complete

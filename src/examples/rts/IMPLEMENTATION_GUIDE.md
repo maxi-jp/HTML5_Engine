@@ -15,9 +15,9 @@
 
 **See `PROGRESS.md` for detailed status tracking.**
 
-**Current Phase:** Phase 1 Session 1.6 - Unit Movement & Commands  
-**Last Completed Session:** Phase 1 Session 1.5 - A* Pathfinding Implementation  
-**Next Session:** Phase 1 Session 1.6  
+**Current Phase:** Phase 2 - Economy Sandbox  
+**Last Completed Session:** Phase 1 Session 1.6 - Unit Movement & Commands  
+**Next Session:** Phase 2 Session 2.1  
 **Known Blockers:** None  
 
 *(Brief status here; full details in PROGRESS.md)*
@@ -294,15 +294,15 @@ Target performance: <10ms for small maps.
 1. `src/examples/rts/entities.js` - Add Unit FSM and movement logic
 
 **Tasks:**
-- [ ] Create `Command` base class with `Validate()` and `Execute()` methods
-- [ ] Create `MoveCommand(targetPosition)` class
-- [ ] Add Unit states: `Idle`, `Moving`
-- [ ] Implement `Unit.AssignCommand(command)` - sets currentCommand
-- [ ] Implement movement logic: follow waypoint array, move toward next waypoint
-- [ ] When reaching final waypoint, transition to Idle
-- [ ] Right-click terrain assigns MoveCommand to selected units
-- [ ] Test: Select units, right-click, watch them path and move
-- [ ] Debug visualization: Draw path waypoints as red dots
+- [x] Create `Command` base class with `Validate()` and `Execute()` methods
+- [x] Create `MoveCommand(targetPosition)` class
+- [x] Add Unit states: `Idle`, `Moving`
+- [x] Implement `Unit.AssignCommand(command)` - sets currentCommand
+- [x] Implement movement logic: follow waypoint array, move toward next waypoint
+- [x] When reaching final waypoint, transition to Idle
+- [x] Right-click terrain assigns MoveCommand to selected units
+- [x] Test: Select units, right-click, watch them path and move
+- [x] Debug visualization: Draw path waypoints as red dots
 
 **Acceptance Criteria:**
 - ✅ Right-clicking terrain moves selected units to that location
@@ -328,7 +328,7 @@ class MoveCommand {
     Execute(unit, deltaTime) {
         // Move toward current waypoint
         // If reached, increment index
-        // If final waypoint reached, return 'complete'
+        // If final waypoint reached, return COMMAND.complete
     }
 }
 
@@ -340,7 +340,7 @@ class Unit extends Entity {
                 this.state = 'Idle';
             } else {
                 const status = this.currentCommand.Execute(this, deltaTime);
-                if (status === 'complete') {
+                if (status === COMMAND.complete) {
                     this.currentCommand = this.commandQueue.shift() || null;
                 }
             }
